@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的规则</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/datapicker/datepicker3.css">
+    <link rel="stylesheet" href="css/share.css">
+    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <style>
+        /*******布控弹窗样式微调******/
+        .form-control{
+            /*height: 26px;*/
+            padding: 0 12px;
+            font-size: 12px;
+        }
+        .input-group-addon{
+            padding: 0 12px;
+        }
+        .taskModelContent .perHours span{
+            /*line-height: 28px;*/
+            padding: 0 5px;
+        }
+        .taskModelContent .perHours select, .taskModelContent .perHours span{
+            /*height: 29px;*/
+        }
+        .add-target .perHours select{
+            width: 35px;
+        }
+    </style>
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0" >我的规则</a></li>
+        <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" >新建规则
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+        </li>
+        <li><span class="fa fa-plus add" @click="add($event.target)"></span></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane" :class="{active:currentIndex == 0}">
+            <div class="search clearfix">
+                <div class="form-inline pull-left searchItems">
+                    <div class="form-group">
+                        <label>规则名称:
+                            <input type="text" v-model="ruleName" @keyup="cartView(1)" class="form-control"  placeholder="请输入关键字">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label >规则表达式:
+                            <input type="text" v-model="ruleStr" @keyup="cartView(1)"  class="form-control" placeholder="请输入关键字">
+                        </label>
+                    </div>
+                    <button type="button" class="btn btn-primary"  @click="cartView(1)">确认</button>
+                </div>
+                <div class="searchEdit pull-right">
+                    <ul class="clearfix">
+                        <li class="pull-right" @click="deleteList" >
+                            <span class="fa fa-trash-o" :class="{active: selected.length>0}">删除</span>
+                        </li>
+                        <li class="pull-right" @click="copyList">
+                            <span class="fa fa-copy" :class="{active: selected.length>0}">复制</span>
+                        </li>
+                        <li class="pull-right" @click="buControlPop">
+                            <span class="fa fa-play" :class="{active: selected.length==1}">布控</span>
+                        </li>
+                        <li class="pull-right" @click="editPop">
+                            <span class="fa fa-pencil" :class="{active: selected.length==1}">编辑</span>
+                        </li>
+                        <li class="pull-right" @click="sharePop()">
+                            <span class="fa fa-share" :class="{active: selected.length>0}">分享</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tableContainer">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width: 45px">
+                                <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </th>
+                            <th>编号</th>
+                            <th>规则名称</th>
+                            <th style="width: 300px">规则表达式</th>
+                            <th @click="sort" style="cursor: pointer">创建时间<span class="fa" :class="sortClass"></span></th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item,index) in list">
+                            <td>
+                                <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </td>
+                            <td>{{index+1}}</td>
+                            <td v-if="item.rule_Discription" class="checkDetail" @click="detail(item.rule_Discription)">{{item.ruleName}}</td>
+                            <td v-else>{{item.ruleName}}</td>
+                            <td class="limitWidth">
+                                <div :title="item.ruleStr">
+                                    {{item.ruleStr}}
+                                </div>
+                            </td>
+                            <td>{{item.create_Time}}</td>
+                            <td class="checkDetail" >
+                                <span style="margin-right: 15px;color: #333"  v-if="item.be_Control==0">已布控</span>
+                                <span style="margin-right: 15px;color: #ccc"  v-else-if="item.be_Control==1">未布控</span>
+                                <span style="color: #333"  v-if="item.be_Share==0">已分享</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page clearfix" >
+                    <div class="pageCut">
+                        每页
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                        </select>
+                        条记录
+                    </div>
+                    <div class="pagelist" >
+                        <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
+                        <span class="ellipsis" v-show="efont">...</span>
+                        <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                              @click="jumpPage(num)">{{num}}</span>
+                        <span class="ellipsis" v-show="ebehind">...</span>
+
+                        <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
+
+                        <span class="jumppoint">跳转到：</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--新建规则-->
+        <div  v-if="navLI_1.length!=0"  v-for="(item,index) in navLI_1" v-show="currentIndex==index+1" :key="index"   :class="{'active':currentIndex==index+1}" >
+            <div class="add-target">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="task-name" class="bold">规则名称:</label>
+                                <input type="text" @blur="vailruleName($event.target,item)"  class="form-control validateRule" v-model="item.ruleName"  placeholder="在此输入内容...">
+                                <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="task-desc" class="bold">规则描述:</label>
+                                <input type="text" class="form-control" v-model="item.rule_Discription"  placeholder="在此输入内容...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row"  >
+                        <div class="col-md-10" style="padding-right: 0">
+                            <div class="form-group" >
+                                <label for="task-desc" class="bold">规则内容:</label>
+                                <input type="text" class="form-control" v-model="item.ruleStr"  placeholder="在此输入内容...">
+                            </div>
+                        </div>
+                        <ul class="col-md-2 addRule" >
+                            <li class="pull-right parent" :class="{active:item.ruleStrType==false}" @click="item.ruleStrType = false">向导
+                                <div class="triangle" v-if="item.ruleStrType == false"></div>
+                            </li>
+                            <li class="pull-right parent" :class="{active:item.ruleStrType==true}" @click="item.ruleStrType = true">
+                                表达式...
+                                <div class="triangle" v-if="item.ruleStrType == true"></div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="row ruleContent">
+                        <div class="col-md-12">
+                            <div class="expression" v-if="item.ruleStrType == true">
+                                <ul class="clearfix expression-con">
+                                    <li class="pull-left first">
+                                        <div class="bold">字段名称：</div>
+                                        <div class="tree">
+                                            <ul class="f">
+                                                <li v-for="(list,treeIndex) in item.express.tree" >
+                                                    <div @click="list.open = !list.open">
+                                                        <span  :class="{collapsion:list.open}"></span>
+                                                        {{list.rule_model_name}}
+                                                    </div>
+                                                    <ul class="s" v-show = "list.open">
+                                                        <li  v-for="(value,ruleIndex) in list.ruleExpList" @click.prevent="chooseValue(currentIndex,treeIndex,ruleIndex,value.rule_expression_str)">{{value.rule_expression_str}}</li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li class="pull-left two" style="margin-left: 2%">
+                                        <div class="bold">关系:</div>
+                                        <ul style="margin-bottom: 15px" class="relation">
+                                            <li v-for="(r,relationIndex) in item.express.relation"   @click="chooseRelation(currentIndex,r.relation_exp)">
+                                                {{r.relation_exp}}
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="pull-right three">
+                                        <div class="form-group" >
+                                            <label for="task-desc" class="bold">值:</label>
+                                            <input type="text"  @keyup="ruleRule($event,currentIndex)" class="form-control" v-model="item.express.input.value">
+                                        </div>
+                                        <div class="bold">预定义的值:</div>
+                                        <ul class="fore-value">
+
+                                        </ul>
+                                        <div class="form-group" >
+                                            <label for="task-desc" class="bold">范围(偏移:长度):</label>
+                                            <input type="text" class="form-control" >
+                                        </div>
+                                        <!--<button class="fore-btn" :class="{y:item.express.input.value!=''}" @click="beforeValue(currentIndex)">确定</button>-->
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="guide" v-if="item.ruleStrType == false">
+                                <div class="guide_items">
+                                    <!--规则项集-->
+                                    <div class="guide_item">
+                                        <div class="title clearfix">
+                                            <div class="pull-left left">
+                                                <span class="bold">数据项集</span>
+                                                <!--<select name="" id="">-->
+                                                <!--<option value="1">关系</option>-->
+                                                <!--</select>(先选择关系，再填写下列配置参数)-->
+                                            </div>
+                                            <div class="pull-right right" >
+                                                <!--<span class="fa fa-plus"></span>收起-->
+                                            </div>
+                                        </div>
+                                        <div class="content">
+                                            <div class="item clearfix">
+                                                <div class="pull-left relation" >
+                                                    <label for="task-desc" class="bold">关系:</label>
+                                                    <select type="text" class="form-control" >
+                                                        <option value="&&">与</option>
+                                                    </select>
+                                                </div>
+                                                <div class="pull-left ip" >
+                                                    <label for="task-desc" class="bold">源IP:</label>
+                                                    <input type="text" class="form-control" >
+                                                    <span>-</span>
+                                                    <input type="text" class="form-control" >
+                                                    <span>-</span>
+                                                    <input type="text" class="form-control" >
+                                                    <span>-</span>
+                                                    <input type="text" class="form-control" >
+                                                </div>
+                                            </div>
+                                            <div class="item clearfix">
+                                                <div class="pull-left relation" >
+                                                    <label  class="bold">关系:</label>
+                                                    <select type="text" class="form-control" >
+                                                        <option value="&&">与</option>
+                                                    </select>
+                                                </div>
+                                                <div class="pull-left ip" >
+                                                    <label for="task-desc" class="bold">目的IP:</label>
+                                                    <input type="text" class="form-control" >
+                                                    <span>-</span>
+                                                    <input type="text" class="form-control" >
+                                                    <span>-</span>
+                                                    <input type="text" class="form-control" >
+                                                    <span>-</span>
+                                                    <input type="text" class="form-control" >
+                                                </div>
+                                            </div>
+                                            <div class="item clearfix">
+                                                <div class="pull-left relation" >
+                                                    <label for="task-desc" class="bold">关系:</label>
+                                                    <select type="text" class="form-control" >
+                                                        <option value="&&">与</option>
+                                                    </select>
+                                                </div>
+                                                <div class="pull-left ip" >
+                                                    <label  class="bold">源端口:</label>
+                                                    <input type="text" class="form-control source" >
+                                                </div>
+                                            </div>
+                                            <div class="item clearfix">
+                                                <div class="pull-left relation" >
+                                                    <label  class="bold">关系:</label>
+                                                    <select type="text" class="form-control" >
+                                                        <option value="&&">与</option>
+                                                    </select>
+                                                </div>
+                                                <div class="pull-left ip" >
+                                                    <label  class="bold">目的端口:</label>
+                                                    <input type="text" class="form-control source" >
+                                                </div>
+                                            </div>
+                                            <div class="item clearfix">
+                                                <div class="pull-left relation" >
+                                                    <label  class="bold">关系:</label>
+                                                    <select type="text" class="form-control" >
+                                                        <option value="&&">与</option>
+                                                    </select>
+                                                </div>
+                                                <div class="pull-left ip" >
+                                                    <label  class="bold">协议:</label>
+                                                    <select type="text" class="form-control source" >
+                                                        <option value="&&">选择协议</option>
+                                                    </select>
+                                                </div>
+                                                <div class="pull-left ip" style="margin-left: 0">
+                                                    <label  class="bold">协议内容:</label>
+                                                    <input type="text" class="form-control source" >
+                                                    <span class="protocol" >查看协议字段</span>
+                                                    <div class="protocol_detail collapse">
+                                                        <table class="protocolTable">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>协议字段</th>
+                                                                <th>值</th>
+                                                                <th>关系</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td><input  type="checkbox" > 邮件名</td>
+                                                                <td><input type="text"></td>
+                                                                <td><select name="" >
+                                                                    <option value="1">1</option></select></td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!--<div class="guide_add"><span class="fa fa-plus"></span>新增</div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 YoN_button" style="margin-top:30px;">
+                            <button class="y" @mousedown="addNewRule(item,currentIndex,$event.target)">确定</button>
+                            <button class="n" @click="tabClose(index+1)">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--弹框-->
+    <div id="detail" style="display: none">
+        <div class="container-fluid">
+            <div class="title">规则描述</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-12">
+                    {{popDetail.detail}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--分享弹窗-->
+    <div id="share" style="display: none">
+        <div class="share_peo clearfix">
+            <div class="left pull-left">
+                <div class="title">
+                    选择用户：
+                </div>
+                <div class="share_search">
+                    <input type="text" placeholder="查找联系人" v-model="search_left" @keyup="zNodes_search_left(search_left)">
+                    <span class="fa fa-search" @click="zNodes_search_left(search_left)"></span>
+                </div>
+                <div class="areas_list">
+                    <ul id="treeDemo" class="ztree"></ul>
+                </div>
+            </div>
+            <div class="right pull-right">
+                <div class="title">
+                    已选用户：
+                    <!--(<span>4</span>/<span>40</span>)-->
+                </div>
+                <div class="share_search">
+                    <input type="text" placeholder="查找联系人" v-model="search_right" @keyup="zNodes_search_right(search_right)">
+                    <span class="fa fa-search" @click="zNodes_search_right(search_right)"></span >
+                </div>
+                <ul class="send_to">
+                    <li v-for="(item,index) in zTreeArr" :class="{zTreeActive:item.zTreeActive}" @click="removeRight(item,'treeDemo')" v-if="item.level==2">{{item.name}}</li>
+                </ul>
+                <!--<div class="close">全部删除</div>-->
+            </div>
+        </div>
+    </div>
+    <!--布控弹窗-->
+    <div id="buControl" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="task-name" class="bold">任务名称:</label>
+                            <input type="text" class="form-control validate" @blur="vailusername($event.target,popDetail.control)" v-model="popDetail.control.task_Name" id="task-name" placeholder="在此输入内容...">
+                            <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="task-desc" class="bold" >任务描述:</label>
+                            <input type="text" class="form-control" v-model="popDetail.control.task_Descrption" id="task-desc" placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="bold">任务运行模式：</div>
+                        <ul class="taskModel clearfix">
+                            <li class="pull-left active" data-target="time">
+                                <label class="radio-inline">
+                                    <input type="radio" name="taskModel" value="1" v-model="popDetail.control.task_Run_Model"> 指定时间
+                                </label>
+                            </li>
+                            <li class="pull-left" data-target="fore">
+                                <label class="radio-inline">
+                                    <input type="radio" name="taskModel" value="2" v-model="popDetail.control.task_Run_Model"> 前置条件
+                                </label>
+                            </li>
+                        </ul>
+                        <div class="taskModelContent">
+                            <div class="timeDIV" v-show="popDetail.control.task_Run_Model == 1">
+                                <div class="row" >
+                                    <div class="col-md-6">
+                                        <div>指定时间:</div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group data_1" >
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control" id="start"  placeholder="开始时间">
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group data_2" >
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control" id="end" placeholder="结束时间">
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6" >
+                                        <div>启动频率:</div>
+                                        <div class="row" style="height: 34px;line-height: 34px">
+                                            <div class="col-md-10" style="padding-right: 0;">
+                                                <label class="radio-inline" style="vertical-align: top">
+                                                    <input type="radio" value="2" v-model="popDetail.control.confirm_time.task_StartType"  style="margin-top:9px"> 周期：每
+                                                </label>
+                                                <div class="perHours" >
+                                                    <select  v-model="popDetail.control.confirm_time.task_StartHZ.hour">
+                                                        <option :value="index" v-for="(item,index) in 25">{{index}}</option>
+                                                    </select>
+                                                    <span>时</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select  v-model="popDetail.control.confirm_time.task_StartHZ.day">
+                                                        <option :value="index" v-for="(item,index) in 32">{{index}}</option>
+                                                    </select>
+                                                    <span>日</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select name="" v-model="popDetail.control.confirm_time.task_StartHZ.month">
+                                                        <option :value="index" v-for="(item,index) in 13">{{index}}</option>
+                                                    </select>
+                                                    <span>月</span>
+                                                </div>
+                                                <span style="vertical-align: top">次</span>
+                                            </div>
+                                            <div class="col-md-2" style="padding-left: 0">
+                                                <label class="radio-inline">
+                                                    <input type="radio" value="1" v-model="popDetail.control.confirm_time.task_StartType" style="margin-top:9px"> 单次
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="foreDIV" v-show="popDetail.control.task_Run_Model == 2">
+                                <div class="row">
+                                    <div class="col-md-4 ">
+                                        <div>前置条件:</div>
+                                        <div class="form-group">
+                                            <select class="form-control" v-model="popDetail.control.pre_condition.parentTaskId">
+                                                <option disabled value="">请选择</option>
+                                                <option v-for="i in buControlSelectList" :value="i.taskId">i.task_Name</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-md-offset-2" >
+                                        <div>启动频率:</div>
+                                        <div class="row" style="height: 34px;line-height: 34px">
+                                            <div class="col-md-10" style="padding-right: 0;">
+                                                <label class="radio-inline" style="vertical-align: top">
+                                                    <input type="radio" value="2" v-model="popDetail.control.pre_condition.task_StartType"  style="margin-top:9px"> 周期：每
+                                                </label>
+                                                <div class="perHours" >
+                                                    <select name=""  v-model="popDetail.control.pre_condition.task_StartHZ.hour">
+                                                        <option :value="index" v-for="(item,index) in 25">{{index}}</option>
+                                                    </select>
+                                                    <span>时</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select name="" v-model="popDetail.control.pre_condition.task_StartHZ.day">
+                                                        <option :value="index" v-for="(item,index) in 32">{{index}}</option>
+                                                    </select>
+                                                    <span>日</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select name="" v-model="popDetail.control.pre_condition.task_StartHZ.month">
+                                                        <option :value="index" v-for="(item,index) in 13">{{index}}</option>
+                                                    </select>
+                                                    <span>月</span>
+                                                </div>
+                                                <span style="vertical-align: top">次</span>
+                                            </div>
+                                            <div class="col-md-2" style="padding-left: 0">
+                                                <label class="radio-inline">
+                                                    <input type="radio" value="1" v-model="popDetail.control.pre_condition.task_StartType"  style="margin-top:9px"> 单次
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:15px">
+                    <div class="col-md-12">
+                        <div class="bold">数据处理方式:</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>命中规则数据</div>
+                        <div class="isDS">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="radio-inline">
+                                        <input type="radio"  value="1"  v-model="popDetail.control.matchdata.matchdata_DealType"> 丢弃
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="radio-inline">
+                                        <input type="radio" value="2"  v-model="popDetail.control.matchdata.matchdata_DealType"> 保存
+                                    </label>
+                                    <select name="" :disabled="popDetail.control.matchdata.matchdata_DealType==1"   v-model="popDetail.control.matchdata.matchdata_DealTable">
+                                        <option value="">1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>未命中规则数据</div>
+                        <div class="isDS">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="radio-inline">
+                                        <input type="radio"  value="1"  v-model="popDetail.control.missdata.missdata_DealType"> 丢弃
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="radio-inline">
+                                        <input type="radio"  value="2"  v-model="popDetail.control.missdata.missdata_DealType"> 保存
+                                    </label>
+                                    <select name="" :disabled="popDetail.control.missdata.missdata_DealType==1" v-model="popDetail.control.missdata.missdata_DealTable"  disabled>
+                                        <option value="1" >1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--数据项集-->
+    <div class="guide_item" style="display: none" id="guide_item">
+        <div class="title clearfix">
+            <div class="pull-left left">
+                <span class="bold">数据项集1</span>
+                <select name="" id="">
+                    <option value="1">关系</option>
+                </select>(先选择关系，再填写下列配置参数)
+            </div>
+            <div class="pull-right right">
+                <span class="fa fa-plus"></span>收起
+            </div>
+        </div>
+        <div class="content">
+            <div class="item clearfix">
+                <div class="pull-left relation" >
+                    <label for="task-desc" class="bold">关系:</label>
+                    <select type="text" class="form-control" >
+                        <option value="&&">与</option>
+                    </select>
+                </div>
+                <div class="pull-left ip" >
+                    <label for="task-desc" class="bold">源IP:</label>
+                    <input type="text" class="form-control" >
+                    <span>-</span>
+                    <input type="text" class="form-control" >
+                    <span>-</span>
+                    <input type="text" class="form-control" >
+                    <span>-</span>
+                    <input type="text" class="form-control" >
+                </div>
+            </div>
+            <div class="item clearfix">
+                <div class="pull-left relation" >
+                    <label  class="bold">关系:</label>
+                    <select type="text" class="form-control" >
+                        <option value="&&">与</option>
+                    </select>
+                </div>
+                <div class="pull-left ip" >
+                    <label for="task-desc" class="bold">目的IP:</label>
+                    <input type="text" class="form-control" >
+                    <span>-</span>
+                    <input type="text" class="form-control" >
+                    <span>-</span>
+                    <input type="text" class="form-control" >
+                    <span>-</span>
+                    <input type="text" class="form-control" >
+                </div>
+            </div>
+            <div class="item clearfix">
+                <div class="pull-left relation" >
+                    <label for="task-desc" class="bold">关系:</label>
+                    <select type="text" class="form-control" >
+                        <option value="&&">与</option>
+                    </select>
+                </div>
+                <div class="pull-left ip" >
+                    <label  class="bold">源端口:</label>
+                    <input type="text" class="form-control source" >
+                </div>
+            </div>
+            <div class="item clearfix">
+                <div class="pull-left relation" >
+                    <label  class="bold">关系:</label>
+                    <select type="text" class="form-control" >
+                        <option value="&&">与</option>
+                    </select>
+                </div>
+                <div class="pull-left ip" >
+                    <label  class="bold">目的端口:</label>
+                    <input type="text" class="form-control source" >
+                </div>
+            </div>
+            <div class="item clearfix">
+                <div class="pull-left relation" >
+                    <label  class="bold">关系:</label>
+                    <select type="text" class="form-control" >
+                        <option value="&&">与</option>
+                    </select>
+                </div>
+                <div class="pull-left ip" >
+                    <label  class="bold">协议:</label>
+                    <select type="text" class="form-control source" >
+                        <option value="&&">选择协议</option>
+                    </select>
+                </div>
+                <div class="pull-left ip" style="margin-left: 0">
+                    <label  class="bold">协议内容:</label>
+                    <input type="text" class="form-control source" >
+                    <span class="protocol" >查看协议字段</span>
+                    <div class="protocol_detail collapse">
+                        <table class="protocolTable">
+                            <thead>
+                            <tr>
+                                <th>协议字段</th>
+                                <th>值</th>
+                                <th>关系</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><input  type="checkbox" > 邮件名</td>
+                                <td><input type="text"></td>
+                                <td><select name="" >
+                                    <option value="1">1</option></select></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--编辑-->
+    <div id="edit" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="task-name" class="bold">规则名称:</label>
+                            <input type="text" @blur="vailruleName($event.target,item)"  class="form-control validateRule" v-model="popDetail.edit.ruleName"  placeholder="在此输入内容...">
+                            <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="task-desc" class="bold">规则描述:</label>
+                            <input type="text" class="form-control" v-model="popDetail.edit.rule_Discription"  placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row"  >
+                    <div class="col-md-9" style="padding-right: 0">
+                        <div class="form-group" >
+                            <label for="task-desc" class="bold">规则内容:</label>
+                            <input type="text" class="form-control" v-model="popDetail.edit.ruleStr"  placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                    <ul class="col-md-3 addRule" >
+                        <li class="pull-right parent" :class="{active:popDetail.edit.ruleStrType==false}" @click="popDetail.edit.ruleStrType = false">向导
+                            <div class="triangle" v-if="popDetail.edit.ruleStrType == false"></div>
+                        </li>
+                        <li class="pull-right parent" :class="{active:popDetail.edit.ruleStrType==true}" @click="popDetail.edit.ruleStrType = true">
+                            表达式...
+                            <div class="triangle" v-if="popDetail.edit.ruleStrType == true"></div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="row ruleContent">
+                    <div class="col-md-12">
+                        <div class="expression" v-if="popDetail.edit.ruleStrType == true">
+                            <ul class="clearfix expression-con">
+                                <li class="pull-left first">
+                                    <div class="bold">字段名称：</div>
+                                    <div class="tree">
+                                        <ul class="f">
+                                            <li v-for="(list,treeIndex) in popDetail.edit.express.tree" >
+                                                <div @click="list.open = !list.open">
+                                                    <span  :class="{collapsion:list.open}"></span>
+                                                    {{list.rule_model_name}}
+                                                </div>
+                                                <ul class="s" v-show = "list.open">
+                                                    <li  v-for="(value,ruleIndex) in list.ruleExpList" @click.prevent="chooseValue(currentIndex,treeIndex,ruleIndex,value.rule_expression_str)">{{value.rule_expression_str}}</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="pull-left two" style="margin-left: 2%">
+                                    <div class="bold">关系:</div>
+                                    <ul style="margin-bottom: 15px" class="relation">
+                                        <li v-for="(r,relationIndex) in popDetail.edit.express.relation"   @click="chooseRelation(currentIndex,r.relation_exp)">
+                                            {{r.relation_exp}}
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="pull-right three">
+                                    <div class="form-group" >
+                                        <label for="task-desc" class="bold">值:</label>
+                                        <input type="text" @keyup="ruleRule($event)"   class="form-control" v-model="popDetail.edit.express.input.value">
+                                    </div>
+                                    <div class="bold">预定义的值:</div>
+                                    <ul class="fore-value">
+
+                                    </ul>
+                                    <!--<button class="fore-btn" :class="{y:popDetail.edit.express.input.value!=''}" @click="beforeValue(currentIndex)">确定</button>-->
+                                    <div class="form-group" >
+                                        <label for="task-desc" class="bold">范围(偏移:长度):</label>
+                                        <input type="text" class="form-control" >
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="guide" v-if="popDetail.edit.ruleStrType == false">
+                            <div class="guide_items">
+                                <!--规则项集-->
+                                <div class="guide_item">
+                                    <div class="title clearfix">
+                                        <div class="pull-left left">
+                                            <span class="bold">数据项集</span>
+                                            <!--<select name="" id="">-->
+                                            <!--<option value="1">关系</option>-->
+                                            <!--</select>(先选择关系，再填写下列配置参数)-->
+                                        </div>
+                                        <div class="pull-right right" >
+                                            <!--<span class="fa fa-plus"></span>收起-->
+                                        </div>
+                                    </div>
+                                    <div class="content">
+                                        <div class="item clearfix">
+                                            <div class="pull-left relation" >
+                                                <label for="task-desc" class="bold">关系:</label>
+                                                <select type="text" class="form-control" >
+                                                    <option value="&&">与</option>
+                                                </select>
+                                            </div>
+                                            <div class="pull-left ip" >
+                                                <label for="task-desc" class="bold">源IP:</label>
+                                                <input type="text" class="form-control" >
+                                                <span>-</span>
+                                                <input type="text" class="form-control" >
+                                                <span>-</span>
+                                                <input type="text" class="form-control" >
+                                                <span>-</span>
+                                                <input type="text" class="form-control" >
+                                            </div>
+                                        </div>
+                                        <div class="item clearfix">
+                                            <div class="pull-left relation" >
+                                                <label  class="bold">关系:</label>
+                                                <select type="text" class="form-control" >
+                                                    <option value="&&">与</option>
+                                                </select>
+                                            </div>
+                                            <div class="pull-left ip" >
+                                                <label for="task-desc" class="bold">目的IP:</label>
+                                                <input type="text" class="form-control" >
+                                                <span>-</span>
+                                                <input type="text" class="form-control" >
+                                                <span>-</span>
+                                                <input type="text" class="form-control" >
+                                                <span>-</span>
+                                                <input type="text" class="form-control" >
+                                            </div>
+                                        </div>
+                                        <div class="item clearfix">
+                                            <div class="pull-left relation" >
+                                                <label for="task-desc" class="bold">关系:</label>
+                                                <select type="text" class="form-control" >
+                                                    <option value="&&">与</option>
+                                                </select>
+                                            </div>
+                                            <div class="pull-left ip" >
+                                                <label  class="bold">源端口:</label>
+                                                <input type="text" class="form-control source" >
+                                            </div>
+                                        </div>
+                                        <div class="item clearfix">
+                                            <div class="pull-left relation" >
+                                                <label  class="bold">关系:</label>
+                                                <select type="text" class="form-control" >
+                                                    <option value="&&">与</option>
+                                                </select>
+                                            </div>
+                                            <div class="pull-left ip" >
+                                                <label  class="bold">目的端口:</label>
+                                                <input type="text" class="form-control source" >
+                                            </div>
+                                        </div>
+                                        <div class="item clearfix">
+                                            <div class="pull-left relation" >
+                                                <label  class="bold">关系:</label>
+                                                <select type="text" class="form-control" >
+                                                    <option value="&&">与</option>
+                                                </select>
+                                            </div>
+                                            <div class="pull-left ip" >
+                                                <label  class="bold">协议:</label>
+                                                <select type="text" class="form-control source" >
+                                                    <option value="&&">选择协议</option>
+                                                </select>
+                                            </div>
+                                            <div class="pull-left ip" style="margin-left: 0">
+                                                <label  class="bold">协议内容:</label>
+                                                <input type="text" class="form-control source" >
+                                                <span class="protocol" >查看协议字段</span>
+                                                <div class="protocol_detail collapse">
+                                                    <table class="protocolTable">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>协议字段</th>
+                                                            <th>值</th>
+                                                            <th>关系</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td><input  type="checkbox" > 邮件名</td>
+                                                            <td><input type="text"></td>
+                                                            <td><select name="" >
+                                                                <option value="1">1</option></select></td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!--<div class="guide_add"><span class="fa fa-plus"></span>新增</div>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/datapicker/bootstrap-datepicker.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
+<script src="js/jquery.ztree.core.js"></script>
+<script src="js/jquery.ztree.excheck.js"></script>
+<script>
+    function DatePicker(beginSelector,endSelector){
+        // 仅选择日期
+        $(beginSelector).datepicker(
+            {
+                language: 'zh-CN',
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                autoclose: true,
+//                format: "yyyy-mm-dd",
+            }).on('changeDate', function(ev){
+            if(ev.date){
+                $(endSelector).datepicker('setStartDate', new Date(ev.date.valueOf()))
+            }else{
+                $(endSelector).datepicker('setStartDate',null);
+            }
+        })
+
+        $(endSelector).datepicker(
+            {
+                language: 'zh-CN',
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                autoclose: true
+            }).on('changeDate', function(ev){
+            if(ev.date){
+                $(beginSelector).datepicker('setEndDate', new Date(ev.date.valueOf()))
+            }else{
+                $(beginSelector).datepicker('setEndDate',new Date());
+            }
+        })
+    }
+</script>
+<script>
+    //高亮样式
+    function getFontCss(treeId, treeNode) {
+        return (treeNode.highlight) ? { color: "#A60000", "font-weight": "bold"} : { color: "#333", "font-weight": "normal" };
+    }
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            sortFlag:undefined, //默认升序
+            ruleName:'',  //搜索项
+            ruleStr:'',   //搜索项
+            current_page: 1, //当前页
+            pageSize:8,  //每页数据条数
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+            navLI:[{}],
+            currentIndex:0,
+            selected:[],    //选中项
+            popDetail:{
+                detail:'',//规则名称详情弹窗
+                control:{  //布控弹窗
+                    task_Name:'',
+                    task_Descrption:'',
+                    task_Run_Model:1, //1-指定时间 2-前置条件
+                    confirm_time:{
+//                        task_StartTime:$("#start").val(),
+//                        task_EndTime:$("#end").val(),
+                        task_StartType:2,  //1-单次  2-周期
+                        task_StartHZ:{
+                            hour:0,
+                            day:0,
+                            month:0
+                        }
+                    },
+                    pre_condition:{
+                        parentTaskId:'',
+                        task_StartType:2,  //1-单次  2-周期
+                        task_StartHZ:{
+                            hour:0,
+                            day:0,
+                            month:0
+                        }
+                    },
+                    matchdata:{
+                        matchdata_DealType:1,  //匹配规则的数据处理方式：1丢弃；2：保存；
+                        matchdata_DealTable:''
+                    },
+                    missdata:{
+                        missdata_DealType:1,  //不匹配规则的处理方式：1：丢弃；2：保存
+                        missdata_DealTable:''
+                    },
+                    isOk:{task_Name:false}
+                },
+                edit:{
+                    'ruleName':'',
+                    'rule_Discription':'',
+                    'ruleStr':'',
+                    'ruleStrType':true, // true-表达式 false-向导
+                    'express':{
+                        'tree': null, //树
+                        'relation':null,
+                        'input':{
+                            'value':''
+                        }
+                    },
+                    'guide':[{
+                        r1:'',sIp1:'',sIp2:'',sIp3:'',sIp4:'',
+                        r2:'',gIp1:'',gIp2:'',gIp3:'',gIp4:'',
+                        r3:'',source:'',
+                        r4:'',goal:'',
+                        r5:'',protocal:'',protocal_content:'',istrue:false,protocal_array:[{name:'',value:'',relation:''}]
+                    }],
+                    'isOk':{ruleName:false}
+                }
+            },
+            buControlSelectList:[], //布控前置条件列表
+            express:null,  //选择表达式中树
+            zNodes:[],  //用户组树
+            zTreeArr:[],  //编辑中选中项
+            search_left:'',
+            lastSearch_left:'',
+            lastzNodes_left:[],
+            search_right:'',
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                _this.cartView(_this.current_page);
+                _this.buControlSelect();
+                _this.valueTree();
+
+                _this.zNodesList(); //先获得树的数据
+                $.fn.zTree.init($("#treeDemo"), _this.zSetting, _this.zNodes);
+            })
+        },
+        computed:{
+            show:function(){
+                console.log(this.pages && this.pages !=1);
+                return this.pages && this.pages !=1
+            },
+            pstart: function() {
+                return this.current_page == 1;
+            },
+            pend: function() {
+                return this.current_page == this.pages;
+            },
+            efont: function() {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function() {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function() {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+            navLI_1:function () {
+                return this.navLI.slice(1);
+            },
+            sortClass:function () {
+                var s = this.sortFlag;
+                //console.log((typeof s == "undefined") ? "fa-sort" : (s == true?"fa-sort-asc":"fa-sort-desc"));
+                return (typeof s == "undefined") ? "fa-sort" : (s == true?"fa-sort-asc":"fa-sort-desc")
+            },
+            zSetting: function(){
+                return  {
+                    check:{
+                        enable: true,
+                        chkStyle : "checkbox"
+                    },
+                    view: {
+                        showIcon: false,
+                        fontCss: getFontCss
+                    },
+                    callback: {
+                        onCheck:  this.onCheck
+                    }
+                };
+            }
+        },
+        methods: {
+            cartView:  function (cPage) {
+                var _this = this;
+                //模拟数据
+                var u = url +"rule/"+localStorage.getItem("userId")+"/queryRuleListPage/single/"
+                    +cPage+"/"+this.pageSize;
+                var queryFilter = {
+                    ruleName:this.ruleName,
+                    ruleStr:this.ruleStr
+                }
+                ajaxPostObj(u,JSON.stringify(queryFilter),function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.ruleList;
+                        _this.pages = parseInt(data.data.countPage);
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            sort:function () {
+                if(typeof this.sortFlag == "undefined"){
+                    this.sortFlag=true;
+                }else{
+                    this.sortFlag=!this.sortFlag;
+                }
+                if(this.sortFlag){ //true 升序
+                    this.list.sort(compare_asc("create_Time"));
+                }else{
+                    this.list.sort(compare_des("create_Time"));
+                }
+            },
+            selectedList: function (item) {
+                var _this=this;
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+
+            },
+            add:function (dom) {
+                var index = $(dom).parent().index(".nav-tabs li");
+                this.navLI.push({
+                    'ruleName':'',
+                    'rule_Discription':'',
+                    'ruleStr':'',
+                    'ruleStrType':true, // true-表达式 false-向导
+                    'express':{
+                        'tree': JSON.parse(JSON.stringify(this.express)), //树
+                        'relation':null,
+                        'input':{
+                            'value':''
+                        }
+                    },
+                    'guide':[{
+                        r1:'',sIp1:'',sIp2:'',sIp3:'',sIp4:'',
+                        r2:'',gIp1:'',gIp2:'',gIp3:'',gIp4:'',
+                        r3:'',source:'',
+                        r4:'',goal:'',
+                        r5:'',protocal:'',protocal_content:'',istrue:false,protocal_array:[{name:'',value:'',relation:''}]
+                    }],
+                    'isOk':{ruleName:false}
+                });
+                this.currentIndex = index;
+            },
+            addNewRule:function (item,index,dom) {
+                console.log(this.navLI[index])
+                var _this = this;
+                var u = url +'rule/'+localStorage.getItem("userId")+'/addNewRule';
+                var Rule = {
+                    create_UserId: localStorage.getItem("userId"),
+                    create_UserName: localStorage.getItem("userName"),
+                    ruleName: item.ruleName,
+                    ruleStr: item.ruleStr,
+                    rule_Discription: item.rule_Discription
+                }
+                //模拟失去焦点
+                var input = $(dom).parent().parent().parent().find(".validateRule");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = item.isOk.ruleName;
+                if(isOk){
+                    ajaxPostObj(u,JSON.stringify(Rule),function (data) {
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("添加成功",function (i) {
+                                _this.cartView(_this.current_page);
+                                _this.selected=[];
+                                _this.tabClose(index);
+                                layer.close(i);
+                            })
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    })
+                }
+            },
+            chooseValue:function (currentIndex,treeIndex,ruleIndex,rule_expression_str) {
+                var tree = currentIndex ? this.navLI[currentIndex].express.tree : this.popDetail.edit.express.tree;
+                for(var i = 0; i < tree.length; i++){
+                    if(i == treeIndex){
+                        for(var j = 0,ruleExpList = tree[i].ruleExpList; j < ruleExpList.length; j++){
+                            if(j == ruleIndex){
+                                currentIndex?(this.navLI[currentIndex].express.relation = ruleExpList[j].relationList):
+                                    (this.popDetail.edit.express.relation = ruleExpList[j].relationList);
+                            }
+                        }
+                    }
+                }
+                currentIndex?this.navLI[currentIndex].ruleStr += rule_expression_str:
+                    this.popDetail.edit.ruleStr += rule_expression_str;
+            },
+            chooseRelation:function (currentIndex,relation_exp) {
+                currentIndex?this.navLI[currentIndex].ruleStr += relation_exp:
+                    this.popDetail.edit.ruleStr += relation_exp;
+            },
+            ruleRule:function (event,currentIndex) {
+                //item.ruleStr += item.express.input.value
+
+                currentIndex?this.navLI[currentIndex].ruleStr += event.key :
+                    this.popDetail.edit.ruleStr += event.key;
+                console.log(event.key)
+            },
+            valueTree:function () {
+                var _this = this;
+                var u = url +"rule/"+localStorage.getItem("userId")+"/queryRuleExpressionTree";
+                ajaxGet(u,function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        data.data.forEach(function (v,i,arr) {
+                            _this.$set(v,"open",false);
+                        });
+                        _this.express = data.data;
+                    }
+                    console.log(_this.express);
+                });
+            },
+            editPop:function () {
+                var _this=this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item);
+                });
+                if(this.selected.length==1){
+                    this.popDetail.edit.ruleName = ruleIdList[0].ruleName;
+                    this.popDetail.edit.ruleStr = ruleIdList[0].ruleStr;
+                    this.popDetail.edit.rule_Discription = ruleIdList[0].rule_Discription;
+                    this.popDetail.edit.express.tree = JSON.parse(JSON.stringify(this.express));
+                    layer.open({
+                        type: 1,
+                        title: ['编辑'],
+                        closeBtn: 1,
+                        btn:['确定','取消'],
+                        btnAlign: 'c',
+                        area: ['1000px', '700px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#edit'),
+                        yes:function () {
+                            _this.edit(ruleIdList[0].ruleId);
+                        }
+                    });
+                }
+            },
+            edit:function (ruleId) {
+                var _this = this;
+                //模拟数据
+                var u = url +"rule/"+localStorage.getItem("userId")+"/editeRuleByRuleId/"
+                    +ruleId;
+                var Rule = {
+                    "ruleName": this.popDetail.edit.ruleName,
+                    "ruleStr": this.popDetail.edit.ruleStr,
+                    "rule_Discription": this.popDetail.edit.rule_Discription
+                }
+                ajaxPostObj(u,JSON.stringify(Rule),function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("修改成功",function () {
+                            _this.cartView(_this.current_page);
+                            _this.selected = [];
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert(data.message);
+                    }
+                });
+            },
+            tabClose:function (index) {
+                if(this.navLI.length>1){
+                    this.navLI.splice(index,1);
+                    if(this.currentIndex == index){ //当前为激活状态,关闭后选择前一个标签
+                        this.currentIndex = index-1;
+                    }else if(this.currentIndex > index){  //选择后前一个tab
+                        this.currentIndex--;
+                    }
+                }
+
+            },
+            demoClickLi:function(index) {
+                this.currentIndex = index;
+                return false;
+            },
+            detail:function (str) {
+                this.popDetail.detail = str;
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '300px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            },
+            deleteList:function () {
+                var _this=this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item.ruleId);
+                });
+                if(this.selected.length>0){
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        var u = url+"rule/"+localStorage.getItem("userId")+"/deleteRuleByRuleIdList";
+                        ajaxGetArray(u,{ruleIdList:ruleIdList},function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("删除成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
+                }else{
+                    return
+                }
+            },
+            copyList:function () {
+                var _this=this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item.ruleId);
+                });
+                if(this.selected.length>0){
+                    layer.confirm('您确定要复制吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        var u = url+"rule/"+localStorage.getItem("userId")+"/"+localStorage.getItem("userName")+"/copyRuleByRuleIdList";
+                        ajaxGetArray(u,{ruleIdList:ruleIdList},function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("复制成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
+                }else{
+                    return
+                }
+            },
+            buControlReset:function () {
+                $("#start").val("");
+                $("#end").val("");
+                this.popDetail.control = {  //布控弹窗
+                    task_Name:'',
+                    task_Descrption:'',
+                    task_Run_Model:1, //1-指定时间 2-前置条件
+                    confirm_time:{
+//                        task_StartTime:$("#start").val(),
+//                        task_EndTime:$("#end").val(),
+                        task_StartType:2,  //1-单次  2-周期
+                        task_StartHZ:{
+                            hour:0,
+                            day:0,
+                            month:0
+                        }
+                    },
+                    pre_condition:{
+                        parentTaskId:'',
+                        task_StartType:2,  //1-单次  2-周期
+                        task_StartHZ:{
+                            hour:0,
+                            day:0,
+                            month:0
+                        }
+                    },
+                    matchdata:{
+                        matchdata_DealType:1,  //匹配规则的数据处理方式：1丢弃；2：保存；
+                        matchdata_DealTable:''
+                    },
+                    missdata:{
+                        missdata_DealType:1,  //不匹配规则的处理方式：1：丢弃；2：保存
+                        missdata_DealTable:''
+                    },
+                    isOk:{task_Name:false}
+                }
+            },
+            buControlPop:function () {
+                var _this=this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item.ruleId);
+                });
+                //数据清空
+                this.buControlReset();
+                if(this.selected.length==1){
+                    var task_RuleId = ruleIdList[0];
+                    //时间控件
+                    DatePicker(".data_1 .input-group.date",".data_2 .input-group.date");
+                    layer.open({
+                        type: 1,
+                        title: ['布控'],
+                        closeBtn: 1,
+                        btn:['确定','取消'],
+                        btnAlign: 'c',
+                        area: ['850px', '480px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#buControl'),
+                        yes:function () {
+                            _this.buControl(task_RuleId);
+                        }
+                    });
+                }
+            },
+            buControlSelect:function () { //布控前置条件的下拉列表
+                var _this = this;
+                var u = url +"rule/"+localStorage.getItem("userId")+"/queryTaskList";
+                ajaxGet(u,function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        _this.buControlSelectList = data.data;
+                    }
+                });
+            },
+            buControl:function (task_RuleId) {
+                var _this = this;
+                var u = url +"rule/"+localStorage.getItem("userId")+"/controlRuleInTask/"
+                    +task_RuleId;
+                var simple = this.popDetail.control;
+                var task_StartHZ = '';
+                if(simple.task_Run_Model==1){
+                    task_StartHZ += simple.confirm_time.task_StartHZ.hour+"小时"+
+                        simple.confirm_time.task_StartHZ.day+"日"+
+                        simple.confirm_time.task_StartHZ.month+"月";
+                }else{
+                    task_StartHZ += simple.pre_condition.task_StartHZ.hour+"小时"+
+                        simple.pre_condition.task_StartHZ.day+"日"+
+                        simple.pre_condition.task_StartHZ.month+"月";
+                }
+                var taskInfo = {
+                    matchdata_DealTable:simple.matchdata.matchdata_DealTable,
+                    matchdata_DealType:simple.matchdata.matchdata_DealType,
+                    missdata_DealTable:simple.missdata.missdata_DealTable,
+                    missdata_DealType:simple.missdata.missdata_DealType,
+                    parentTaskId:simple.pre_condition.parentTaskId,
+                    task_Descrption:simple.task_Descrption,
+                    task_EndTime:document.getElementById("end").value,
+                    task_Name:simple.task_Name,
+                    task_RuleId:task_RuleId,
+                    task_Run_Model:simple.task_Run_Model,
+                    task_StartHZ:task_StartHZ,
+                    task_StartTime:document.getElementById("start").value,
+                    task_StartType:(simple.task_Run_Model==1)?simple.confirm_time.task_StartType:simple.pre_condition.task_StartType
+                }
+                //模拟失去焦点
+                var input = $("#buControl").find(".validate");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = simple.task_Name;
+                if(isOk){
+                    ajaxPostObj(u,JSON.stringify(taskInfo),function (data) {
+                        console.log(data);
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("布控成功",function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                layer.closeAll();
+                            });
+                        }else{
+                            layer.alert("数据请求失败");
+                        }
+                    });
+                }
+            },
+            vailusername:function (dom,item) {
+                var task_Name = item.task_Name;
+                var span = dom.nextElementSibling;
+                if(task_Name==""){
+                    item.isOk.task_Name = false;
+                    this.valiWays(span,"任务名不能为空",false);
+                    return;
+                }
+                if(task_Name.length>20){
+                    item.isOk.task_Name = false;
+                    this.valiWays(span,"长度只能在20个字符之间",false);
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(task_Name)){
+                    item.isOk.task_Name = true;
+                    this.valiWays(span,"",true);
+                    return;
+                }else{
+                    item.isOk.task_Name = false;
+                    this.valiWays(span,"格式错误，仅支持汉字、字母、数字、“-”“_”的组合",false);
+                    return;
+                }
+
+            },
+            vailruleName:function (dom,item) {  //验证布控任务名称
+                var ruleName = item.ruleName;
+                var span = dom.nextElementSibling;
+                if(ruleName==""){
+                    item.isOk.ruleName = false;
+                    this.valiWays(span,"规则名不能为空",false);
+                    return;
+                }
+                if(ruleName.length>20){
+                    item.isOk.ruleName = false;
+                    this.valiWays(span,"长度只能在20个字符之间",false);
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(ruleName)){
+                    item.isOk.ruleName = true;
+                    this.valiWays(span,"",true);
+                    return;
+                }else{
+                    item.isOk.ruleName = false;
+                    this.valiWays(span,"格式错误，仅支持汉字、字母、数字、“-”“_”的组合",false);
+                    return;
+                }
+
+            },
+            valiWays:function (span,str,flag) {
+                span.innerHTML = str;
+                if(flag){
+                    removeClass(span.parentElement, "error")
+                }else{ //增加error
+                    addClass( span.parentElement, "error")
+                }
+
+            },
+            shareReset:function () {
+                var zTreeObject=$.fn.zTree.getZTreeObj("treeDemo");
+                var arrSel = zTreeObject.getCheckedNodes(true); //选择项
+                for(var k=0;k<arrSel.length;k++){
+                    if(arrSel[k].level == 2){
+                        zTreeObject.checkNode(arrSel[k],false, true);//取消这个节点的勾选状态
+                    }
+                }
+                this.zTreeArr = zTreeObject.getCheckedNodes(true);
+            },
+            sharePop:function () {
+                var _this=this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item.ruleId);
+                });
+                //数据清空
+                this.shareReset();
+                if(this.selected.length > 0){
+                    layer.open({
+                        type: 1,
+                        title: ['分享'],
+                        closeBtn: 1,
+                        btn:['确定','取消'],
+                        btnAlign: 'c',
+                        area: ['800px', '440px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#share'),
+                        yes:function () {
+                            _this.share(ruleIdList);
+                        }
+                    });
+                }
+
+            },
+            share:function (ruleIdList) {
+                var u = url+"rule/"+localStorage.getItem("userId")+"/shareRule";
+                var userIdList = this.userIdList("treeDemo");
+                var _this = this;
+                ajaxGetArray(u,{ruleIdList:ruleIdList,shareUserIdList:ruleIdList},function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("分享成功",function () {
+                            _this.cartView(_this.current_page);
+                            _this.selected = [];
+                            _this.checkAll = false;
+                            layer.closeAll();
+                        });
+
+                    }else{
+                        layer.alert(data.message);
+                    }
+                });
+            },
+            zNodesList:function () {  //获取用户组树 后台数据
+                var _this = this;
+                ajaxGetAsync(url+"user/getGroupListContainsUserList",function (data) {
+                    var data = data.data;
+                    _this.zNodes_manage(data);
+                })
+            },
+            zNodes_manage:function (data) {  //处理后台传过来的数据
+                this.zNodes = [{
+                    name:'全部用户',open:true,children:[]
+                }];
+                for(var i = 0;i < data.length; i++){
+                    if(data[i].groupName){
+                        this.zNodes[0].children.push({name:data[i].groupName,open:false,children:[]});
+                        for(var j = 0; j<data[i].userInfoList.length; j++){
+                            var userInfoList = data[i].userInfoList[j];
+                            this.zNodes[0].children[i].children.push({name:userInfoList.userName,userId:userInfoList.userId});
+                        }
+                    }
+                }
+            },
+            zNodes_search_left:function (key) {
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                var lastNodeList =this.lastzNodes_left;
+                var lastKey = this.lastSearch_left;
+                if (key != "" && key != lastKey) {
+                    var nodeList = zTree.getNodesByParamFuzzy("name", key);
+                    for (var i = 0, l = lastNodeList.length; i < l; i++) { //上次查询的节点集合取消高亮
+                       this.lastzNodes_left[i].highlight=false;
+                        zTree.updateNode(this.lastzNodes_left[i]);
+                    }
+                    zTree.expandAll(false); //全部收缩
+                    if (nodeList.length > 0) {
+                        for (var i = 0, m = nodeList.length; i < m; i++) { //遍历找到的节点集合
+                            if (nodeList[i].getParentNode()) {
+                                zTree.expandNode(nodeList[i].getParentNode(), true, false, false); //展开其父节点
+                            }
+                            nodeList[i].highlight = true;
+                            zTree.updateNode(nodeList[i]);
+                        }
+                    }
+                    zTree.refresh(); // 很重要，否则节点状态更新混乱。
+                    this.lastzNodes_left = nodeList;
+                    this.lastSearch_left = key;
+                }
+                if(key == ""){
+                    zTree.expandAll(false); //全部收缩
+                    for (var i = 0, l = lastNodeList.length; i < l; i++) { //上次查询的节点集合取消高亮
+                        this.lastzNodes_left[i].highlight = false;
+                        zTree.updateNode(this.lastzNodes_left[i]);
+                    }
+                    zTree.refresh(); // 很重要，否则节点状态更新混乱。
+                    this.lastzNodes_left = [];
+                    this.lastSearch_left = "";
+                }
+            },
+            onCheck:function (event, treeId, treeNode) {
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                this.zTreeArr = zTreeObject.getCheckedNodes(true);
+
+            },
+            removeRight:function (item,treeId) {
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                var arrSel = zTreeObject.getCheckedNodes(true); //选择项
+                for(var k=0;k<arrSel.length;k++){
+                    if(arrSel[k].tId==item.tId &&arrSel[k].level == 2){
+                        zTreeObject.checkNode(arrSel[k],false, true);//取消这个节点的勾选状态
+                        break;
+                    }
+                }
+                this.zTreeArr = zTreeObject.getCheckedNodes(true);
+            },
+            zNodes_search_right:function (key) {
+                var _this = this;
+                var arr = this.zTreeArr;
+                arr.forEach(function (cValue,i) {
+                    if(cValue.level == 2){
+                        if(key == ""){
+                            _this.$set(cValue, "zTreeActive",false);
+                            return
+                        }
+                        if(cValue.name.indexOf(key) != -1){
+                            _this.$set(cValue, "zTreeActive",true);
+                        }else{
+                            _this.$set(cValue, "zTreeActive",false);
+                        }
+                    }
+                })
+                this.zTreeArr=arr;
+            },
+            userIdList:function (treeId) {
+                var arr = [];
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                var arrSel = zTreeObject.getCheckedNodes(true); //选择项
+                for(var k=0;k<arrSel.length;k++){
+                    if(arrSel[k].level == 2){
+                        arr.push(arrSel[k].userId);
+                    }
+                }
+                return arr;
+            },
+        }
+
+    })
+</script>
+</html>

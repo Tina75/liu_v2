@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>报文实时过滤分析系统</title>
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/metisMenu.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/common.css">
+</head>
+<body class="fixed-sidebar full-height-layout" style="overflow:hidden">
+    <div class="wrapper">
+        <nav>
+            <div class="nav-close"><i class="fa fa-bars"></i>
+            </div>
+            <ul class="metismenu" id="menu">
+                <li class="menu-header">
+                    <a  href="javascript:void(0)">
+                    <span style="font-size:16px;">
+                        <i class="fa fa-area-chart"></i>
+                        <strong>报文实时过滤分析系统</strong>
+                    </span>
+                    </a>
+                    <div class="miniDiv" style="display: none">
+                    <span style="font-size:16px;">
+                        <i class="fa fa-area-chart"></i>
+                    </span>
+                    </div>
+                </li>
+                <!--<li>-->
+                    <!--<a href="2.html" class="J_menuItem">-->
+                        <!--<i class="fa fa-home"></i>-->
+                        <!--<span>首页</span>-->
+                    <!--</a>-->
+                <!--</li>-->
+                <li>
+                    <a href="javascript:void(0)" >
+                        <i class="fa fa-chain"></i>
+                        <span>规则管理</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul  class="nav-second-level" >
+                        <li><a href="quanbuguize.html" class="J_menuItem">全部规则</a></li>
+                        <li><a href="wodeguize.html" class="J_menuItem">我的规则</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" >
+                        <i class="fa fa-file-text-o"></i>
+                        <span>任务管理</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul  class="nav-second-level">
+                        <li><a href="quanburenwu.html" class="J_menuItem">全部任务</a></li>
+                        <li><a href="woderenwu.html" class="J_menuItem">我的任务</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" >
+                        <i class="fa fa-bar-chart"></i>
+                        <span>统计查看</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul  class="nav-second-level">
+                        <li>
+                            <a href="javascript:void(0)" >流量统计<span class="fa arrow"></span></a>
+                            <ul class="nav-third-level">
+                                <li><a href="tongjichakan_duankou.html" class="J_menuItem">端口</a></li>
+                                <li><a href="tongjichakan_xieyi.html" class="J_menuItem">协议</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="hitChaKan.html" class="J_menuItem">命中查看</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="zhishiku.html" class="J_menuItem">
+                        <i class="fa fa-book"></i>
+                        <span>知识库</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" >
+                        <i class="fa fa-cog"></i>
+                        <span>系统管理</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul  class="nav-second-level">
+                        <li>
+                            <a href="javascript:void(0)" >全局配置<span class="fa arrow"></span></a>
+                            <ul class="nav-third-level">
+                                <li><a href="shujuyuanpeizhi.html" class="J_menuItem">数据源配置</a></li>
+                                <li><a href="duankoupeizhi.html" class="J_menuItem">端口配置</a></li>
+                                <li><a href="shujukupeizhi.html" class="J_menuItem">数据库配置</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0)" >用户管理 <span class="fa arrow"></span></a>
+                            <ul class="nav-third-level">
+                                <li><a href="yonghuzuliebiao.html" class="J_menuItem">用户组列表</a></li>
+                                <li><a href="yonghuliebiao.html" class="J_menuItem">用户列表</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="rizhiguanli.html" class="J_menuItem">日志管理</a></li>
+                        <li>
+                            <a href="javascript:void(0)" >集群管理<span class="fa arrow"></span></a>
+                            <ul class="nav-third-level">
+                                <li><a href="fuwuqijiedian.html" class="J_menuItem">服务器节点</a></li>
+                                <li><a href="fuwuguangtai.html" class="J_menuItem">服务状态</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <div id="page-wrapper" >
+            <div class="row" style="height: 50px">
+                <div class="head">
+                    <ul class="clearfix lists">
+                        <li class="pull-right">
+                            <span class="glyphicon glyphicon-user user" aria-hidden="true"></span>
+                            <b data-toggle="dropdown" style="cursor: pointer">admin</b>
+                            <span class="caret" data-toggle="dropdown" style="cursor: pointer"></span>
+                            <ul class="dropdown-menu">
+                                <li onclick="logout()"><a href="javascript:void(0)">退出登录</a></li>
+                                <!--<li class="divider"></li>-->
+                                <!--<li><a href="#">111</a></li>-->
+                                <!--<li class="divider"></li>-->
+                                <!--<li><a href="#">22</a></li>-->
+                            </ul>
+                        </li>
+                        <li class="pull-right">
+                            2017-09-11 00:00:00
+                        </li>
+                        <li class="pull-right">
+                            系统状态：<b>在线</b>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row J_mainContent" id="content-main" style="height: 57rem">
+                <iframe id="J_iframe" width="100%" height="100%" src="quanbuguize.html" frameborder="0" ></iframe>
+            </div>
+        </div>
+    </div>
+</body>
+<!-- 全局js -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/index.js"></script>
+<script src="js/pace/pace.min.js"></script>
+<script src="js/metisMenu/jquery.metisMenu.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/url.js"></script>
+<script>
+    $(document).ready(function () {
+        // MetsiMenu
+        $("#menu").metisMenu();
+        document.getElementById("content-main").style.height = window.innerHeight-50+"px";
+    });
+    //退出登陆
+    function logout() {
+        layer.confirm('您确定要登出吗？', {
+            btn: ['确定','取消'] //按钮
+        }, function(){
+            ajaxGet(url + "logout",  function (data) {
+                if(data.resultCode == ERR_OK){ //登陆成功
+                    self.location = "login.html";
+                }else{
+                    layer.alert(data.message);
+                }
+            });
+        }, function(){
+            layer.close();
+        });
+    }
+
+</script>
+</html>

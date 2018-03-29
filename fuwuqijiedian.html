@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>服务器节点</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/animate.css">
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">服务器节点</a></li>
+        <!--<li><a href="#profile" data-toggle="tab">我的任务</a></li>-->
+        <li><span class="fa fa-plus add"></span></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="home">
+            <div class="search clearfix">
+                <div class="form-inline pull-left searchItems">
+                    <div class="form-group">
+                        <label for="name">名称:</label>
+                        <input type="text" class="form-control" id="name" placeholder="请输入关键字">
+                    </div>
+                    <div class="form-group">
+                        <label for="IP">IP:</label>
+                        <input type="text" class="form-control" id="IP" placeholder="请输入关键字">
+                    </div>
+                    <button type="button" class="btn btn-primary">确认</button>
+                </div>
+                <div class="searchEdit pull-right">
+                    <ul class="clearfix">
+                        <li class="pull-right">
+                            <span class="fa fa-trash-o active">删除</span>
+                        </li>
+                        <li class="pull-right">
+                            <span class="fa fa-pencil active">编辑</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tableContainer">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width: 45px">
+                                <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </th>
+                            <th>编号</th>
+                            <th>名称</th>
+                            <th>IP</th>
+                            <th>状态</th>
+                            <th>CPU占用率</th>
+                            <th>内存占用率</th>
+                            <th>磁盘占用率</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item,index) in list">
+                            <td>
+                                <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </td>
+                            <td>{{index+1}}</td>
+                            <td>服务器p1</td>
+                            <td>192.168.1.2</td>
+                            <td class="grey">离线</td>
+                            <td>10%</td>
+                            <td>10%</td>
+                            <td>10%</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page clearfix" v-show="show">
+                    <div class="pageCut">
+                        每页
+                        <select name="" class="form-control pageSelect" >
+                            <option value="1">1</option>
+                        </select>
+                        条记录
+                    </div>
+                    <div class="pagelist">
+                        <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span class="ellipsis" v-show="efont">...</span>
+                        <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                              @click="jumpPage(num)">{{num}}</span>
+                        <span class="ellipsis" v-show="ebehind">...</span>
+
+                        <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+
+                        <span class="jumppoint">跳转到：</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--新建任务-->
+    <div  id="profile" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nName" class="bold">名称:</label>
+                            <input type="text" class="form-control" id="nName" placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nIP" class="bold">IP:</label>
+                            <input type="text" class="form-control" id="nIP" placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 YoN_button" style="margin-top:30px">
+                        <button class="y">确定</button>
+                        <button class="n">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--弹框-->
+    <div id="detail" style="display: none">
+        <div class="container-fluid">
+            <div class="title">本次任务运行信息</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>开始时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+                <div class="col-md-6">
+                    <b>结束时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>cpu占用：</b>
+                    <span>10%</span>
+                </div>
+                <div class="col-md-6">
+                    <b>内存占用：</b>
+                    <span>10%</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>运行时间：</b>
+                    <span>00:15:00</span>
+                </div>
+            </div>
+            <!--</div>-->
+            <div class="title">任务属性</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>创建时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+                <div class="col-md-6">
+                    <b>创建人：</b>
+                    <span>admin</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>调度信息：</b>
+                    <span>单次</span>
+                </div>
+                <div class="col-md-6">
+                    <b>运行次数：</b>
+                    <span>第一次</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>关联规则：</b>
+                    <span>aa</span>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/mockData.js"></script>
+<script>
+    $(function () {
+        $(document).on("click",".nav-tabs li .add",function () {
+            /*******排序**********/
+            $(".nav-tabs a").each(function (i, n) {
+                $(n).attr("href", "#navTabs_" + i);
+            });
+            $(".tab-content>div").each(function (i, n) {
+                $(n).attr("id", "navTabs_" + i);
+            });
+            var index = $(this).parent().index(".nav-tabs li");
+            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建任务 <span class="fa fa-close tabClose"></span></a></li>';
+            var strContent = $("#profile").html();
+            //console.log(strContent);
+            $(this).parent().before(str);
+            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
+        });
+        $(document).on("click", ".tabClose", function () {
+            /*******排序**********/
+            $(".nav-tabs a").each(function (i, n) {
+                $(n).attr("href", "#navTabs_" + i);
+            });
+            $(".tab-content>div").each(function (i, n) {
+                $(n).attr("id", "navTabs_" + i);
+            });
+
+            if($(this).parent().parent().hasClass('active')){ //当前是active的被删除
+                console.log($(this).parent().parent().prev());
+                $(this).parent().parent().prev().find('a').click();
+            }
+            var index = $(this).parent().parent().index(".nav-tabs li");
+            $(".tab-content>div").eq(index).remove();
+            $(this).parent().parent().remove();
+        });
+        $(document).on("click",".taskModel li",function () {
+            var target=$(this).attr("data-target");
+            $(".taskModelContent>div").hide();
+            $(".taskModelContent").find("."+target+"DIV").show();
+        });
+
+    });
+</script>
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            current_page: 1, //当前页
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                this.cartView(false);
+
+            })
+        },
+        computed:{
+            show:function(){
+                console.log(this.pages && this.pages !=1);
+                return this.pages && this.pages !=1
+            },
+            pstart: function() {
+                return this.current_page == 1;
+            },
+            pend: function() {
+                return this.current_page == this.pages;
+            },
+            efont: function() {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function() {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function() {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+        },
+        methods: {
+            cartView: function (flag) {
+                //console.log(this.username);
+                if (flag) { //搜索
+                    this.current_page = 1;
+                }
+                var _this = this;
+                //模拟数据
+                _this.list = data.Renwugunali;
+                _this.pages = data.CountPage;
+//                $.ajax({
+//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
+//                    type:'post',
+//                    dataType:'json',
+//                    data: {
+//                        PAGE: _this.current_page - 1,
+//                        task_name:'',
+//                        creater: ''
+//                    },
+//                    success: function(data){ //成功的回调函数的处理
+//                        _this.list = data.Renwugunali;
+//                        _this.pages = data.CountPage;
+//                    },
+//                    error:function(errorData){
+//                        if(errorData.readyState=='0'){
+//                            layer.close(index);
+//                            layer.alert('请先连接服务器');
+//                        }
+//                    }
+//                });
+            },
+            selectedList: function (item) {
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                console.log(_this.list);
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                this.current_page = id;
+            },
+            pageAjax:function () {
+                alert(this.current_page);
+            },
+            detail:function () {
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '410px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            }
+        }
+
+    })
+</script>
+</html>

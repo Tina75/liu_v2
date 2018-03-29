@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库配置</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <style>
+        .test{
+             margin-top: 22px;
+         }
+        .test > button{
+            padding: 6px 12px;
+            border-radius: 0;
+            color: #fff;
+            background: #ED8105;
+            border: 1px solid transparent;
+            margin-right: 10px;
+        }
+        .test > a >span{
+            color: #00B83F;
+        }
+        .database .layui-layer-wrap{
+            height: 100%;
+        }
+        .database .left,.database .right{
+            float: left;
+            width: 48%;
+            height: 100%;
+            border: 1px solid #ccc;
+            padding:0 10px;
+            overflow-y: scroll;
+        }
+        .database .right{
+            float: right;
+        }
+        .database .left .litle,.database .right .litle{
+            font-weight: bold;
+            height: 35px;
+            line-height: 35px;
+        }
+        .database .left ul li,.database .right ul li{
+            line-height: 30px;
+            height: 30px;
+        }
+        .database .left ul li.active{
+            color: #0078E6;
+        }
+    </style>
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">数据库配置</a></li>
+        <!--<li><a href="#profile" data-toggle="tab">我的任务</a></li>-->
+        <li><span class="fa fa-plus add"></span></li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="home">
+            <div class="search clearfix">
+                <div class="form-inline pull-left searchItems">
+                    <div class="form-group">
+                        <label for="task">数据库名称:</label>
+                        <input type="text" class="form-control" id="task" placeholder="请输入关键字">
+                    </div>
+                    <button type="button" class="btn btn-primary">确认</button>
+                </div>
+                <div class="searchEdit pull-right">
+                    <ul class="clearfix">
+                        <li class="pull-right">
+                            <span class="fa fa-refresh active">刷新</span>
+                        </li>
+                        <li class="pull-right">
+                            <span class="fa fa-trash-o active">删除</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tableContainer">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width: 45px">
+                                <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </th>
+                            <th>编号</th>
+                            <th>数据库名称</th>
+                            <th>数据库查看</th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item,index) in list">
+                            <td>
+                                <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </td>
+                            <td>{{index+1}}</td>
+                            <td class="checkDetail" @click="detail()">00001</td>
+                            <td class="checkDetail" @click="database()">查看详情</td>
+                            <td>已连接</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page clearfix" v-show="show">
+                    <div class="pageCut">
+                        每页
+                        <select name="" class="form-control pageSelect" >
+                            <option value="1">1</option>
+                        </select>
+                        条记录
+                    </div>
+                    <div class="pagelist">
+                        <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span class="ellipsis" v-show="efont">...</span>
+                        <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                              @click="jumpPage(num)">{{num}}</span>
+                        <span class="ellipsis" v-show="ebehind">...</span>
+
+                        <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+
+                        <span class="jumppoint">跳转到：</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--新建任务-->
+    <div  id="profile" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="task-name" class="bold">IP地址:</label>
+                            <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="task-desc" class="bold">端口号:</label>
+                            <input type="text" class="form-control" id="task-desc" placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label  class="bold">账号:</label>
+                            <input type="text" class="form-control"  placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label  class="bold">密码:</label>
+                            <input type="password" class="form-control"  placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label  class="bold">数据库类型:</label>
+                            <select class="form-control" >
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="test">
+                            <button >测试连接</button>
+                            <a href="javascript:void(0)"><span class="fa fa-check"></span>连接成功</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 YoN_button" style="margin-top:30px">
+                        <button class="y">确定</button>
+                        <button class="n">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--数据库名称点击-->
+    <div id="detail" style="display: none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <b>IP地址：</b>
+                    <span>192.168.1.2</span>
+                </div>
+                <div class="col-md-6">
+                    <b>端口号：</b>
+                    <span>ETE 192.168.1.2</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>数据库类型：</b>
+                    <span>mysql</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--点击详情-->
+    <div id="database" style="display: none">
+        <div class="left">
+            <div class="litle">数据表列表</div>
+            <ul>
+                <li class="active">sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+            </ul>
+        </div>
+        <div class="right">
+            <div class="litle">字段列表</div>
+            <ul>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+                <li>sql</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/mockData.js"></script>
+<script>
+    $(function () {
+        $(document).on("click",".nav-tabs li .add",function () {
+            /*******排序**********/
+            $(".nav-tabs a").each(function (i, n) {
+                $(n).attr("href", "#navTabs_" + i);
+            });
+            $(".tab-content>div").each(function (i, n) {
+                $(n).attr("id", "navTabs_" + i);
+            });
+            var index = $(this).parent().index(".nav-tabs li");
+            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建数据库 <span class="fa fa-close tabClose"></span></a></li>';
+            var strContent = $("#profile").html();
+            //console.log(strContent);
+            $(this).parent().before(str);
+            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
+        });
+        $(document).on("click", ".tabClose", function () {
+            /*******排序**********/
+            $(".nav-tabs a").each(function (i, n) {
+                $(n).attr("href", "#navTabs_" + i);
+            });
+            $(".tab-content>div").each(function (i, n) {
+                $(n).attr("id", "navTabs_" + i);
+            });
+
+            if($(this).parent().parent().hasClass('active')){ //当前是active的被删除
+                console.log($(this).parent().parent().prev());
+                $(this).parent().parent().prev().find('a').click();
+            }
+            var index = $(this).parent().parent().index(".nav-tabs li");
+            $(".tab-content>div").eq(index).remove();
+            $(this).parent().parent().remove();
+        });
+        $(document).on("click",".taskModel li",function () {
+            var target=$(this).attr("data-target");
+            $(".taskModelContent>div").hide();
+            $(".taskModelContent").find("."+target+"DIV").show();
+        });
+
+    });
+</script>
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            current_page: 1, //当前页
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                this.cartView(false);
+
+            })
+        },
+        computed:{
+            show:function(){
+                console.log(this.pages && this.pages !=1);
+                return this.pages && this.pages !=1
+            },
+            pstart: function() {
+                return this.current_page == 1;
+            },
+            pend: function() {
+                return this.current_page == this.pages;
+            },
+            efont: function() {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function() {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function() {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+        },
+        methods: {
+            cartView: function (flag) {
+                //console.log(this.username);
+                if (flag) { //搜索
+                    this.current_page = 1;
+                }
+                var _this = this;
+                //模拟数据
+                _this.list = data.Renwugunali;
+                _this.pages = data.CountPage;
+//                $.ajax({
+//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
+//                    type:'post',
+//                    dataType:'json',
+//                    data: {
+//                        PAGE: _this.current_page - 1,
+//                        task_name:'',
+//                        creater: ''
+//                    },
+//                    success: function(data){ //成功的回调函数的处理
+//                        _this.list = data.Renwugunali;
+//                        _this.pages = data.CountPage;
+//                    },
+//                    error:function(errorData){
+//                        if(errorData.readyState=='0'){
+//                            layer.close(index);
+//                            layer.alert('请先连接服务器');
+//                        }
+//                    }
+//                });
+            },
+            selectedList: function (item) {
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                console.log(_this.list);
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                this.current_page = id;
+            },
+            pageAjax:function () {
+                alert(this.current_page);
+            },
+            detail:function () {
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '250px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            },
+            database:function () {
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['确定','取消'],
+                    btnAlign: 'c',
+                    area: ['600px', '500px'],
+                    skin: 'database', //没有背景色
+                    shadeClose: true,
+                    content: $('#database')
+                });
+            }
+        }
+
+    })
+</script>
+</html>

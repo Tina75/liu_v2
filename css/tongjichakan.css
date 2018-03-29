@@ -1,0 +1,156 @@
+.content{
+    /*display: flex;*/
+    margin-top:15px;
+    /*min-height: 80vh;*/
+    padding-left: 265px;
+    overflow: hidden;
+}
+.content .left{
+    float: left;
+    width: 250px;
+    border: 1px solid #E6E6E6;
+    /*border: 1px solid red;*/
+    margin-right: 15px;
+    margin-left: -265px;
+    padding:5px;
+    height: 58rem;
+    /*overflow-y:scroll;*/
+}
+.content .left .title{
+    font-weight: bold;
+    color: #000;
+}
+.content .left .ztree{
+    /*border: 1px solid green;*/
+    height: 54rem;
+    margin-top:8px;
+    overflow: auto;
+}
+.content .left .ztree li{
+    line-height: 30px;
+}
+.content .left>.title span{
+    color: #9D9D9D;
+}
+.content .right{
+    float: left;
+    width: 100%;
+    /*border: 1px solid black;*/
+}
+.content .right .top{
+    /*display: flex;*/
+}
+.content .right .top .items{
+    width: 75%;
+    height: 127px;
+    border: 1px solid #CFCFCF;
+}
+.content .right .top .items>.title{
+    overflow: hidden;
+    padding:5px 8px;
+    border-bottom: 1px solid #CFCFCF;
+}
+.content .right .top .items .t{
+    float: left;
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing:3px;
+    color: #000;
+}
+.content .right .top .items .r{
+    float: right;
+    color: #F27B00;
+    cursor: pointer;
+}
+.content .right .top .items>.line{
+    margin:0 8px;
+    padding:5px 0;
+    border-bottom: 1px solid #F2F2F2;
+}
+.content .right .top .items>.line:last-child{
+    border-bottom: none;
+}
+.content .right .top .items>.line input[type="radio"]{
+    margin-top: 2px!important;
+}
+.content .right .top .items>.line .form-control{
+    height: 27px;
+    font-size: 12px;
+}
+.content .right .top .items>.line .input-group-addon{
+    padding: 4px 12px;
+    font-size: 12px;
+}
+/*.content .right .top .items>.choose{*/
+/*overflow-x: scroll;*/
+/*}*/
+.content .right .top .items>.choose>span{
+    margin-right:6px;
+}
+.content .right .top .topTen{
+    height: 250px;
+    width: 18%;
+    /*border: 1px solid red;*/
+    position: absolute;
+    z-index: 1000000;
+    left:81%;
+    top:74px;
+}
+.content .right .div1{
+    width: 99%;
+    min-height: 100px;
+    /*background: blue;*/
+}
+.content .right .div1 .title>b{
+    font-weight: bold;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: #000;
+}
+.content .right .div1 .title>span{
+    color: #0078E6;
+    font-weight: bold;
+}
+.content .right .div1 .title>.toggle{
+    color: #F27B00;
+    cursor: pointer;
+}
+.content .right .div1 .title>.toggle span{
+    font-size: 14px;
+    margin-right: 5px;
+}
+.content .right .div1 .ten > thead > tr > th{
+    border: none;
+    background: #3DA6F7;
+    color: #fff;
+}
+.content .right .div1 .ten > tbody > tr > td{
+    border: none;
+    /*background: #F2F9FF;*/
+    background: rgba(254,240,239,0.2);
+    color: #666;
+}
+.content .right .div1 .ten > tbody > tr > td.red{
+    color: red;
+}
+.content .right .div1 .ten > tbody > tr > td .fa-long-arrow-down{
+    color: #FA6E0F;
+}
+.content .right .div1 .ten > tbody > tr > td .fa-long-arrow-right{
+    color: #686765;
+}
+.content .right .div1 .ten > tbody > tr > td .fa-long-arrow-up{
+    color: red;
+}
+.content .right .div1 .ten > tbody > tr:nth-child(1)>td,
+.content .right .div1 .ten > tbody > tr:nth-child(2)>td,
+.content .right .div1 .ten > tbody > tr:nth-child(3)>td{
+    /*background: #FFEBEC;*/
+    background: rgba(255,233,236,0.5);
+}
+.content .right .echarts{
+    width: 100%;
+    /*border:1px solid #ccc;*/
+    height: 430px;
+    margin-top: 18px;
+}

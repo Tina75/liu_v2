@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        div{
+            height: 300px;
+            border: 1px solid #000000;
+        }
+    </style>
+</head>
+<body>
+<a href="3.html" id="ddd" >我是3页面</a>
+</body>
+<script src="js/jquery.min.js"></script>
+<script>
+    //对象排序
+    var arr = [
+        {"userId":"e23b9d51ef3244ea","userName":"123456", "userGroupInfoList":[],"createTime":"2018-02-28 09:45:00.0","updateTime":"2018-02-28 13:51:00.0"},
+        {"userId":"2773419e2e5d4960","userName":"q","userGroupInfoList":[],"createTime":"2018-02-08 10:02:00.0","updateTime":"2018-02-28 13:57:00.0"},
+        {"userId":"7117969642704402","userName":"www","userGroupInfoList":[],"createTime":"2018-02-08 10:02:00.0","updateTime":"2018-02-28 13:58:00.0"},
+        {"userId":"cda1991bb5aa44b4","userName":"aa","userGroupInfoList":[{"groupId":"8ef932e904d641a0","groupName":"爆破组","createTime":"2018-02-05 10:57:00.0","updateTime":"2018-02-05 11:19:00.0","inGroupUserNams":null,"userInfoList":null}],"phoneNum":"213311333","email":"12133334@qq.com","createTime":"2018-02-08 10:02:00.0","updateTime":null,"onDisabled":"1","remark":"新建用户"},
+        {"userId":"55fe77cca7ac4427","userName":"lwx","userGroupInfoList":[],"createTime":"2018-02-05 10:39:00.0","updateTime":null,"onDisabled":"1","remark":"新建用户"}];
+
+    function compare(property){ //升序
+        return function(a,b){
+            var value1 = a[property];
+            var value2 = b[property];
+            return value1 > value2 ? 1 : -1;
+        }
+    }
+    console.log(arr.sort(compare('createTime')))
+</script>
+</html>

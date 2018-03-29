@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IP与地区对应关系图</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <!--<link rel="stylesheet" href="css/datapicker/datepicker3.css">-->
+    <link rel="stylesheet" href="css/share.css">
+    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <!--<link rel="stylesheet" href="css/animate.css">-->
+</head>
+<body>
+<div class="container-fluid" id="example">
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="home">
+            <div class="search clearfix">
+                <div class="form-inline pull-left searchItems">
+                    <div class="form-group">
+                        <label for="task">IP段:</label>
+                        <input type="text" class="form-control" id="task" placeholder="请输入关键字">
+                    </div>
+                    <div class="form-group">
+                        <label for="rule">地区:</label>
+                        <input type="email" class="form-control" id="rule" placeholder="请输入地区">
+                    </div>
+                    <button type="button" class="btn btn-primary">确认</button>
+                </div>
+                <div class="searchEdit pull-right">
+                    <ul class="clearfix">
+                        <li class="pull-right">
+                            <span class="fa fa-trash-o active">新建</span>
+                        </li>
+                        <li class="pull-right" @click="edit()">
+                            <span class="fa fa-pencil active">编辑</span>
+                        </li>
+                        <li class="pull-right">
+                            <span class="fa fa-stop active">导入</span>
+                        </li>
+                        <li class="pull-right">
+                            <span class="fa fa-pause active">分享</span>
+                        </li>
+                        <li class="pull-right">
+                            <span class="fa fa-play active">删除</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tableContainer">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width: 45px">
+                                <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </th>
+                            <th>编号</th>
+                            <th>IP段</th>
+                            <th>地区</th>
+                            <th>状态</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="item in list">
+                            <td>
+                                <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </td>
+                            <td>1</td>
+                            <td>192.168.1.1 <i class="fa fa-bookmark bule" aria-hidden="true"></i></td>
+                            <td>河北省</td>
+                            <td class="checkDetail" @click="share()">
+                                已分享
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page clearfix" v-show="show">
+                    <div class="pageCut">
+                        每页
+                        <select name="" class="form-control pageSelect" >
+                            <option value="1">1</option>
+                        </select>
+                        条记录
+                    </div>
+                    <div class="pagelist">
+                        <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span class="ellipsis" v-show="efont">...</span>
+                        <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                              @click="jumpPage(num)">{{num}}</span>
+                        <span class="ellipsis" v-show="ebehind">...</span>
+
+                        <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+
+                        <span class="jumppoint">跳转到：</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--分享弹窗-->
+    <div id="share" style="display: none">
+        <div class="share_peo clearfix">
+            <div class="left pull-left">
+                <div class="title">
+                    选择用户：
+                </div>
+                <div class="share_search">
+                    <input type="text" placeholder="查找联系人"  >
+                    <span class="fa fa-search"></span>
+                </div>
+                <div class="areas_list">
+                    <ul id="treeDemo" class="ztree"></ul>
+                </div>
+            </div>
+            <div class="right pull-right">
+                <div class="title">
+                    已选用户：(<span>4</span>/<span>40</span>)
+                </div>
+                <div class="share_search">
+                    <input type="text" placeholder="查找联系人">
+                    <span class="fa fa-search"></span>
+                </div>
+                <ul class="send_to">
+                    <li v-for="(item,index) in zTreeArr" @click="removeRight(index)">{{item}}</li>
+                </ul>
+                <!--<div class="close">全部删除</div>-->
+            </div>
+        </div>
+    </div>
+    <!--弹框-->
+    <div id="edit" style="display: none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="task-name" class="bold">原名称:</label>
+                        <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-9" style="padding-right: 10px">
+                    <div class="form-group">
+                        <label for="task-name" class="bold">新名称:</label>
+                        <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                    </div>
+                </div>
+                <div class="col-md-3" style="padding-left: 0;padding-right: 0;margin-top: 17px">
+                    <div class="addBtn"><i class="fa fa-plus" aria-hidden="true"></i>新增</div>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<!--<script src="js/My97DatePicker/WdatePicker.js"></script>-->
+<!--<script src="js/datapicker/bootstrap-datepicker.js"></script>-->
+<script src="js/vue.js"></script>
+<script src="js/mockData.js"></script>
+<script src="js/jquery.ztree.core.js"></script>
+<script src="js/jquery.ztree.excheck.js"></script>
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            current_page: 1, //当前页
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+            zNodes:[],
+            zTreeArr:[]  //树形结构右侧
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                this.cartView(false);
+                this.zTree();
+            })
+        },
+        computed:{
+            show:function(){
+                console.log(this.pages && this.pages !=1);
+                return this.pages && this.pages !=1
+            },
+            pstart: function() {
+                return this.current_page == 1;
+            },
+            pend: function() {
+                return this.current_page == this.pages;
+            },
+            efont: function() {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function() {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function() {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+        },
+        methods: {
+            cartView: function (flag) {
+                //console.log(this.username);
+                if (flag) { //搜索
+                    this.current_page = 1;
+                }
+                var _this = this;
+                //模拟数据
+                _this.list = data.Renwugunali;
+                _this.pages = data.CountPage;
+//                $.ajax({
+//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
+//                    type:'post',
+//                    dataType:'json',
+//                    data: {
+//                        PAGE: _this.current_page - 1,
+//                        task_name:'',
+//                        creater: ''
+//                    },
+//                    success: function(data){ //成功的回调函数的处理
+//                        _this.list = data.Renwugunali;
+//                        _this.pages = data.CountPage;
+//                    },
+//                    error:function(errorData){
+//                        if(errorData.readyState=='0'){
+//                            layer.close(index);
+//                            layer.alert('请先连接服务器');
+//                        }
+//                    }
+//                });
+            },
+            selectedList: function (item) {
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                console.log(_this.list);
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                this.current_page = id;
+            },
+            pageAjax:function () {
+                alert(this.current_page);
+            },
+            detail:function () {
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '410px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            },
+            share:function () {
+                layer.open({
+                    type: 1,
+                    title: ['分享'],
+                    closeBtn: 1,
+                    btn:['确定','取消'],
+                    btnAlign: 'c',
+                    area: ['800px', '440px'],
+                    skin: '', //没有背景色
+                    shade: 0,
+                    content: $('#share')
+                });
+            },
+            zTree:function () {
+                this.zNodes=["A1","A2","B1","B2","C1","C2","D1","D2"];
+                var zNodes = [
+                    {name:'全部用户',open:true,children:[
+                        {name:"A组用户", open:true, children:[
+                            {name:"A1"}, {name:"A2"}]},
+                        {name:"B组用户", open:true, children:[
+                            {name:"B1"}, {name:"B2"}]},
+                        {name:"C组用户", open:true, children:[
+                            {name:"C1"}, {name:"C2"}]},
+                        {name:"D组用户", open:true, children:[
+                            {name:"D1"}, {name:"D2"}]
+                        }
+                    ]}
+                ];
+                var setting = {
+                    check:{
+                        enable: true,
+                        chkStyle : "checkbox"
+                    },
+                    view: {
+                        showIcon: false
+                    },
+                    callback: {
+                        onCheck:  this.onCheck
+                    }
+                };
+                $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+            },
+            onCheck:function () {
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo").getNodesByFilter(this.filter);
+                var str = "";
+                this.zTreeArr=[];
+                for (var i=0;i<zTree.length;i++) {
+                    if(zTree[i].name !=null)
+                        this.zTreeArr.push(zTree[i].name);
+                }
+            },
+            filter:function (node) {   //过滤器直选中2级节点累加
+                return (node.level == 2 && node.checked == true);
+            },
+            removeRight:function (i) {
+                this.zTreeArr.splice(i,1);
+            },
+            edit:function () {
+                layer.open({
+                    type: 1,
+                    title: ['编辑'],
+                    closeBtn: 1,
+                    btn:['确定','取消'],
+                    btnAlign: 'c',
+                    area: ['450px', '300px'],
+                    skin: '', //没有背景色
+                    shade: 0,
+                    content: $('#edit')
+                });
+            }
+        }
+
+    })
+</script>
+</html>

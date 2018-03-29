@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    select {
+        /*Chrome和Firefox里面的边框是不一样的，所以复写了一下*/
+        border: solid 1px #000;
+
+        /*很关键：将默认的select选择框样式清除*/
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        /*在选择框的最右侧中间显示小箭头图片*/
+        background: url("http://ourjs.github.io/static/2015/arrow.png") no-repeat scroll right center transparent;
+        /*为下拉小箭头留出一点位置，避免被文字覆盖*/
+        padding-right: 14px;
+    }
+
+    /*清除ie的默认选择框样式清除，隐藏下拉箭头*/
+    select::-ms-expand {
+        display: none;
+    }
+</style>
+<body>
+
+</body>
+
+<script>
+    var d = {
+        "resultCode": "0",
+        "data": [
+            {
+                "id": "model_01",
+                "rule_model_name": "IP",
+                "rule_model_description": "网络协议（Internet Protocol）",
+                "ruleExpList": [
+                    {
+                        "id": "exp_0001",
+                        "rule_expression_str": "ip.src",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": "length",
+                        "exp_validation_range_min": "7",
+                        "exp_validation_range_max": "15",
+                        "exp_validation_mattcher": "[0-9]{1,3}\\\\.[0-9]{1,3}\\\\.[0-9]{1,3}\\\\.[0-9]{1,3}",
+                        "relationList": [
+                            {
+                                "id": "relation_01",
+                                "relation_exp": "==",
+                                "relation_level": "2"
+                            },
+                            {
+                                "id": "relation_02",
+                                "relation_exp": "!=",
+                                "relation_level": "2"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "exp_0002",
+                        "rule_expression_str": "ip.dst",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": "length",
+                        "exp_validation_range_min": "7",
+                        "exp_validation_range_max": "15",
+                        "exp_validation_mattcher": "[0-9]{1,3}\\\\.[0-9]{1,3}\\\\.[0-9]{1,3}\\\\.[0-9]{1,3}",
+                        "relationList": [
+                            {
+                                "id": "relation_01",
+                                "relation_exp": "==",
+                                "relation_level": "2"
+                            },
+                            {
+                                "id": "relation_02",
+                                "relation_exp": "!=",
+                                "relation_level": "2"
+                             }
+                        ]
+                    },
+                    {
+                        "id": "exp_0003",
+                        "rule_expression_str": "ip.len",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": "value",
+                        "exp_validation_range_min": "0",
+                        "exp_validation_range_max": "65536",
+                        "exp_validation_mattcher": null,
+                        "relationList": []
+                    },
+                    {
+                        "id": "exp_0004",
+                        "rule_expression_str": "ip.payload ",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": null,
+                        "exp_validation_range_min": "",
+                        "exp_validation_range_max": null,
+                        "exp_validation_mattcher": null,
+                        "relationList": []
+                    },
+                    {
+                        "id": "exp_0005",
+                        "rule_expression_str": "ip.payload.len",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": null,
+                        "exp_validation_range_min": "",
+                        "exp_validation_range_max": null,
+                        "exp_validation_mattcher": null,
+                        "relationList": []
+                    },
+                    {
+                        "id": "exp_0006",
+                        "rule_expression_str": "ip.proto",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": null,
+                        "exp_validation_range_min": "",
+                        "exp_validation_range_max": null,
+                        "exp_validation_mattcher": "[A-Z]{2,5}",
+                        "relationList": []
+                    },
+                    {
+                        "id": "exp_0007",
+                        "rule_expression_str": "ip.hdr",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": null,
+                        "exp_validation_range_min": "",
+                        "exp_validation_range_max": null,
+                        "exp_validation_mattcher": null,
+                        "relationList": []
+                    },
+                    {
+                        "id": "exp_0008",
+                        "rule_expression_str": "ip.hdr_len",
+                        "expstr_model_id": "model_01",
+                        "exp_validation_property": null,
+                        "exp_validation_range_min": "",
+                        "exp_validation_range_max": null,
+                        "exp_validation_mattcher": null,
+                        "relationList": []
+                    }
+                ]
+            },
+            {
+                "id": "model_02",
+                "rule_model_name": "IPV6",
+                "rule_model_description": "网络协议（Internet Protocol Version 6）",
+                "ruleExpList": []
+            },
+            {
+                "id": "model_03",
+                "rule_model_name": "ICMP",
+                "rule_model_description": "无连接的协议(Internet Control Message Protocol)",
+                "ruleExpList": []
+             },
+            {
+                "id": "model_04",
+                "rule_model_name": "TCP",
+                "rule_model_description": "传输控制协议（Transmission Control Protocol）",
+                "ruleExpList": []
+            },
+            {
+                "id": "model_05",
+                "rule_model_name": "UDP",
+                "rule_model_description": "用户数据报协议(User Datagram Protocol)",
+                "ruleExpList": []
+            },
+            {
+                "id": "model_06",
+                "rule_model_name": "HTTP",
+                "rule_model_description": "超文本传输协议(HyperText Transfer Protocol)",
+                "ruleExpList": []
+            },
+            {
+                "id": "model_07",
+                "rule_model_name": "FTP",
+                "rule_model_description": "文件传输协议（File Transfer Protocol）",
+                "ruleExpList": []
+            },
+            {
+                "id": "model_08",
+                "rule_model_name": "SMTP",
+                "rule_model_description": "简单邮件传输协议（Simple Mail Transfer Protocol）",
+                "ruleExpList": []
+             },
+            {
+                "id": "model_09",
+                "rule_model_name": "POP3",
+                "rule_model_description": "邮局协议(Post Office Protocol - Version 3)",
+                "ruleExpList": []
+            },
+            {
+                "id": "model_10",
+                "rule_model_name": "DNS",
+                "rule_model_description": "域名系统（Domain Name System）",
+                "ruleExpList": []
+            }
+        ],
+        "message": "获取规则表达式成功！"
+    }
+</script>
+</html>

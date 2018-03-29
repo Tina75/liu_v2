@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户组列表</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/share.css">
+    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <link rel="stylesheet" href="css/animate.css">
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li :class="{active:currentIndex == 0}" ><a href="javascript:void(0)" @click.prevent="currentIndex=0" >用户组列表</a></li>
+        <li v-for="(item,index) in navLI_1"  :class="{'active':currentIndex==index+1}">
+            <a href="javascript:void(0)"  @click.prevent.stop="demoClickLi(index+1)" >新建用户组
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+        </li>
+        <li><span class="fa fa-plus add" @click="add($event.target)"></span></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane " :class="{active:currentIndex == 0}" id="home">
+            <div class="search clearfix">
+                <div class="form-inline pull-left searchItems">
+                    <div class="form-group">
+                        <label>用户组名称:</label>
+                        <input type="text" class="form-control"  v-model.trim="groupName" placeholder="请输入关键字"  @keyup="cartView(1)">
+                    </div>
+                    <button type="button" class="btn btn-primary" @click="cartView(1)">确认</button>
+                </div>
+                <div class="searchEdit pull-right">
+                    <ul class="clearfix">
+                        <li class="pull-right"  @click="deleteList" >
+                            <span class="fa fa-trash-o" :class="{active: selected.length>0}">删除</span>
+                        </li>
+                        <li class="pull-right" @click="editPop">
+                            <span class="fa fa-pencil" :class="{active: selected.length==1}">编辑</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tableContainer">
+                <div class="table-responsive" style="overflow-x: visible">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width: 45px">
+                                <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </th>
+                            <th>编号</th>
+                            <th>用户组名称</th>
+                            <th @click="sort" style="cursor: pointer">创建时间<span class="fa" :class="sortClass"></span></th>
+                            <th>用户</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item,index) in list">
+                            <td>
+                                <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </td>
+                            <td>{{index+1}}</td>
+                            <td>{{item.groupName}}</td>
+                            <td>{{item.createTime}}</td>
+                            <td class="dropdown" style="overflow: visible;">
+                                <div  v-if="item.inGroupUserNams.length!=0">
+                                    <span class="dropdown-toggle" data-toggle="dropdown" :class="{detail:item.inGroupUserNams.length!=1}">
+                                        {{item.inGroupUserNams[0]}}
+                                        <span v-if="item.inGroupUserNams.length!=1" class="fa fa-eye"></span>
+                                    </span>
+                                    <ul class="dropdown-menu" style="font-size: inherit" v-if="item.inGroupUserNams.length!=1">
+                                        <li v-for="inner in item.inGroupUserNams">{{inner}}</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page clearfix" >
+                    <div class="pageCut">
+                        每页
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                        </select>
+                        条记录
+                    </div>
+                    <div class="pagelist" >
+                        <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
+                        <span class="ellipsis" v-show="efont">...</span>
+                        <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                              @click="jumpPage(num)">{{num}}</span>
+                        <span class="ellipsis" v-show="ebehind">...</span>
+
+                        <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
+
+                        <span class="jumppoint">跳转到：</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--新建任务-->
+        <div v-for="(item,index) in navLI_1"  :class="{'active':currentIndex==index+1}" class="tab-pane">
+            <div class="add-target">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="bold">用户组:</label>
+                                <input type="text" v-model="item.groupName" @blur="valiGroupName($event.target,item)" class="form-control validate" placeholder="在此输入内容...">
+                                <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="share_peo clearfix">
+                                <div class="left pull-left">
+                                    <div class="title">
+                                        选择用户：
+                                    </div>
+                                    <div class="share_search">
+                                        <input type="text" placeholder="查找联系人" v-model="item.search_left"  @keyup="zNodes_search_left(currentIndex,item.search_left)">
+                                        <span class="fa fa-search" @click="zNodes_search_left(currentIndex,item.search_left)"></span>
+                                    </div>
+                                    <div class="areas_list">
+                                        <ul :id="item.treeDemoID"   class="ztree"></ul>
+                                        <ul    class="ztree"></ul>
+                                    </div>
+                                </div>
+                                <div class="right pull-right">
+                                    <div class="title">
+                                        已选用户：(<span>4</span>/<span>40</span>)
+                                    </div>
+                                    <div class="share_search">
+                                        <input type="text" placeholder="查找联系人" v-model="item.search_right" @keyup="zNodes_search_right(currentIndex,item.search_right)">
+                                        <span class="fa fa-search" @click="zNodes_search_right(currentIndex,item.search_right)"></span>
+                                    </div>
+                                    <ul class="send_to">
+                                        <li v-for="(item,index) in item.selected"  @click="removeRight(item,'treeDemo'+currentIndex)" v-if="item.level==2">{{item.name}}</li>
+                                    </ul>
+                                    <!--<div class="close">全部删除</div>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 YoN_button" style="margin-top:30px">
+                            <button class="y" @mousedown="addNewGroup(item,currentIndex,$event.target)">确定</button>
+                            <button class="n" @click="tabClose(index+1)">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--弹框-->
+    <div id="edit" style="display: none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="task-name" class="bold">用户组:</label>
+                        <input type="text" v-model="editList.groupName"  class="form-control" id="task-name" placeholder="在此输入内容...">
+                    </div>
+                </div>
+                <div class="col-md-6"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="share_peo clearfix">
+                        <div class="left pull-left">
+                            <div class="title">
+                                选择用户：
+                            </div>
+                            <div class="share_search">
+                                <input type="text" placeholder="查找联系人" v-model="search_left"   @keyup="zNodes_search_left('',search_left)" >
+                                <span class="fa fa-search" @click="zNodes_search_left('',search_left)"></span>
+                            </div>
+                            <div class="areas_list">
+                                <!--<ul :id="item.treeDemoID"   class="ztree"></ul>-->
+                                <ul id="treeDemo"   class="ztree"></ul>
+                            </div>
+                        </div>
+                        <div class="right pull-right">
+                            <div class="title">
+                                已选用户：
+                            </div>
+                            <div class="share_search">
+                                <input type="text" placeholder="查找联系人" v-model="search_right" @keyup="zNodes_search_right('',search_right)">
+                                <span class="fa fa-search" @click="zNodes_search_right('',search_right)"></span>
+                            </div>
+                            <ul class="send_to">
+                                <li v-for="(item,index) in zTreeArr" :class="{zTreeActive:item.zTreeActive}" @click="removeRight(item,'treeDemo')" v-if="item.level==2">{{item.name}}</li>
+                            </ul>
+                            <!--<div class="close">全部删除</div>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
+<script src="js/jquery.ztree.core.js"></script>
+<script src="js/jquery.ztree.excheck.js"></script>
+<script>
+    function navLiSort(){
+        $(".nav-tabs a").each(function (i, n) {
+            $(n).attr("href", "#navTabs_" + i);
+        });
+        $(".tab-content>div").each(function (i, n) {
+            $(n).attr("id", "navTabs_" + i);
+        });
+    }
+//    $(function () {
+//        $(document).on("click",".nav-tabs li .add",function () {
+//            /*******排序**********/
+//            $(".nav-tabs a").each(function (i, n) {
+//                $(n).attr("href", "#navTabs_" + i);
+//            });
+//            $(".tab-content>div").each(function (i, n) {
+//                $(n).attr("id", "navTabs_" + i);
+//            });
+//            var index = $(this).parent().index(".nav-tabs li");
+//            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建任务 <span class="fa fa-close tabClose"></span></a></li>';
+//            var strContent = $("#profile").html();
+//            $(this).parent().before(str);
+//            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
+//            $(this).parent().prev().find('a').click();  //新增的active
+//
+//            zTree();
+//        });
+//        $(document).on("click", ".tabClose", function () {
+//            /*******排序**********/
+//            $(".nav-tabs a").each(function (i, n) {
+//                $(n).attr("href", "#navTabs_" + i);
+//            });
+//            $(".tab-content>div").each(function (i, n) {
+//                $(n).attr("id", "navTabs_" + i);
+//            });
+//
+//            if($(this).parent().parent().hasClass('active')){ //当前是active的被删除
+//                console.log($(this).parent().parent().prev());
+//                $(this).parent().parent().prev().find('a').click();
+//            }
+//            var index = $(this).parent().parent().index(".nav-tabs li");
+//            $(".tab-content>div").eq(index).remove();
+//            $(this).parent().parent().remove();
+//        });
+//        $(document).on("click",".taskModel li",function () {
+//            var target=$(this).attr("data-target");
+//            $(".taskModelContent>div").hide();
+//            $(".taskModelContent").find("."+target+"DIV").show();
+//        });
+//
+//    });
+</script>
+
+<script>
+    //高亮样式
+    function getFontCss(treeId, treeNode) {
+        return (treeNode.highlight) ? { color: "#A60000", "font-weight": "bold"} : { color: "#333", "font-weight": "normal" };
+    }
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            sortFlag:undefined, //默认升序
+            groupName:'', //搜索项
+            current_page: 1, //当前页
+            pageSize:8,  //每页数据条数
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+            navLI:[{}],
+            currentIndex:0,
+            selected:[],    //表格选中项
+            editList:{},   //编辑参数
+            zNodes:[],  //用户组树
+            zTreeArr:[],  //编辑中选中项
+            search_left:'',
+            lastSearch_left:'',
+            lastzNodes_left:[],
+            search_right:'',
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                _this.cartView(_this.current_page);
+
+            })
+        },
+        computed:{
+            show:function(){
+               // console.log(this.pages && this.pages !=1);
+                return this.pages && this.pages !=1
+            },
+            pstart: function() {
+                return this.current_page == 1;
+            },
+            pend: function() {
+                return this.current_page == this.pages;
+            },
+            efont: function() {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function() {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function() {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+            navLI_1:function () {
+
+                return this.navLI.slice(1);
+            },
+            sortClass:function () {
+                var s = this.sortFlag;
+                //console.log((typeof s == "undefined") ? "fa-sort" : (s == true?"fa-sort-asc":"fa-sort-desc"));
+                return (typeof s == "undefined") ? "fa-sort" : (s == true?"fa-sort-asc":"fa-sort-desc")
+            },
+            zSetting: function(){
+               return  {
+                   check:{
+                       enable: true,
+                       chkStyle : "checkbox"
+                   },
+                   view: {
+                       showIcon: false,
+                       fontCss: getFontCss
+                   },
+                   callback: {
+                       onCheck:  this.onCheck
+                   }
+               };
+            }
+        },
+        methods: {
+            cartView: function (cPage) {
+                var _this = this;
+                //模拟数据
+                var u = url +"user/getPageGroupListData/"+cPage+"/"+this.pageSize+"?groupName="+encodeURIComponent(this.groupName);
+                ajaxGet(u,function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.groupListData;
+                        _this.pages = parseInt(data.data.countPage);
+                        console.log(_this.list)
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            sort:function () {
+                if(typeof this.sortFlag == "undefined"){
+                    this.sortFlag=true;
+                }else{
+                    this.sortFlag=!this.sortFlag;
+                }
+                if(this.sortFlag){ //true 升序
+                    this.list.sort(compare_asc("createTime"));
+                }else{
+                    this.list.sort(compare_des("createTime"));
+                }
+            },
+            selectedList: function (item) {
+                var _this=this;
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+            },
+            deleteList:function () {
+                var _this=this;
+                var groupIdList = [];
+                this.selected.forEach(function (item) {
+                    groupIdList.push(item.groupId);
+                });
+                if(this.selected.length>0){
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        ajaxGetArray(url+"user/deleteGroupByGroupIdList",{groupIdList:groupIdList},function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("删除成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
+                }else{
+                    return
+                }
+            },
+            editTreeInit:function () {
+                var zTreeObject=$.fn.zTree.getZTreeObj("treeDemo");
+                var zTreeGetNode = zTreeObject.getNodes();
+                var groupName = this.editList.groupName;
+                for(var i = 0,tree = zTreeGetNode[0].children; i < tree.length; i++){
+                    if(groupName == tree[i].name && tree[i].level == 1){
+                        zTreeObject.checkNode(tree[i],true, true);
+                    }
+
+                }
+                this.zTreeArr = zTreeObject.getCheckedNodes(true);
+            },
+            editPop:function () {
+                this.zNodesList(); //先获得树的数据
+                $.fn.zTree.init($("#treeDemo"), this.zSetting, this.zNodes);
+                var arr = [];
+                var _this = this;
+                this.selected.forEach(function (item) {
+                    arr.push(item);
+                });
+                if(arr.length==1){
+                    _this.editList = arr[0];
+                    //编辑显示之前的选中项
+                    _this.editTreeInit();
+                    layer.open({
+                        type: 1,
+                        title: ['详情'],
+                        closeBtn: 1,
+                        btn:['确定','关闭'],
+                        btnAlign: 'c',
+                        area: ['800px', '520px'],
+                        //skin: 'detailPop', //没有背景色
+                        shadeClose: true,
+                        content: $('#edit'),
+                        yes:function () {
+                            _this.edit();
+                        }
+                    });
+                }else{
+                    return;
+                }
+            },
+            edit:function () {
+                var _this=this;
+                var u = url+"user/editeGroupDetails/"+this.editList.groupName+"/"+this.editList.groupId;
+                var userIdList = this.userIdList("treeDemo");
+                ajaxPostArray(u,{userIdList:userIdList},function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("修改成功",function () {
+                            _this.cartView(_this.current_page);
+                            _this.selected = [];
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert(data.message);
+                    }
+                });
+            },
+            userIdList:function (treeId) {
+                var arr = [];
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                var arrSel = zTreeObject.getCheckedNodes(true); //选择项
+                for(var k=0;k<arrSel.length;k++){
+                    if(arrSel[k].level == 2){
+                        arr.push(arrSel[k].userId);
+                    }
+                }
+                console.log(arr);
+                return arr;
+            },
+            add:function (dom) {
+                var index = $(dom).parent().index(".nav-tabs li");
+                this.navLI.push({
+                    groupName:'',
+                    isOk:{userName:false},
+                    treeDemoID:'treeDemo'+index,
+                    search_left:'',
+                    lastSearch_left:'',
+                    lastzNodes_left:[],
+                    search_right:'',
+                    selected:[]});
+                this.currentIndex = index;
+                var _this = this;
+                _this.zNodesList();
+                setTimeout(function() {
+                    $.fn.zTree.init($("#"+_this.navLI[index].treeDemoID), _this.zSetting, _this.zNodes);
+                }, 0);
+            },
+            addNewGroup:function (item,index,dom) {
+                var _this = this;
+                var u = url +'user/addNewGroup/'+item.groupName;
+                console.log(item.groupName);
+                var userIdList = this.userIdList("treeDemo"+index);
+                //模拟失去焦点
+                var input = $(dom).parent().parent().parent().find(".validate");
+                console.log(input);
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = item.isOk.groupName;
+                if(isOk){
+                    if(userIdList.length == 0){
+                        layer.alert("请选择用户");
+                        return;
+                    }
+                    ajaxPostArray(u,{userIdList:userIdList},function (data) {
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("添加成功",function (i) {
+                                _this.cartView(_this.current_page);
+                                _this.selected=[];
+                                _this.tabClose(index);
+                                layer.close(i);
+                            })
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    })
+                }
+            },
+            valiGroupName:function (dom,item) {
+                var groupName = item.groupName;
+                var span = dom.nextElementSibling;
+                if(groupName==""){
+                    item.isOk.groupName = false;
+                    this.valiWays(span,"用户组不能为空",false);
+                    return;
+                }
+                if(groupName.length>20){
+                    item.isOk.groupName = false;
+                    this.valiWays(span,"长度只能在20个字符之间",false);
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(groupName)){
+                    item.isOk.groupName = true;
+                    this.valiWays(span,"",true);
+                    return;
+                }else{
+                    item.isOk.groupName = false;
+                    this.valiWays(span,"格式错误，仅支持汉字、字母、数字、“-”“_”的组合",groupName);
+                    return;
+                }
+
+            },
+            valiWays:function (span,str,flag) {
+                span.innerHTML = str;
+                if(flag){
+                    removeClass(span.parentElement, "error")
+                }else{ //增加error
+                    addClass( span.parentElement, "error")
+                }
+
+            },
+            tabClose:function (index) {
+                if(this.navLI.length>1){
+                    this.navLI.splice(index,1);
+                    if(this.currentIndex == index){ //当前为激活状态,关闭后选择前一个标签
+                        this.currentIndex = index-1;
+                    }else if(this.currentIndex > index){  //选择后前一个tab
+                        this.currentIndex--;
+                    }
+                }
+            },
+            demoClickLi:function(index) {
+                this.currentIndex = index;
+                return false;
+            },
+            zNodesList:function () {  //获取用户组树 后台数据
+                var _this = this;
+                ajaxGetAsync(url+"user/getGroupListContainsUserList",function (data) {
+                    var data = data.data;
+                    _this.zNodes_manage(data);
+                })
+            },
+            zNodes_manage:function (data) {  //处理后台传过来的数据
+                this.zNodes = [{
+                    name:'全部用户',open:true,children:[]
+                }];
+                for(var i = 0;i < data.length; i++){
+                    if(data[i].groupName){
+                        this.zNodes[0].children.push({name:data[i].groupName,open:false,children:[]});
+                        for(var j = 0; j<data[i].userInfoList.length; j++){
+                            var userInfoList = data[i].userInfoList[j];
+                            this.zNodes[0].children[i].children.push({name:userInfoList.userName,userId:userInfoList.userId});
+                        }
+                    }
+                }
+            },
+            zNodes_search_left:function (currentIndex,key) {
+                var zTree = currentIndex?$.fn.zTree.getZTreeObj("treeDemo"+currentIndex):$.fn.zTree.getZTreeObj("treeDemo");
+                var lastNodeList = currentIndex ? this.navLI[currentIndex].lastzNodes_left :this.lastzNodes_left;
+                var lastKey = currentIndex ? this.navLI[currentIndex].lastSearch_left :this.lastSearch_left;
+                if (key != "" && key != lastKey) {
+                    var nodeList = zTree.getNodesByParamFuzzy("name", key);
+                    for (var i = 0, l = lastNodeList.length; i < l; i++) { //上次查询的节点集合取消高亮
+                        currentIndex?(this.navLI[currentIndex].lastzNodes_left[i].highlight = false):(this.lastzNodes_left[i].highlight=false);
+                        zTree.updateNode((currentIndex?(this.navLI[currentIndex].lastzNodes_left[i]):(this.lastzNodes_left[i])));
+                    }
+                    zTree.expandAll(false); //全部收缩
+                    if (nodeList.length > 0) {
+                        for (var i = 0, m = nodeList.length; i < m; i++) { //遍历找到的节点集合
+                            if (nodeList[i].getParentNode()) {
+                                zTree.expandNode(nodeList[i].getParentNode(), true, false, false); //展开其父节点
+                            }
+                            nodeList[i].highlight = true;
+                            zTree.updateNode(nodeList[i]);
+                        }
+                    }
+                    zTree.refresh(); // 很重要，否则节点状态更新混乱。
+                    currentIndex?(this.navLI[currentIndex].lastzNodes_left = nodeList):(this.lastzNodes_left = nodeList);
+                    currentIndex?(this.navLI[currentIndex].lastSearch_left = key):(this.lastSearch_left = key);
+                }
+                if(key == ""){
+                    zTree.expandAll(false); //全部收缩
+                    for (var i = 0, l = lastNodeList.length; i < l; i++) { //上次查询的节点集合取消高亮
+                        currentIndex?(this.navLI[currentIndex].lastzNodes_left[i].highlight = false):(this.lastzNodes_left[i].highlight=false);
+                        zTree.updateNode(currentIndex?(this.navLI[currentIndex].lastzNodes_left[i]):(this.lastzNodes_left[i]));
+                    }
+                    zTree.refresh(); // 很重要，否则节点状态更新混乱。
+                    currentIndex?(this.navLI[currentIndex].lastzNodes_left = []):(this.lastzNodes_left = []);
+                    currentIndex?(this.navLI[currentIndex].lastSearch_left = ""):(this.lastSearch_left = "");
+                }
+            },
+            onCheck:function (event, treeId, treeNode) {
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                //id  treeDemo + 数字
+                var num= treeId.replace(/[^0-9]/ig,"");
+                if(num){  //新增的树
+                    this.navLI[num].selected = zTreeObject.getCheckedNodes(true);
+                }else{
+                    this.zTreeArr = zTreeObject.getCheckedNodes(true);
+                }
+            },
+            removeRight:function (item,treeId) {
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                var num= treeId.replace(/[^0-9]/ig,"");
+                var arrSel = zTreeObject.getCheckedNodes(true); //选择项
+                for(var k=0;k<arrSel.length;k++){
+                    if(arrSel[k].tId==item.tId &&arrSel[k].level == 2){
+                        zTreeObject.checkNode(arrSel[k],false, true);//取消这个节点的勾选状态
+                        break;
+                    }
+                }
+                if(num){  //新增的树
+                    this.navLI[num].selected = zTreeObject.getCheckedNodes(true);
+                }else{
+                    this.zTreeArr = zTreeObject.getCheckedNodes(true);
+                }
+
+            },
+            zNodes_search_right:function (currentIndex,key) {
+                var _this = this;
+                var arr = currentIndex?this.navLI[currentIndex].selected:this.zTreeArr;
+                arr.forEach(function (cValue,i) {
+                    if(cValue.level == 2){
+                        if(key == ""){
+                            _this.$set(cValue, "zTreeActive",false);
+                            return
+                        }
+                        if(cValue.name.indexOf(key) != -1){
+                            _this.$set(cValue, "zTreeActive",true);
+                        }else{
+                            _this.$set(cValue, "zTreeActive",false);
+                        }
+                    }
+                })
+                currentIndex?(this.navLI[currentIndex].selected=arr):(this.zTreeArr=arr)
+            }
+        }
+
+    })
+</script>
+</html>

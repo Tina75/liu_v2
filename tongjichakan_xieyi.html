@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>统计查看—协议</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/datapicker/datepicker3.css">
+    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/tongjichakan.css">
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">端口</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="home">
+            <div class="content">
+                <div class="left">
+                    <div class="title">端口列表 <span>(最多可选5个)</span></div>
+                    <ul id="treeDemo" class="ztree">
+
+                    </ul>
+                </div>
+                <div class="right">
+                    <div class="top clearfix">
+                        <div class="items">
+                            <div class="title">
+                                <div class="t">端口流量统计图</div>
+                                <div class="r"><span class="fa fa-check"></span>确认</div>
+                            </div>
+                            <div class="line">
+                                选择类型：
+                                <label class="radio-inline">
+                                    <input name="type" type="radio">
+                                    字节数
+                                </label>
+                                <label class="radio-inline">
+                                    <input name="type" type="radio">
+                                    报文数
+                                </label>
+                            </div>
+                            <div class="line">
+                                选择时间：
+                                <label class="radio-inline">
+                                    <input name="time" type="radio">
+                                    月
+                                </label>
+                                <label class="radio-inline">
+                                    <input name="time" type="radio">
+                                    周
+                                </label>
+                                <label class="radio-inline">
+                                    <input name="time" type="radio">
+                                    天
+                                </label>
+                                <label class="radio-inline">
+                                    <input name="time" type="radio">
+                                    实时时间：
+                                </label>
+                                <div style="display: inline-block;vertical-align: middle;width:180px">
+                                    <div class="input-group date">
+                                        <input type="text" class="form-control" placeholder="开始时间">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="line choose">
+                                已选端口：
+                                <span>ETH1 192.168.1.5</span>
+                                <span>ETH1 192.168.1.5</span>
+                                <span>ETH1 192.168.1.5</span>
+                                <span>ETH1 192.168.1.5</span>
+                                <span>ETH1 192.168.1.5</span>
+                            </div>
+                        </div>
+                        <div class="topTen">
+                            <div class="div1">
+                                <div class="title">
+                                    <b>端口流量排行</b><span>Top10</span>
+                                    <div class="pull-right toggle" @click="topTenShow=!topTenShow">
+                                        <span class="fa " :class="{'fa-angle-up':topTenShow,'fa-angle-down':!topTenShow}"></span>
+                                        <span v-if="topTenShow">收起</span>
+                                        <span v-else>展开</span>
+                                    </div>
+                                </div>
+                                <div v-show="topTenShow">
+                                    <table class="table ten">
+                                        <thead>
+                                        <tr>
+                                            <th>编号</th>
+                                            <th>名称</th>
+                                            <th>数量</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr v-for="(item,index) in topTen">
+                                            <td :class="{red:index==0||index==1||index==2}">{{index+1}}</td>
+                                            <td>{{item.portorName}}</td>
+                                            <td>{{item.countMesNum}}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="echarts" id="main">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/Tdrag.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/datapicker/bootstrap-datepicker.js"></script>
+<script src="js/jquery.ztree.core.js"></script>
+<script src="js/jquery.ztree.excheck.js"></script>
+<script src="js/echarts.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
+<script>
+    new Vue({
+        el:'#example',
+        data:{
+            zNodes:[],  //用户组树
+            topTen:[],
+            topTenShow:true,
+            CheckedNodes:null
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                _this.zNodesList();
+                _this.top();
+            })
+        },
+        methods:{
+            zNodesList:function () {  //获取用户组树 后台数据
+                var _this = this;
+                //http://localhost:8080/streamplatserver/statisview/{userId}/getPortorItem
+                ajaxGetAsync(url+"statisview/"+localStorage.getItem('userId')+'/getPortorItem',function (data) {
+                    var data = data.data;
+                    if(data.length!=0){
+                        data.forEach(function (v,i) {
+                            _this.zNodes.push({name:v.portorName,portorId:v.portorId})
+                        })
+                        _this.treeShow();
+                    }
+                })
+            },
+            treeShow:function () {
+                var setting = {
+                    check:{
+                        enable: true,
+                        chkStyle : "checkbox"
+                    },
+                    view: {
+                        showIcon: false,
+                    },
+                    callback: {
+                        onCheck:  this.onCheck
+                    }
+                }
+                $.fn.zTree.init($("#treeDemo"), setting, this.zNodes);
+            },
+            onCheck:function (event, treeId, treeNode) {
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                var CheckedNodes = [];
+                for(var i = 0,Nodes=zTreeObject.getCheckedNodes(true); i<Nodes.length;i++){
+                    if(Nodes[i].level == 1){
+                        CheckedNodes.push(Nodes[i])
+                    }
+                }
+                if(CheckedNodes.length>5){
+                    zTreeObject.checkNode(treeNode,false, true);
+                }
+                this.CheckedNodes = zTreeObject.getCheckedNodes(true);
+                console.log(this.CheckedNodes)
+            },
+            top:function () {
+                var _this = this;
+                ajaxGetAsync(url+"statisview/"+localStorage.getItem('userId')+'/getServerPortRanking/portor',function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        _this.topTen = data.data;
+                    }
+                })
+            }
+        }
+    })
+</script>
+<script>
+
+    $(function () {
+        $(".div1").Tdrag();
+
+//        $(document).on("click", ".title .toggle", function () {
+//            var display = $(this).parent().next("div").css("display");
+//            if(display == 'block'){
+//                $(this).find("span").removeClass("fa-angle-up").addClass("fa-angle-down");
+//            }else{
+//                $(this).find("span").removeClass("fa-angle-down").addClass("fa-angle-up");
+//            }
+//            $(this).parent().next("div").slideToggle();
+//        });
+//        $('.input-group.date').datepicker({
+//            format: 'yyyy-mm-dd',
+//            autoclose: true
+//        });
+    });
+    var myChart = echarts.init(document.getElementById('main'));
+    var option = {
+        title: {
+            text: '字节数（Mbps）',
+            textStyle:{
+                //文字颜色
+                color:'#333',
+                //字体风格,'normal','italic','oblique'
+                fontStyle:'normal',
+                //字体粗细 'normal','bold','bolder','lighter',100 | 200 | 300 | 400...
+                fontWeight:'normal',
+                //字体大小
+                fontSize:12
+            },
+            x:'7%',
+            y:'5%'
+        },
+        tooltip : {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#6a7985'
+                }
+            }
+        },
+        legend: {
+            data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎'],
+            y:'5%'
+        },
+
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                data : ['周一','周二','周三','周四','周五','周六','周日'],
+                splitLine:{
+                    show:true
+                },
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value'
+            }
+        ],
+        series : [
+            {
+                name:'邮件营销',
+                type:'line',
+                stack: '总量',
+
+                data:[120, 132, 101, 134, 90, 230, 210]
+            },
+            {
+                name:'联盟广告',
+                type:'line',
+                stack: '总量',
+
+                data:[220, 182, 191, 234, 290, 330, 310]
+            },
+            {
+                name:'视频广告',
+                type:'line',
+                stack: '总量',
+
+                data:[150, 232, 201, 154, 190, 330, 410]
+            },
+            {
+                name:'直接访问',
+                type:'line',
+                stack: '总量',
+
+                data:[320, 332, 301, 334, 390, 330, 320]
+            },
+            {
+                name:'搜索引擎',
+                type:'line',
+                stack: '总量',
+
+
+                data:[820, 932, 901, 934, 1290, 1330, 1320]
+            }
+        ]
+    };
+    myChart.setOption(option);
+</script>
+</html>

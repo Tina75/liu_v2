@@ -1,0 +1,62 @@
+/*已分享 树图*/
+.share_peo{
+    background-color: #FFF;
+    /*height: 330px;*/
+    position: relative;
+}
+.share_peo .left{
+    width: 48%;
+    overflow: hidden;
+    /*border: 1px solid #c8c8c8;*/
+}
+.share_peo .right{
+    width: 48%;
+    /*border: 1px solid #c8c8c8;*/
+}
+.share_peo .left, .share_peo .right {
+    /*line-height: 30px;*/
+    /*height: 330px;*/
+}
+.share_peo .left .title, .share_peo .right .title{
+    font-weight: bold;
+}
+.share_peo .left .areas_list,.share_peo .right .send_to{
+    line-height: 30px;
+    padding:5px;
+    width: 100%;
+    border: 1px solid #c8c8c8;
+    overflow-y: auto;
+    /*float: left;*/
+    height: 280px;
+}
+.share_peo .left .share_search, .share_peo .right .share_search{
+    border: 1px solid #c8c8c8;
+    border-bottom: 0;
+    height: 31px;
+    position: relative;
+}
+.share_peo .left .share_search input, .share_peo .right .share_search input{
+    width: 100%;
+    height: 30px;
+    padding:3px;
+}
+.share_peo .left .share_search span, .share_peo .right .share_search span{
+    position: absolute;
+    right: 5px;
+    top:10px;
+}
+.ztree li{
+    line-height: 22px;
+}
+.share_peo .right .send_to{
+    /*padding:10px;*/
+}
+.share_peo .right .send_to li{
+    padding:0 10px;
+    line-height: 22px;
+}
+.share_peo .right .send_to li:hover{
+    /*background-color: #FFF4E4;*/
+    cursor: pointer;
+    background:#FFF4E4 url('../image/tck_03.png') no-repeat right;
+}

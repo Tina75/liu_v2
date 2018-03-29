@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>服务器状态</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/animate.css">
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">知识库</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active server" id="home" style="height: 100%">
+            <div class="server-left">
+                <div class="server-litle" style="font-weight: bold;color: #000;">知识库列表</div>
+                <ul class="server-list">
+                    <li class="active"><a href="IP_address.html" class="J_menuItem">IP与地区对应关系库</a></li>
+                    <li><a href="domain_IP.html" class="J_menuItem">域名与ip对应关系库</a></li>
+                    <li><a href="virtual_state.html" class="J_menuItem">虚拟身份对应关系库</a></li>
+                </ul>
+            </div>
+            <div class="server-right" style="height:61rem;">
+                <iframe id="J_iframe" width="100%" height="100%" src="IP_address.html" frameborder="0" ></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script>
+    $(".J_menuItem").on('click',function(){
+        $(this).parent().parent().find("li").removeClass("active");
+        $(this).parent().toggleClass("active");
+        var url = $(this).attr('href');
+        $("#J_iframe").attr('src',url);
+        return false;
+    });
+
+</script>
+</html>

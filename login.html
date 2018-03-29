@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="keywords" content="" />
+		<meta name="description" content="" />
+		<title>login</title>
+		<link rel="stylesheet" type="text/css" href="css/login.css" />
+	</head>
+
+	<body>
+		<div class="box">
+			<div class="mulu">
+				<h1><img src="image/login-logo.png"></h1>
+			</div>
+			<div class="ztbf">
+				<div class="dlk">
+					<h2>用户登录</h2>
+					<input type="text" placeholder="请输入用户名" class="srk name" id="username">
+					<input type="password" placeholder="请输入密码" class="srk password" id="password">
+					<input type="button" class="login" name="登录" value="登录" onclick="login()">
+				</div>
+			</div>
+			<div class="fotwz">
+				南京信安融慧网络技术有限公司 © 2011～2018 版权所有
+			</div>
+		</div>
+	</body>	
+</html>
+<script src="js/jquery.min.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/url.js"></script>
+<script>
+	$(function(){
+		//页面加载时的高度
+		var h = $(window).height();
+		$(".box").css("height",h);
+		var w = $(window).width();
+		$(".box").css("width",w);
+		
+		var h2 =(h-130);
+		$(".ztbf").css("height",h2);
+		
+		//刷新页面加载的高度
+		$(window).resize(function(){
+			var h = $(window).height();
+			$(".box").css("height",h);
+			var w = $(window).width();
+			$(".box").css("width",w);
+			var h2 =(h-130);
+			$(".ztbf").css("height",h2);
+		})
+	})
+</script>
+<script>
+    function login() {
+        var uName = $("#username").val();
+        var pwd = $("#password").val();
+        if (uName && pwd) {
+            ajaxPost(url + "loginPost", {userName: uName, password: pwd}, function (data) {
+                console.log(data);
+                if(data.resultCode == ERR_OK){ //登陆成功
+					localStorage.setItem("userId",data.data.userId);
+					localStorage.setItem("userName",data.data.name)
+                    self.location = "index.html";
+				}else{
+                    layer.alert(data.message);
+				}
+            });
+        } else {
+            layer.alert("用户名密码不能为空");
+        }
+    }
+    $("#password").keydown(function (event) {
+        if (event.keyCode == "13") {//keyCode=13是回车键
+            login();
+        }
+    });
+</script>

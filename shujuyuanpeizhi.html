@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据源配置</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/share.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <style>
+       .sourceItem{
+           margin:10px 0;
+           overflow: hidden;
+       }
+       .sourceItem label{ position: relative; padding:0 10px 0 25px; cursor: pointer;}
+       .sourceItem label input{ display: none;}
+       .sourceItem label span{
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 12px;
+            height: 12px;
+            margin: auto;
+            border: 1px solid #ccc;
+            border-radius: 100%;
+        }
+       .sourceItem label span:after{
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            margin: auto;
+            border-radius: 100%;
+            background: #fff;
+            -webkit-transform: scale(0);
+            transform: scale(0);
+            -webkit-transition: all .3s; transition: all .3s;
+        }
+       .sourceItem label input:checked + span{
+            border-color: #0078E6;
+            background: #0078E6;
+        }
+       .sourceItem label input:checked + span:after{ -webkit-transform: scale(1); transform: scale(1);}
+       .sourceItem .item{
+           float: left;
+       }
+       .sourceItem>select{
+           width: 120px;
+           border-radius: 0;
+           font-size: 12px;
+           height: 24px;
+           padding:2px 10px;
+       }
+       .sourceItem .force{
+           margin-left: 20px;
+           padding-top:4px
+       }
+       .sourceItem .force>label{
+           padding:0 10px 0 20px;
+       }
+        h5.title{
+            line-height: 40px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">数据源配置</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="home">
+            <h5 class="title">数据源接入方式：</h5>
+            <div class="sourceItem">
+                <label><input name="sourceItem" type="radio"  /><span></span>网络镜像</label>
+            </div>
+            <div class="sourceItem">
+                <label class="item" style="padding-top:4px"><input name="sourceItem" type="radio"  /><span></span>自定义设备</label>
+                <select class="form-control item">
+                    <option value="1">水电费</option>
+                </select>
+                <span class="item force">反压
+                    <label><input name="force" type="radio" checked /><span></span>是</label>
+                    <label><input name="force" type="radio"  /><span></span>否</label>
+                </span>
+            </div>
+            <div class="sourceItem">
+                <label style="padding-top:4px"><input name="sourceItem" type="radio" checked /><span></span>PCAP文件</label>
+                <div class="search clearfix">
+                    <div class="form-inline pull-left searchItems">
+                        <div class="form-group">
+                            <label for="task">服务器:</label>
+                            <input type="text" class="form-control" id="task" placeholder="请输入关键字">
+                        </div>
+                        <button type="button" class="btn btn-primary">搜索</button>
+                    </div>
+                    <div class="searchEdit pull-right">
+                        <ul class="clearfix">
+                            <li class="pull-right">
+                                <span class="fa fa-trash-o active">测试链接</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tableContainer">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th style="width: 45px">
+                                    <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                        <span class="fa fa-check icon-ok"></span>
+                                    </div>
+                                </th>
+                                <th>编号</th>
+                                <th>服务器</th>
+                                <th>文件目录</th>
+                                <th>状态</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in list">
+                                <td>
+                                    <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                        <span class="fa fa-check icon-ok"></span>
+                                    </div>
+                                </td>
+                                <td>1</td>
+                                <td>admin</td>
+                                <td>2017-5-5</td>
+                                <td>查看详情</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="page clearfix" v-show="show">
+                        <div class="pageCut">
+                            每页
+                            <select name="" class="form-control pageSelect" >
+                                <option value="1">1</option>
+                            </select>
+                            条记录
+                        </div>
+                        <div class="pagelist">
+                            <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                            <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                            <span class="ellipsis" v-show="efont">...</span>
+                            <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                                  @click="jumpPage(num)">{{num}}</span>
+                            <span class="ellipsis" v-show="ebehind">...</span>
+
+                            <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                            <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+
+                            <span class="jumppoint">跳转到：</span>
+                            <span class="jumpinp"><input  type="text" v-model="changePage"></span>
+                            <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--弹框-->
+    <div id="detail" style="display: none">
+        <div class="container-fluid">
+            <div class="title">本次任务运行信息</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>开始时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+                <div class="col-md-6">
+                    <b>结束时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>cpu占用：</b>
+                    <span>10%</span>
+                </div>
+                <div class="col-md-6">
+                    <b>内存占用：</b>
+                    <span>10%</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>运行时间：</b>
+                    <span>00:15:00</span>
+                </div>
+            </div>
+            <!--</div>-->
+            <div class="title">任务属性</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>创建时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+                <div class="col-md-6">
+                    <b>创建人：</b>
+                    <span>admin</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>调度信息：</b>
+                    <span>单次</span>
+                </div>
+                <div class="col-md-6">
+                    <b>运行次数：</b>
+                    <span>第一次</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>关联规则：</b>
+                    <span>aa</span>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/mockData.js"></script>
+
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            current_page: 1, //当前页
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+            zNodes:[],
+            zTreeArr:[]  //树形结构右侧
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                this.cartView(false);
+            })
+        },
+        computed:{
+            show:function(){
+                console.log(this.pages && this.pages !=1);
+                return this.pages && this.pages !=1
+            },
+            pstart: function() {
+                return this.current_page == 1;
+            },
+            pend: function() {
+                return this.current_page == this.pages;
+            },
+            efont: function() {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function() {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function() {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+        },
+        methods: {
+            cartView: function (flag) {
+                //console.log(this.username);
+                if (flag) { //搜索
+                    this.current_page = 1;
+                }
+                var _this = this;
+                //模拟数据
+                _this.list = data.Renwugunali;
+                _this.pages = data.CountPage;
+//                $.ajax({
+//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
+//                    type:'post',
+//                    dataType:'json',
+//                    data: {
+//                        PAGE: _this.current_page - 1,
+//                        task_name:'',
+//                        creater: ''
+//                    },
+//                    success: function(data){ //成功的回调函数的处理
+//                        _this.list = data.Renwugunali;
+//                        _this.pages = data.CountPage;
+//                    },
+//                    error:function(errorData){
+//                        if(errorData.readyState=='0'){
+//                            layer.close(index);
+//                            layer.alert('请先连接服务器');
+//                        }
+//                    }
+//                });
+            },
+            selectedList: function (item) {
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                console.log(_this.list);
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                this.current_page = id;
+            },
+            pageAjax:function () {
+                alert(this.current_page);
+            },
+            detail:function () {
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '410px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            },
+            share:function () {
+                layer.open({
+                    type: 1,
+                    title: ['分享'],
+                    closeBtn: 1,
+                    btn:['确定','取消'],
+                    btnAlign: 'c',
+                    area: ['800px', '440px'],
+                    skin: '', //没有背景色
+                    shadeClose: true,
+                    content: $('#share')
+                });
+            }
+        }
+
+    })
+</script>
+</html>

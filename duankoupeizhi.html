@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>端口配置</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <style>
+        .treeContent{
+            margin-top:15px;
+        }
+        .treeContent>ul,.treeContent .net,.treeContent .type{
+            float: left;
+            width: 33.3%;
+        }
+        .treeContent li{
+            min-height: 30px;
+            line-height: 30px;
+        }
+    </style>
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">端口配置</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="home">
+            <div class="treeContent clearfix">
+                <ul id="treeDemo" class="ztree" style="margin-top:12px"></ul>
+                <div class="net">
+                    <div style="font-weight: bold">网络适配器</div>
+                    <div class="netContent"></div>
+                </div>
+                <div class="type">
+                    <div style="font-weight: bold">端口类型</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/mockData.js"></script>
+<script src="js/jquery.ztree.core.js"></script>
+<script src="js/jquery.ztree.excheck.js"></script>
+<script>
+    var zTreeObj;
+    var zTreeArr = [];
+    // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+    var setting = {
+        check: {
+            enable: true,
+            chkStyle: "checkbox"
+        },
+        view: {
+            showIcon: false
+        },
+        callback: {
+            onCheck: onCheck
+        }
+    };
+    // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+    var zNodes = [
+        {
+            name: "A组用户", open: true, children: [
+                {name: "A1",net:'192.168.1.1',type:'以太网'}, {name: "A2",net:'192.168.1.2',type:'以太网'}, {name: "A3",net:'192.168.1.3',type:'以太网'}, {name: "A4",net:'192.168.1.4',type:'以太网'}
+            ]
+        },
+        {
+            name: "B组用户", open: true, children: [
+                {name: "B1"}, {name: "B2"},{name: "B3"}, {name: "B4"}
+            ]
+        },
+        {
+            name: "C组用户", open: true, children: [
+                {name: "C1"}, {name: "C2"},{name: "C3"}, {name: "C4"}
+            ]
+        },
+        {
+            name: "D组用户", open: true, children: [
+                {name: "D1"}, {name: "D2"},{name: "D3"}, {name: "D4"}
+            ]
+        }
+    ];
+    function filter(node) {   //过滤器直选中2级节点累加
+        return (node.level == 2 && node.checked == true);
+    }
+    function onCheck(e, treeId, treeNode) {  //这是将所有选中节点的名字 用,分割做拼接 用于持久化到数据库
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = zTree.getNodes();
+        var str = "<ul>";
+        $.each(nodes,function (i,items) {
+            str += "<li></li></ul>";
+            //console.log(items.children);
+            $.each(items.children,function (i,choosed) {
+                if(choosed.checked){
+                    str += '<li>'+choosed.name+'</li>';
+                }else{
+                    str += '<li></li>';
+                }
+            });
+            str += '</ul>';
+        });
+        str += '</ul>';
+        $('.netContent').html(str);
+    }
+    $(document).ready(function () {
+        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+    });
+</script>
+<script>
+    $(function () {
+        $(document).on("click", ".nav-tabs li .add", function () {
+            /*******排序**********/
+            $(".nav-tabs a").each(function (i, n) {
+                $(n).attr("href", "#navTabs_" + i);
+            });
+            $(".tab-content>div").each(function (i, n) {
+                $(n).attr("id", "navTabs_" + i);
+            });
+            var index = $(this).parent().index(".nav-tabs li");
+            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建任务 <span class="fa fa-close tabClose"></span></a></li>';
+            var strContent = $("#profile").html();
+            //console.log(strContent);
+            $(this).parent().before(str);
+            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
+        });
+        $(document).on("click", ".tabClose", function () {
+            /*******排序**********/
+            $(".nav-tabs a").each(function (i, n) {
+                $(n).attr("href", "#navTabs_" + i);
+            });
+            $(".tab-content>div").each(function (i, n) {
+                $(n).attr("id", "navTabs_" + i);
+            });
+
+            if ($(this).parent().parent().hasClass('active')) { //当前是active的被删除
+                console.log($(this).parent().parent().prev());
+                $(this).parent().parent().prev().find('a').click();
+            }
+            var index = $(this).parent().parent().index(".nav-tabs li");
+            $(".tab-content>div").eq(index).remove();
+            $(this).parent().parent().remove();
+        });
+        $(document).on("click", ".taskModel li", function () {
+            var target = $(this).attr("data-target");
+            $(".taskModelContent>div").hide();
+            $(".taskModelContent").find("." + target + "DIV").show();
+        });
+
+    });
+</script>
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            current_page: 1, //当前页
+            pages: 0, //总页数
+            changePage: 0,//跳转页
+            checkAll: false,
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                this.cartView(false);
+
+            })
+        },
+        computed: {
+            show: function () {
+                console.log(this.pages && this.pages != 1);
+                return this.pages && this.pages != 1
+            },
+            pstart: function () {
+                return this.current_page == 1;
+            },
+            pend: function () {
+                return this.current_page == this.pages;
+            },
+            efont: function () {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function () {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function () {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+        },
+        methods: {
+            cartView: function (flag) {
+                //console.log(this.username);
+                if (flag) { //搜索
+                    this.current_page = 1;
+                }
+                var _this = this;
+                //模拟数据
+                _this.list = data.Renwugunali;
+                _this.pages = data.CountPage;
+//                $.ajax({
+//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
+//                    type:'post',
+//                    dataType:'json',
+//                    data: {
+//                        PAGE: _this.current_page - 1,
+//                        task_name:'',
+//                        creater: ''
+//                    },
+//                    success: function(data){ //成功的回调函数的处理
+//                        _this.list = data.Renwugunali;
+//                        _this.pages = data.CountPage;
+//                    },
+//                    error:function(errorData){
+//                        if(errorData.readyState=='0'){
+//                            layer.close(index);
+//                            layer.alert('请先连接服务器');
+//                        }
+//                    }
+//                });
+            },
+            selectedList: function (item) {
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll = !this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                console.log(_this.list);
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if (!item.checked) {
+                        flag = false;
+                    }
+                })
+                if (flag) {
+                    this.checkAll = true;
+                } else {
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function (id) {
+                this.current_page = id;
+            },
+            pageAjax: function () {
+                alert(this.current_page);
+            }
+        }
+
+    })
+</script>
+</html>

@@ -1,0 +1,121 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body
+{
+	font: 12px/1.5 Tahoma, Helvetica, Arial, '微软雅黑', sans-serif;
+	color: #666;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-size: 100%;
+}
+
+ul,
+ol,
+dl,
+li {
+	list-style: none;
+}
+
+fieldset,
+img {
+	border: 0;
+}
+
+button,
+input,
+select,
+textarea {
+	font-size: 100%;
+	outline: none;
+}
+
+a {
+	text-decoration: none;
+}
+
+
+/*新增login样式*/
+
+.box{
+	position: relative;
+}
+.mulu{
+	height: 60px;
+}
+
+.fotwz {
+	width: 100%;
+	height: 60px;
+	line-height: 60px;
+	text-align: center;
+	font-size: 14px;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+}
+.mulu h1 img {
+	width: 281px;
+	height: 32px;
+	margin: 15px;
+}
+
+.ztbf {
+	width:100%;
+	background: url(../image/login-bj.jpg) 0 0 no-repeat;
+	background-size:cover;
+}
+
+.dlk {
+	width: 513px;
+	height: 380px;
+	background: url(../image/dlk.png);
+	float: right;
+	margin-right: 8%;
+	margin-top: 8%;
+}
+
+
+.dlk h2 {
+	font-size: 16px;
+	height: 18px;
+	line-height: 18px;
+	/*font-weight: normal;*/
+	color: #373737;
+	margin-left: 128px;
+	margin-top: 28px;
+}
+
+.dlk .srk {
+	margin-left: 175px;
+	width: 188px;
+	height: 38px;
+	line-height: 38px;
+	padding: 0 10px;
+	font-size: 14px;
+	border: none;
+	background: none;
+	margin-top: 24px;
+}
+
+.dlk .login {
+	width: 256px;
+	height: 42px;
+	line-height: 42px;
+	background: #f18101;
+	color: #fff;
+	/*text-align: center;*/
+	font-size: 16px;
+	border: 1px solid #e5e5e5;
+	margin-top: 24px;
+	margin-left: 128px;
+}
+

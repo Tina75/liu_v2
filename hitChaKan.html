@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>命中查看</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/animate.css">
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#home" data-toggle="tab">命中查看</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active server" id="home" style="height: 100%">
+            <div class="server-left">
+                <div class="server-litle" style="font-weight: bold;color: #000;">任务列表</div>
+                <ul class="server-list">
+                    <li class="active">任务 <span class="badge">222</span></li>
+                    <li>任务一</li>
+                    <li>任务二</li>
+                    <li>任务三</li>
+                    <li>任务四</li>
+                    <li>任务</li>
+                </ul>
+            </div>
+            <div class="server-right" style="height:61rem;">
+                <div class="hit_top">
+                    <div class="hit_top_Tittle">
+                        <div class="title bold" @click="detail()"><span class="bule bold">任务</span>报文条目</div>
+                        <div class="export"><i class="fa fa-upload"></i>导出</div>
+                    </div>
+                    <div class="hit_top_table">
+                        <div class="tableContainer">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 45px">
+                                            <!--<input type="checkbox" name="btSelectAll" @click="isAll()">-->
+                                            <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
+                                                <span class="fa fa-check icon-ok"></span>
+                                            </div>
+                                        </th>
+                                        <th>编号</th>
+                                        <th>时间</th>
+                                        <th>源IP</th>
+                                        <th>源端口</th>
+                                        <th>目的IP</th>
+                                        <th>目的端口</th>
+                                        <th>协议</th>
+                                        <th>长度</th>
+                                        <th>内容</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody >
+                                    <tr v-for="item in list">
+                                        <td>
+                                            <!--<input @click="selectedList(item)" type="checkbox" name="btSelectItem">-->
+                                            <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
+                                                <span class="fa fa-check icon-ok"></span>
+                                            </div>
+                                        </td>
+                                        <td>1</td>
+                                        <td>2018-03-25 10:13:34</td>
+										<td>192.168.1.20</td>
+                                        <td>66</td>
+										<td>74.125.23.139</td>
+										<td>443</td>
+										<td>TCP</td>
+                                        <td>13664</td>
+                                        <td>"271","11.736086","192.168.1.20","74.125.23.139","TCP","66","443","13664","[TCP Retransmission] 13664 → 443 [SYN] Seq=0 Win=64240 Len=0 MSS=1460 WS=256 SACK_PERM=1"</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hit_middle"></div>
+                <div class="hit_bottom"></div>
+            </div>
+        </div>
+    </div>
+    <!--详情-->
+    <div id="detail" style="display: none">
+        <div class="container-fluid">
+            <div class="title">本次任务运行信息</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>开始时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+                <div class="col-md-6">
+                    <b>结束时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>cpu占用：</b>
+                    <span>10%</span>
+                </div>
+                <div class="col-md-6">
+                    <b>内存占用：</b>
+                    <span>10%</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>运行时间：</b>
+                    <span>00:15:00</span>
+                </div>
+            </div>
+            <!--</div>-->
+            <div class="title">任务属性</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>创建时间：</b>
+                    <span>2017-07-07 10:15</span>
+                </div>
+                <div class="col-md-6">
+                    <b>创建人：</b>
+                    <span>admin</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>调度信息：</b>
+                    <span>单次</span>
+                </div>
+                <div class="col-md-6">
+                    <b>运行次数：</b>
+                    <span>第一次</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>关联规则：</b>
+                    <span>aa</span>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<!--<script src="js/bootstrap.min.js"></script>-->
+<script src="js/vue.js"></script>
+<script src="js/mockData.js"></script>
+<script>
+    $(".server-left").on("click",function () {
+        alert(111);
+//        $(".server-list li").removeClass("active");
+//        $(this).addClass("active");
+    });
+</script>
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            current_page: 1, //当前页
+            pages: 0, //总页数
+            changePage:0,//跳转页
+            checkAll:false,
+        },
+        mounted: function () {
+            //var _this = this;
+            this.$nextTick(function () {
+                this.cartView(false);
+            })
+        },
+        methods: {
+            cartView: function (flag) {
+                //console.log(this.username);
+                if (flag) { //搜索
+                    this.current_page = 1;
+                }
+                var _this = this;
+                //模拟数据
+                _this.list = data.Renwugunali;
+                _this.pages = data.CountPage;
+//                $.ajax({
+//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
+//                    type:'post',
+//                    dataType:'json',
+//                    data: {
+//                        PAGE: _this.current_page - 1,
+//                        task_name:'',
+//                        creater: ''
+//                    },
+//                    success: function(data){ //成功的回调函数的处理
+//                        _this.list = data.Renwugunali;
+//                        _this.pages = data.CountPage;
+//                    },
+//                    error:function(errorData){
+//                        if(errorData.readyState=='0'){
+//                            layer.close(index);
+//                            layer.alert('请先连接服务器');
+//                        }
+//                    }
+//                });
+            },
+            selectedList: function (item) {
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll=!this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                console.log(_this.list);
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if(!item.checked){
+                        flag = false;
+                    }
+                })
+                if(flag){
+                    this.checkAll = true;
+                }else{
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function(id) {
+                this.current_page = id;
+            },
+            pageAjax:function () {
+                alert(this.current_page);
+            },
+            detail:function () {
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn:['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '410px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            }
+        }
+
+    })
+</script>
+</html>

@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的任务</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/datapicker/datepicker3.css">
+    <link rel="stylesheet" href="css/animate.css">
+</head>
+<body class=" animated fadeInRight">
+<div class="container-fluid" id="example">
+    <!--页签-->
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0">我的任务</a>
+        </li>
+        <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)">新建任务
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+        </li>
+        <li><span class="fa fa-plus add" @click="add($event.target)"></span></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane" :class="{active:currentIndex == 0}">
+            <div class="search clearfix">
+                <div class="form-inline pull-left searchItems">
+                    <div class="form-group">
+                        <label for="task">任务名称:</label>
+                        <input type="text" @keyup="cartView(1)" class="form-control" id="task" v-model="taskName"
+                               placeholder="请输入关键字">
+                    </div>
+                    <div class="form-group">
+                        <label for="rule">关联规则:</label>
+                        <input type="email" @keyup="cartView(1)" class="form-control" id="rule" v-model="taskConRuleId"
+                               placeholder="关联规则">
+                    </div>
+                    <div class="form-group">
+                        <label for="creater">创建人:</label>
+                        <select class="form-control" id="creater" v-model="taskCreateUserName">
+                            <option>admin</option>
+                            <option>上海</option>
+                            <option>广州</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" @keyup="cartView(1)">确认</button>
+                </div>
+                <div class="searchEdit pull-right">
+                    <ul class="clearfix">
+                        <li class="pull-right" @click="deleteList">
+                            <span class="fa fa-trash-o" :class="{active: selected.length>0}">删除</span>
+                        </li>
+                        <li class="pull-right" @click="buControlPop">
+                            <span class="fa fa-pencil" :class="{active: selected.length==1}">编辑</span>
+                        </li>
+                        <li class="pull-right" @click="operaterTask(2)">
+                            <span class="fa fa-stop" :class="{active: selected.length==1}">停止</span>
+                        </li>
+                        <li class="pull-right" @click="operaterTask(3)">
+                            <span class="fa fa-pause" :class="{active: selected.length==1}">暂停</span>
+                        </li>
+                        <li class="pull-right" @click="operaterTask(1)">
+                            <span class="fa fa-play" :class="{active: selected.length==1}">运行</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tableContainer">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th style="width: 45px">
+                                <div class="item-check-btn" :class="{'check':checkAll}" @click="isAll()">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </th>
+                            <th>编号</th>
+                            <th>任务名称</th>
+                            <th>关联规则</th>
+                            <th>创建人</th>
+                            <th @click="sort" style="cursor: pointer">最新启动时间<span class="fa" :class="sortClass"></span>
+                            </th>
+                            <th>运行状态</th>
+                            <th>任务运行详情</th>
+                            <th>任务进度</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(item,index) in list">
+                            <td>
+                                <div class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)">
+                                    <span class="fa fa-check icon-ok"></span>
+                                </div>
+                            </td>
+                            <td>{{index+1}}</td>
+                            <td class="checkDetail" @click="detail(item.taskId)">{{item.task_Name}}</td>
+                            <td>{{item.task_RuleName}}</td>
+                            <td>{{item.task_CreateUserName}}</td>
+                            <td>{{item.task_CurrentStartTime}}</td>
+                            <td v-if="item.task_RunState == 1">启动任务</td>
+                            <td v-else-if="item.task_RunState == 2">停止运行</td>
+                            <td v-else-if="item.task_RunState == 3">暂停运行</td>
+                            <td v-else="item.task_RunState">未运行</td>
+                            <td class="checkDetail" @click="detail(item.taskId)">查看详情</td>
+                            <td class="progressContainer">
+                                <div class="progress ">
+                                    <div :style="{width: parseInt(item.task_RunProgress)+'%'}"
+                                         class="progress-bar progress-bar-info progress-bar-striped">
+                                    </div>
+                                </div>
+                                <div><span :class="{zero:item.task_RunProgress==0}">{{item.task_RunProgress}}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="page clearfix">
+                    <div class="pageCut">
+                        每页
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                        </select>
+                        条记录
+                    </div>
+                    <div class="pagelist">
+                        <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
+                        <span class="ellipsis" v-show="efont">...</span>
+                        <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
+                              @click="jumpPage(num)">{{num}}</span>
+                        <span class="ellipsis" v-show="ebehind">...</span>
+
+                        <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
+
+                        <span class="jumppoint">跳转到：</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage"
+                                                     @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--新建任务-->
+        <div v-if="navLI_1.length!=0" v-for="(item,index) in navLI_1" v-show="currentIndex==index+1" :key="index"
+             :class="{'active':currentIndex==index+1}">
+            <div class="add-target">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="task-name" class="bold">任务名称:</label>
+                                <input type="text" @blur="vailruleName($event.target,item)"
+                                       class="form-control validateTask" v-model="item.task_Name" id="task-name"
+                                       placeholder="在此输入内容...">
+                                <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="task-desc" class="bold">任务描述:</label>
+                                <input type="text" class="form-control" v-model="item.task_Descrption" id="task-desc"
+                                       placeholder="在此输入内容...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="rule" class="bold">关联规则:</label>
+                                <select type="text" class="form-control" v-model="item.task_RuleId"
+                                        @change="relationRule(currentIndex,item.task_RuleId)">
+                                    <option value="" disabled>选择规则名称</option>
+                                    <option :value="v.ruleId" v-for="v in ruleItem">{{v.ruleName}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="bold" style="color: transparent">规则内容</label>
+                                <input type="text" class="form-control" v-model="item.ruleExp" placeholder="规则内容"
+                                       disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="bold">任务运行模式：</div>
+                            <ul class="taskModel clearfix">
+                                <li class="pull-left active" data-target="time">
+                                    <label class="radio-inline">
+                                        <input type="radio"  value="1" v-model="item.task_Run_Model">
+                                        指定时间
+                                    </label>
+                                </li>
+                                <li class="pull-left" data-target="fore">
+                                    <label class="radio-inline">
+                                        <input type="radio"  value="2" v-model="item.task_Run_Model">
+                                        前置条件
+                                    </label>
+                                </li>
+                            </ul>
+                            <div class="taskModelContent">
+                                <div class="timeDIV" v-show="item.task_Run_Model == 1">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div>指定时间:</div>
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group data_1">
+                                                        <div class="input-group date">
+                                                            <input type="text" class="form-control start"
+                                                                   placeholder="开始时间">
+                                                            <span class="input-group-addon"><i
+                                                                    class="fa fa-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="form-group data_2">
+                                                        <div class="input-group date">
+                                                            <input type="text" class="form-control end"
+                                                                   placeholder="结束时间">
+                                                            <span class="input-group-addon"><i
+                                                                    class="fa fa-calendar"></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div>启动频率:</div>
+                                            <div class="row" style="height: 34px;line-height: 34px">
+                                                <div class="col-md-9">
+                                                    <label class="radio-inline" style="vertical-align: top">
+                                                        <input type="radio" value="2"
+                                                               v-model="item.confirm_time.task_StartType"
+                                                               style="margin-top:9px"> 周期：每
+                                                    </label>
+                                                    <div class="perHours">
+                                                        <select v-model="item.confirm_time.task_StartHZ.hour">
+                                                            <option :value="index" v-for="(item,index) in 25">
+                                                                {{index}}
+                                                            </option>
+                                                        </select>
+                                                        <span>时</span>
+                                                    </div>
+                                                    <div class="perHours">
+                                                        <select v-model="item.confirm_time.task_StartHZ.day">
+                                                            <option :value="index" v-for="(item,index) in 32">
+                                                                {{index}}
+                                                            </option>
+                                                        </select>
+                                                        <span>日</span>
+                                                    </div>
+                                                    <div class="perHours">
+                                                        <select v-model="item.confirm_time.task_StartHZ.month">
+                                                            <option :value="index" v-for="(item,index) in 13">
+                                                                {{index}}
+                                                            </option>
+                                                        </select>
+                                                        <span>月</span>
+                                                    </div>
+                                                    <span style="vertical-align: top">次</span>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="radio-inline">
+                                                        <input type="radio" value="1"
+                                                               v-model="item.confirm_time.task_StartType"
+                                                               style="margin-top:9px"> 单次
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-1"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="foreDIV" v-show="item.task_Run_Model == 2">
+                                    <div class="row">
+                                        <div class="col-md-4 ">
+                                            <div>前置条件:</div>
+                                            <div class="form-group">
+                                                <select class="form-control" v-model="item.pre_condition.parentTaskId">
+                                                    <option disabled value="">请选择</option>
+                                                    <option v-for="i in buControlSelectList" :value="i.taskId">
+                                                        i.task_Name
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-md-offset-2">
+                                            <div>启动频率:</div>
+                                            <div class="row" style="height: 34px;line-height: 34px">
+                                                <div class="col-md-9" style="padding-right: 0;">
+                                                    <label class="radio-inline" style="vertical-align: top">
+                                                        <input type="radio" value="2"
+                                                               v-model="item.pre_condition.task_StartType"
+                                                               style="margin-top:9px"> 周期：每
+                                                    </label>
+                                                    <div class="perHours">
+                                                        <select name="" v-model="item.pre_condition.task_StartHZ.hour">
+                                                            <option :value="index" v-for="(item,index) in 25">
+                                                                {{index}}
+                                                            </option>
+                                                        </select>
+                                                        <span>时</span>
+                                                    </div>
+                                                    <div class="perHours">
+                                                        <select name="" v-model="item.pre_condition.task_StartHZ.day">
+                                                            <option :value="index" v-for="(item,index) in 32">
+                                                                {{index}}
+                                                            </option>
+                                                        </select>
+                                                        <span>日</span>
+                                                    </div>
+                                                    <div class="perHours">
+                                                        <select name="" v-model="item.pre_condition.task_StartHZ.month">
+                                                            <option :value="index" v-for="(item,index) in 13">
+                                                                {{index}}
+                                                            </option>
+                                                        </select>
+                                                        <span>月</span>
+                                                    </div>
+                                                    <span>次</span>
+                                                </div>
+                                                <div class="col-md-2" style="padding-left: 0">
+                                                    <label class="radio-inline">
+                                                        <input type="radio" value="1"
+                                                               v-model="item.pre_condition.task_StartType"
+                                                               style="margin-top:9px"> 单次
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-1"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:15px">
+                        <div class="col-md-12">
+                            <div class="bold">数据处理方式:</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>命中规则数据</div>
+                            <div class="isDS">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="radio-inline">
+                                            <input type="radio" value="1" v-model="item.matchdata.matchdata_DealType">
+                                            丢弃
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="radio-inline">
+                                            <input type="radio" value="2" v-model="item.matchdata.matchdata_DealType">
+                                            保存
+                                        </label>
+                                        <select name="" :disabled="item.matchdata.matchdata_DealType==1"
+                                                v-model="item.matchdata.matchdata_DealTable">
+                                            <option value="">1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>未命中规则数据</div>
+                            <div class="isDS">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label class="radio-inline">
+                                            <input type="radio" value="1" v-model="item.missdata.missdata_DealType"> 丢弃
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="radio-inline">
+                                            <input type="radio" value="2" v-model="item.missdata.missdata_DealType"> 保存
+                                        </label>
+                                        <select name="" :disabled="item.missdata.missdata_DealType==1"
+                                                v-model="item.missdata.missdata_DealTable">
+                                            <option value="1">1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 YoN_button" style="margin-top:30px">
+                            <button class="y" @mousedown="addTask(item,currentIndex,$event.target)">确定</button>
+                            <button class="n" @click="tabClose(index+1)">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--弹框-->
+    <div id="detail" style="display: none;">
+        <div class="container-fluid">
+            <div class="title">本次任务运行信息</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>开始时间：</b>
+                    <span>{{popDetail.detail.startTime}}</span>
+                </div>
+                <div class="col-md-6">
+                    <b>结束时间：</b>
+                    <span>{{popDetail.detail.endTime}}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>cpu占用：</b>
+                    <span>{{popDetail.detail.cpuUsage}}%</span>
+                </div>
+                <div class="col-md-6">
+                    <b>内存占用：</b>
+                    <span>{{popDetail.detail.memUsage}}%</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>运行时间：</b>
+                    <span>{{popDetail.detail.taskRunTime}}</span>
+                </div>
+            </div>
+            <!--</div>-->
+            <div class="title">任务属性</div>
+            <!--<div class="content">-->
+            <div class="row">
+                <div class="col-md-6">
+                    <b>创建时间：</b>
+                    <span>{{popDetail.detail.createTime}}</span>
+                </div>
+                <div class="col-md-6">
+                    <b>创建人：</b>
+                    <span>{{popDetail.detail.createUserName}}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <b>调度信息：</b>
+                    <span>{{popDetail.detail.dispatcherInfo}}次</span>
+                </div>
+                <div class="col-md-6">
+                    <b>运行次数：</b>
+                    <span>第{{popDetail.detail.runTimes}}次</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <b>关联规则：</b>
+                    <span>{{popDetail.detail.ruleName}}</span>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+    <!--编辑弹窗-->
+    <div id="buControl" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label  class="bold">任务名称:</label>
+                            <input type="text" class="form-control validate"
+                                   @blur="vailruleName($event.target,popDetail.control)"
+                                   v-model="popDetail.control.task_Name"  placeholder="在此输入内容...">
+                            <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label  class="bold">任务描述:</label>
+                            <input type="text" class="form-control" v-model="popDetail.control.task_Descrption"
+                                  placeholder="在此输入内容...">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rule" class="bold">关联规则:</label>
+                            <select type="text" class="form-control" v-model="popDetail.control.task_RuleId"
+                                    @change="relationRule(undefined,popDetail.control.task_RuleId)">
+                                <option value="" disabled>选择规则名称</option>
+                                <option :value="v.ruleId" v-for="v in ruleItem">{{v.ruleName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="bold" style="color: transparent">规则内容</label>
+                            <input type="text" class="form-control" v-model="popDetail.control.ruleExp"
+                                   placeholder="规则内容" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="bold">任务运行模式：</div>
+                        <ul class="taskModel clearfix">
+                            <li class="pull-left active" data-target="time">
+                                <label class="radio-inline">
+                                    <input type="radio" name="taskModel" value="1"
+                                           v-model="popDetail.control.task_Run_Model"> 指定时间
+                                </label>
+                            </li>
+                            <li class="pull-left" data-target="fore">
+                                <label class="radio-inline">
+                                    <input type="radio" name="taskModel" value="2"
+                                           v-model="popDetail.control.task_Run_Model"> 前置条件
+                                </label>
+                            </li>
+                        </ul>
+                        <div class="taskModelContent">
+                            <div class="timeDIV" v-show="popDetail.control.task_Run_Model == 1">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div>指定时间:</div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group data_1">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control" id="start"
+                                                               placeholder="开始时间">
+                                                        <span class="input-group-addon"><i
+                                                                class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group data_2">
+                                                    <div class="input-group date">
+                                                        <input type="text" class="form-control" id="end"
+                                                               placeholder="结束时间">
+                                                        <span class="input-group-addon"><i
+                                                                class="fa fa-calendar"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div>启动频率:</div>
+                                        <div class="row" style="height: 34px;line-height: 34px">
+                                            <div class="col-md-10" style="padding-right: 0;">
+                                                <label class="radio-inline" style="vertical-align: top">
+                                                    <input type="radio" value="2"
+                                                           v-model="popDetail.control.confirm_time.task_StartType"
+                                                           style="margin-top:9px"> 周期：每
+                                                </label>
+                                                <div class="perHours">
+                                                    <select v-model="popDetail.control.confirm_time.task_StartHZ.hour">
+                                                        <option :value="index" v-for="(item,index) in 25">{{index}}
+                                                        </option>
+                                                    </select>
+                                                    <span>时</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select v-model="popDetail.control.confirm_time.task_StartHZ.day">
+                                                        <option :value="index" v-for="(item,index) in 32">{{index}}
+                                                        </option>
+                                                    </select>
+                                                    <span>日</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select v-model="popDetail.control.confirm_time.task_StartHZ.month">
+                                                        <option :value="index" v-for="(item,index) in 13">{{index}}
+                                                        </option>
+                                                    </select>
+                                                    <span>月</span>
+                                                </div>
+                                                <span style="vertical-align: top">次</span>
+                                            </div>
+                                            <div class="col-md-2" style="padding-left: 0">
+                                                <label class="radio-inline">
+                                                    <input type="radio" value="1"
+                                                           v-model="popDetail.control.confirm_time.task_StartType"
+                                                           style="margin-top:9px"> 单次
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="foreDIV" v-show="popDetail.control.task_Run_Model == 2">
+                                <div class="row">
+                                    <div class="col-md-4 ">
+                                        <div>前置条件:</div>
+                                        <div class="form-group">
+                                            <select class="form-control"
+                                                    v-model="popDetail.control.pre_condition.parentTaskId">
+                                                <option disabled value="">请选择</option>
+                                                <option v-for="i in buControlSelectList" :value="i.taskId">i.task_Name
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-md-offset-2">
+                                        <div>启动频率:</div>
+                                        <div class="row" style="height: 34px;line-height: 34px">
+                                            <div class="col-md-10" style="padding-right: 0;">
+                                                <label class="radio-inline" style="vertical-align: top">
+                                                    <input type="radio" value="2"
+                                                           v-model="popDetail.control.pre_condition.task_StartType"
+                                                           style="margin-top:9px"> 周期：每
+                                                </label>
+                                                <div class="perHours">
+                                                    <select name=""
+                                                            v-model="popDetail.control.pre_condition.task_StartHZ.hour">
+                                                        <option :value="index" v-for="(item,index) in 25">{{index}}
+                                                        </option>
+                                                    </select>
+                                                    <span>时</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select name=""
+                                                            v-model="popDetail.control.pre_condition.task_StartHZ.day">
+                                                        <option :value="index" v-for="(item,index) in 32">{{index}}
+                                                        </option>
+                                                    </select>
+                                                    <span>日</span>
+                                                </div>
+                                                <div class="perHours">
+                                                    <select name=""
+                                                            v-model="popDetail.control.pre_condition.task_StartHZ.month">
+                                                        <option :value="index" v-for="(item,index) in 13">{{index}}
+                                                        </option>
+                                                    </select>
+                                                    <span>月</span>
+                                                </div>
+                                                <span style="vertical-align: top">次</span>
+                                            </div>
+                                            <div class="col-md-2" style="padding-left: 0">
+                                                <label class="radio-inline">
+                                                    <input type="radio" value="1"
+                                                           v-model="popDetail.control.pre_condition.task_StartType"
+                                                           style="margin-top:9px"> 单次
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:15px">
+                    <div class="col-md-12">
+                        <div class="bold">数据处理方式:</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>命中规则数据</div>
+                        <div class="isDS">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="radio-inline">
+                                        <input type="radio" value="1"
+                                               v-model="popDetail.control.matchdata.matchdata_DealType"> 丢弃
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="radio-inline">
+                                        <input type="radio" value="2"
+                                               v-model="popDetail.control.matchdata.matchdata_DealType"> 保存
+                                    </label>
+                                    <select name="" :disabled="popDetail.control.matchdata.matchdata_DealType==1"
+                                            v-model="popDetail.control.matchdata.matchdata_DealTable">
+                                        <option value="">1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>未命中规则数据</div>
+                        <div class="isDS">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="radio-inline">
+                                        <input type="radio" value="1"
+                                               v-model="popDetail.control.missdata.missdata_DealType"> 丢弃
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="radio-inline">
+                                        <input type="radio" value="2"
+                                               v-model="popDetail.control.missdata.missdata_DealType"> 保存
+                                    </label>
+                                    <select name="" :disabled="popDetail.control.missdata.missdata_DealType==1"
+                                            v-model="popDetail.control.missdata.missdata_DealTable">
+                                        <option value="1">1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/layer/layer.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/datapicker/bootstrap-datepicker.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
+<script>
+    // 创建根实例
+    new Vue({
+        el: '#example',
+        data: {
+            list: [],   //展示数组
+            sortFlag: undefined, //默认升序
+            taskConRuleId: "",  //搜索项
+            taskCreateUserName: "", //搜索项
+            taskName: "",     //搜索项
+            current_page: 1, //当前页
+            pageSize: 8,  //每页数据条数
+            pages: 0, //总页数
+            changePage: 0,//跳转页
+            checkAll: false,
+            navLI: [{}],
+            currentIndex: 0,
+            selected: [],    //选中项
+            popDetail: {
+                detail: '',//规则名称详情弹窗
+                control: {  //布控弹窗
+                    task_Name: '',
+                    task_Descrption: '',
+                    task_RuleId: '',
+                    ruleExp: '',
+                    task_Run_Model: 1, //1-指定时间 2-前置条件
+                    confirm_time: {
+                        task_StartType: 2,  //1-单次  2-周期
+                        task_StartHZ: {
+                            hour: 0,
+                            day: 0,
+                            month: 0
+                        }
+                    },
+                    pre_condition: {
+                        parentTaskId: '',
+                        task_StartType: 2,  //1-单次  2-周期
+                        task_StartHZ: {
+                            hour: 0,
+                            day: 0,
+                            month: 0
+                        }
+                    },
+                    matchdata: {
+                        matchdata_DealType: 1,  //匹配规则的数据处理方式：1丢弃；2：保存；
+                        matchdata_DealTable: ''
+                    },
+                    missdata: {
+                        missdata_DealType: 1,  //不匹配规则的处理方式：1：丢弃；2：保存
+                        missdata_DealTable: ''
+                    },
+                    isOk: {task_Name: false}
+                }, //编辑
+            },
+            buControlSelectList: [], //布控前置条件列表,
+            ruleItem: []  //关联规则列表
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                _this.cartView(_this.current_page);
+                _this.buControlSelect();
+                _this.getRuleItem();
+            })
+        },
+        computed: {
+            show: function () {
+                console.log(this.pages && this.pages != 1);
+                return this.pages && this.pages != 1
+            },
+            pstart: function () {
+                return this.current_page == 1;
+            },
+            pend: function () {
+                return this.current_page == this.pages;
+            },
+            efont: function () {
+                if (this.pages <= 7) return false;
+                return this.current_page > 5
+            },
+            ebehind: function () {
+                if (this.pages <= 7) return false;
+                var nowAy = this.indexs;
+                return nowAy[nowAy.length - 1] != this.pages;
+            },
+            indexs: function () {
+
+                var left = 1,
+                    right = this.pages,
+                    ar = [];
+                if (this.pages >= 7) {
+                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
+                        left = Number(this.current_page) - 3;
+                        right = Number(this.current_page) + 3;
+                    } else {
+                        if (this.current_page <= 5) {
+                            left = 1;
+                            right = 7;
+                        } else {
+                            right = this.pages;
+
+                            left = this.pages - 6;
+                        }
+                    }
+                }
+                while (left <= right) {
+                    ar.push(left);
+                    left++;
+                }
+                return ar;
+            },
+            navLI_1: function () {
+                return this.navLI.slice(1);
+            },
+            sortClass: function () {
+                var s = this.sortFlag;
+                //console.log((typeof s == "undefined") ? "fa-sort" : (s == true?"fa-sort-asc":"fa-sort-desc"));
+                return (typeof s == "undefined") ? "fa-sort" : (s == true ? "fa-sort-asc" : "fa-sort-desc")
+            },
+        },
+        methods: {
+            cartView: function (cPage) {
+                var _this = this;
+                //模拟数据
+                var u = url + "task/" + localStorage.getItem("userId") + "/queryPageTaskData/single/"
+                    + cPage + "/" + this.pageSize + "?userName=" + localStorage.getItem("userName");
+                //task/{userId}/queryPageTaskData/{type}/{currentPageNum}/{pageSize}?userName=ss
+                var taskFilter = {
+                    taskConRuleId: this.taskConRuleId,
+                    taskCreateUserName: this.taskCreateUserName,
+                    taskName: this.taskName
+                }
+                ajaxPostObj(u, JSON.stringify(taskFilter), function (data) {
+                    console.log(data);
+                    if (data.resultCode == ERR_OK) {
+                        _this.list = data.data.taskList;
+                        _this.pages = parseInt(data.data.countNum);
+                    } else {
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            sort: function () {
+                if (typeof this.sortFlag == "undefined") {
+                    this.sortFlag = true;
+                } else {
+                    this.sortFlag = !this.sortFlag;
+                }
+                if (this.sortFlag) { //true 升序
+                    this.list.sort(compare_asc("create_Time"));
+                } else {
+                    this.list.sort(compare_des("create_Time"));
+                }
+            },
+            selectedList: function (item) {
+                var _this = this;
+                if (typeof item.checked == "undefined") {
+                    // Vue.set(item,"checked",true);
+                    this.$set(item, "checked", true);
+                } else {
+                    item.checked = !item.checked;
+                }
+                this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if (item.checked) {
+                        _this.selected.push(item);
+                    }
+                });
+            },
+            isAll: function () {  //全选
+                var _this = this;
+                this.checkAll = !this.checkAll;
+                _this.list.forEach(function (item) {
+                    if (typeof item.checked == "undefined") {
+                        _this.$set(item, "checked", _this.checkAll);
+                    } else {
+                        item.checked = _this.checkAll;
+                    }
+                });
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if (item.checked) {
+                        _this.selected.push(item);
+                    }
+                });
+            },
+            isCheckAll: function () {
+                var flag = true;
+                this.list.forEach(function (item) {
+                    if (!item.checked) {
+                        flag = false;
+                    }
+                })
+                if (flag) {
+                    this.checkAll = true;
+                } else {
+                    this.checkAll = false;
+                }
+
+            },
+            jumpPage: function (id) {
+                if (id <= this.pages) {
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                } else {
+                    layer.alert("超出最大页数")
+                }
+
+            },
+            add: function (dom) {
+                var index = $(dom).parent().index(".nav-tabs li");
+                this.navLI.push({  //布控弹窗
+                    task_Name: '',
+                    task_Descrption: '',
+                    task_RuleId: '',
+                    ruleExp: '',
+                    task_Run_Model: 1, //1-指定时间 2-前置条件
+                    confirm_time: {
+                        task_StartType: 2,  //1-单次  2-周期
+                        task_StartHZ: {
+                            hour: 0,
+                            day: 0,
+                            month: 0
+                        }
+                    },
+                    pre_condition: {
+                        parentTaskId: '',
+                        task_StartType: 2,  //1-单次  2-周期
+                        task_StartHZ: {
+                            hour: 0,
+                            day: 0,
+                            month: 0
+                        }
+                    },
+                    matchdata: {
+                        matchdata_DealType: 1,  //匹配规则的数据处理方式：1丢弃；2：保存；
+                        matchdata_DealTable: ''
+                    },
+                    missdata: {
+                        missdata_DealType: 1,  //不匹配规则的处理方式：1：丢弃；2：保存
+                        missdata_DealTable: ''
+                    },
+                    isOk: {task_Name: false}
+                });
+                this.currentIndex = index;
+                setTimeout(function () {
+                    //时间插件
+                    DatePicker(".data_1 .input-group.date", ".data_2 .input-group.date");
+                }, 0)
+            },
+            addTask: function (item, index, dom) {
+                var _this = this;
+                var u = url + "task/" + localStorage.getItem("userId") + "/addTask";
+                var simple = item;
+                var task_StartHZ = '';
+                if (simple.task_Run_Model == 1) {
+                    task_StartHZ += simple.confirm_time.task_StartHZ.hour + "小时" +
+                        simple.confirm_time.task_StartHZ.day + "日" +
+                        simple.confirm_time.task_StartHZ.month + "月";
+                } else {
+                    task_StartHZ += simple.pre_condition.task_StartHZ.hour + "小时" +
+                        simple.pre_condition.task_StartHZ.day + "日" +
+                        simple.pre_condition.task_StartHZ.month + "月";
+                }
+                var taskInfo = {
+                    matchdata_DealTable: simple.matchdata.matchdata_DealTable,
+                    matchdata_DealType: simple.matchdata.matchdata_DealType,
+                    missdata_DealTable: simple.missdata.missdata_DealTable,
+                    missdata_DealType: simple.missdata.missdata_DealType,
+                    parentTaskId: simple.pre_condition.parentTaskId,
+                    taskId: '',
+                    task_CreateTime: '',
+                    task_CreateUserName: localStorage.getItem("userName"),
+                    task_Descrption: simple.task_Descrption,
+                    task_EndTime:$(dom).parent().parent().parent().find(".end").val(),
+                    task_Name: simple.task_Name,
+                    task_RuleId: simple.task_RuleId,
+                    task_RunProgress: '',
+                    task_RunState: '',
+                    task_RunTimes: '',
+                    task_Run_Model: simple.task_Run_Model,
+                    task_StartHZ: task_StartHZ,
+                    task_StartTime: $(dom).parent().parent().parent().find(".start").val(),
+                    task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
+                }
+                //模拟失去焦点
+                var input = $(dom).parent().parent().parent().find(".validateTask");
+                for (var i = 0; i < input.length; i++) {
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = simple.task_Name;
+                if (isOk) {
+                    ajaxPostObj(u, JSON.stringify(taskInfo), function (data) {
+                        console.log(data);
+                        if (data.resultCode == ERR_OK) {
+                            layer.alert("添加成功", function (i) {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                _this.tabClose(index);
+                                layer.close(i);
+                            });
+                        } else {
+                            layer.alert("数据请求失败");
+                        }
+                    });
+                }
+            },
+            tabClose: function (index) {
+                if (this.navLI.length > 1) {
+                    this.navLI.splice(index, 1);
+                    if (this.currentIndex == index) { //当前为激活状态,关闭后选择前一个标签
+                        this.currentIndex = index - 1;
+                    } else if (this.currentIndex > index) {  //选择后前一个tab
+                        this.currentIndex--;
+                    }
+                }
+
+            },
+            demoClickLi: function (index) {
+                this.currentIndex = index;
+                return false;
+            },
+            detail: function (taskId) {
+                var _this = this;
+                var u = url + "task/" + localStorage.getItem("userId") + "/getTaskDetailsInfo/" + taskId;
+                ajaxGet(u, function (data) {
+                    console.log(data);
+                    if (data.resultCode == ERR_OK) {
+                        _this.popDetail.detail = data.data;
+                        _this.detailPop();
+                    }else{
+                        layer.alert(data.message)
+                    }
+                });
+            },
+            detailPop: function () {
+                console.log(this.popDetail.detail)
+                layer.open({
+                    type: 1,
+                    title: ['详情'],
+                    closeBtn: 1,
+                    btn: ['关闭'],
+                    btnAlign: 'c',
+                    area: ['600px', '410px'],
+                    skin: 'detailPop', //没有背景色
+                    shadeClose: true,
+                    content: $('#detail')
+                });
+            },
+            operaterTask: function (type) {
+                var _this = this;
+                var taskIdList = [];
+                this.selected.forEach(function (item) {
+                    taskIdList.push(item.taskId);
+                });
+                var u = url + "task/" + localStorage.getItem("userId") + "/delaTask/" + type + "?taskIdList=" + taskIdList[0];
+                if (this.selected.length == 1) {
+                    ajaxGet(u, function (data) {
+                        if (data.resultCode == ERR_OK) {
+                            layer.alert(data.message, function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                layer.closeAll();
+                            });
+                        }
+                    });
+                }
+            },
+            deleteList: function () {
+                var _this = this;
+                var taskIdList = [];
+                this.selected.forEach(function (item) {
+                    taskIdList.push(item.taskId);
+                });
+                if (this.selected.length > 0) {
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定', '取消'] //按钮
+                    }, function () {
+                        var u = url + "task/" + localStorage.getItem("userId") + "/deleteTask";
+                        ajaxGetArray(u, {taskIdList: taskIdList}, function (data) {
+                            if (data.resultCode == ERR_OK) {
+                                var index = layer.alert("删除成功", function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            } else {
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function () {
+                        layer.closeAll();
+                    });
+                } else {
+                    return
+                }
+            },
+            buControlSelect: function () { //布控前置条件的下拉列表
+                var _this = this;
+                var u = url + "rule/" + localStorage.getItem("userId") + "/queryTaskList";
+                ajaxGet(u, function (data) {
+                    if (data.resultCode == ERR_OK) {
+                        _this.buControlSelectList = data.data;
+                    }
+                });
+            },
+            getRuleItem: function () {//关联规则
+                var _this = this;
+                var u = url + "task/" + localStorage.getItem("userId") + "/getRuleItem";
+                ajaxGet(u, function (data) {
+                    console.log(data);
+                    if (data.resultCode == ERR_OK) {
+                        _this.ruleItem = data.data;
+                    }
+                });
+            },
+            relationRule: function (currentIndex, ruleId) {
+                var _this = this;
+                this.ruleItem.forEach(function (v, i) {
+                    if (v.ruleId == ruleId) {
+                        console.log(v.ruleExp)
+                        currentIndex ? (_this.navLI[currentIndex].ruleExp = v.ruleExp) :
+                            (_this.popDetail.control.ruleExp = v.ruleExp);
+                    }
+                })
+            },
+            vailruleName: function (dom, item) {  //验证布控任务名称
+                var ruleName = item.task_Name;
+                var span = dom.nextElementSibling;
+                if (ruleName == "") {
+                    item.isOk.ruleName = false;
+                    this.valiWays(span, "任务名不能为空", false);
+                    return;
+                }
+                if (ruleName.length > 20) {
+                    item.isOk.ruleName = false;
+                    this.valiWays(span, "长度只能在20个字符之间", false);
+                    return;
+                }
+                if (/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(ruleName)) {
+                    item.isOk.ruleName = true;
+                    this.valiWays(span, '', true);
+                    return;
+                } else {
+                    item.isOk.ruleName = false;
+                    this.valiWays(span, "格式错误，仅支持汉字、字母、数字、“-”“_”的组合", false);
+                    return;
+                }
+
+            },
+            valiWays: function (span, str, flag) {
+                span.innerHTML = str;
+                if (flag) {
+                    removeClass(span.parentElement, "error")
+                } else { //增加error
+                    addClass(span.parentElement, "error")
+                }
+
+            },
+            buControlEdit: function (item) {
+                console.log(item);
+                this.relationRule(undefined,item.task_RuleId);
+                this.popDetail.control.task_Name = item.task_Name;
+                this.popDetail.control.task_Descrption = item.task_Descrption;
+                this.popDetail.control.task_RuleId = item.task_RuleId;
+                this.popDetail.control.task_Run_Model = item.task_Run_Model;
+                var hourIndex = item.task_StartHZ.indexOf("小时");
+                var dayIndex = item.task_StartHZ.indexOf("日");
+                var monthIndex = item.task_StartHZ.indexOf("月")
+                if(item.task_Run_Model == 1){ //指定时间
+                    $("#start").val(item.task_StartTime);
+                    $("#end").val(item.task_EndTime);
+                    this.popDetail.control.confirm_time.task_StartType = item.task_StartType;
+                    this.popDetail.control.confirm_time.task_StartHZ.hour = item.task_StartHZ.slice(0,hourIndex);
+                    this.popDetail.control.confirm_time.task_StartHZ.day = item.task_StartHZ.slice(hourIndex+2,dayIndex);
+                    this.popDetail.control.confirm_time.task_StartHZ.month = item.task_StartHZ.slice(dayIndex+1,monthIndex);
+                }else{
+                    this.popDetail.control.pre_condition.task_StartType = item.task_StartType;
+                    this.popDetail.control.pre_condition.parentTaskId = item.parentTaskId;
+                    this.popDetail.control.pre_condition.task_StartHZ.hour = item.task_StartHZ.slice(0,hourIndex-1);
+                    this.popDetail.control.pre_condition.task_StartHZ.day = item.task_StartHZ.slice(hourIndex+1,dayIndex-1);
+                    this.popDetail.control.pre_condition.task_StartHZ.month = item.task_StartHZ.slice(dayIndex+1,monthIndex-1);
+                }
+                this.popDetail.control.matchdata.matchdata_DealType = item.matchdata_DealType;
+                this.popDetail.control.matchdata.matchdata_DealTable = item.matchdata_DealTable;
+                this.popDetail.control.missdata.missdata_DealType = item.missdata_DealType;
+                this.popDetail.control.missdata.missdata_DealTable = item.missdata_DealTable;
+            },
+            buControlPop: function () {
+                var _this = this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item);
+                });
+                if (this.selected.length == 1) {
+                    //数据填充
+                    this.buControlEdit(ruleIdList[0]);
+                    //时间控件
+                    DatePicker(".data_1 .input-group.date", ".data_2 .input-group.date");
+                    layer.open({
+                        type: 1,
+                        title: ['编辑'],
+                        closeBtn: 1,
+                        btn: ['确定', '取消'],
+                        btnAlign: 'c',
+                        area: ['850px', '480px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#buControl'),
+                        yes: function () {
+                            _this.buControl(ruleIdList[0]);
+                        }
+                    });
+                }
+            },
+            buControl: function (item) {
+                var _this = this;
+                var u = url + "task/" + localStorage.getItem("userId") + "/editeTask/"
+                    + item.taskId;
+                var simple = this.popDetail.control;
+                var task_StartHZ = '';
+                if (simple.task_Run_Model == 1) {
+                    task_StartHZ += simple.confirm_time.task_StartHZ.hour + "小时" +
+                        simple.confirm_time.task_StartHZ.day + "日" +
+                        simple.confirm_time.task_StartHZ.month + "月";
+                } else {
+                    task_StartHZ += simple.pre_condition.task_StartHZ.hour + "小时" +
+                        simple.pre_condition.task_StartHZ.day + "日" +
+                        simple.pre_condition.task_StartHZ.month + "月";
+                }
+                var taskInfo = {
+                    matchdata_DealTable: simple.matchdata.matchdata_DealTable,
+                    matchdata_DealType: simple.matchdata.matchdata_DealType,
+                    missdata_DealTable: simple.missdata.missdata_DealTable,
+                    missdata_DealType: simple.missdata.missdata_DealType,
+                    parentTaskId: simple.pre_condition.parentTaskId,
+                    taskId: '',
+                    task_CreateTime: '',
+                    task_CreateUserName: localStorage.getItem("userName"),
+                    task_Descrption: simple.task_Descrption,
+                    task_EndTime: document.getElementById("end").value,
+                    task_Name: simple.task_Name,
+                    task_RuleId: item.task_RuleId,
+                    task_RunProgress: '',
+                    task_RunState: '',
+                    task_RunTimes: '',
+                    task_Run_Model: simple.task_Run_Model,
+                    task_StartHZ: task_StartHZ,
+                    task_StartTime: document.getElementById("start").value,
+                    task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
+                }
+                //模拟失去焦点
+                var input = $("#buControl").find(".validate");
+                for (var i = 0; i < input.length; i++) {
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = simple.task_Name;
+                if (isOk) {
+                    console.log(this.popDetail.control)
+                    ajaxPostObj(u, JSON.stringify(taskInfo), function (data) {
+                        if (data.resultCode == ERR_OK) {
+                            layer.alert("编辑成功", function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                layer.closeAll();
+                            });
+                        } else {
+                            layer.alert("数据请求失败");
+                        }
+                    });
+                }
+
+            },
+        }
+
+    })
+</script>
+</html>
