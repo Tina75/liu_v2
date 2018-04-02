@@ -154,3 +154,6 @@
     height: 430px;
     margin-top: 18px;
 }
+.error input{
+    border: 1px solid red;
+}

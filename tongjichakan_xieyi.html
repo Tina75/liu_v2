@@ -6,7 +6,7 @@
     <link href="css/bootstrap.css" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/font-awesome.css">
-    <link rel="stylesheet" href="css/datapicker/datepicker3.css">
+    <link rel="stylesheet" href="js/datapicker/css/bootstrap-datetimepicker.css">
     <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
     <link rel="stylesheet" href="css/animate.css">
     <link rel="stylesheet" href="css/tongjichakan.css">
@@ -34,51 +34,65 @@
                         <div class="items">
                             <div class="title">
                                 <div class="t">端口流量统计图</div>
-                                <div class="r"><span class="fa fa-check"></span>确认</div>
+                                <div class="r" @click="echartsView()"><span class="fa fa-check"></span>确认</div>
                             </div>
                             <div class="line">
                                 选择类型：
                                 <label class="radio-inline">
-                                    <input name="type" type="radio">
+                                    <input v-model="valueType"  value="1" type="radio">
                                     字节数
                                 </label>
                                 <label class="radio-inline">
-                                    <input name="type" type="radio">
+                                    <input v-model="valueType" value="2"  type="radio">
                                     报文数
                                 </label>
                             </div>
                             <div class="line">
                                 选择时间：
                                 <label class="radio-inline">
-                                    <input name="time" type="radio">
+                                    <input v-model="timeType" value="month" type="radio">
                                     月
                                 </label>
                                 <label class="radio-inline">
-                                    <input name="time" type="radio">
+                                    <input v-model="timeType" value="week" type="radio">
                                     周
                                 </label>
                                 <label class="radio-inline">
-                                    <input name="time" type="radio">
+                                    <input v-model="timeType" value="day"  type="radio">
                                     天
                                 </label>
                                 <label class="radio-inline">
-                                    <input name="time" type="radio">
-                                    实时时间：
+                                    <input v-model="timeType" value="current" type="radio">
+                                    实时时间
                                 </label>
-                                <div style="display: inline-block;vertical-align: middle;width:180px">
-                                    <div class="input-group date">
-                                        <input type="text" class="form-control" placeholder="开始时间">
+                                <div v-show="timeType == 'month'" class="data1" style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
+                                    <div class="input-group date" >
+                                        <input type="text"   class="form-control" placeholder="开始时间">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                                <div v-show="timeType == 'week'"  class="data2" style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
+                                    <div class="input-group date"  >
+                                        <input type="text"   class="form-control" placeholder="开始时间">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                                <div v-show="timeType == 'day'" class="data3" style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
+                                    <div class="input-group date"  >
+                                        <input type="text"   class="form-control" placeholder="开始时间">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                                <div v-show="timeType == 'current'" class="data4"  style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
+                                    <div class="input-group date"  >
+                                        <input type="text"   class="form-control" placeholder="开始时间">
                                         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                     </div>
                                 </div>
                             </div>
                             <div class="line choose">
                                 已选端口：
-                                <span>ETH1 192.168.1.5</span>
-                                <span>ETH1 192.168.1.5</span>
-                                <span>ETH1 192.168.1.5</span>
-                                <span>ETH1 192.168.1.5</span>
-                                <span>ETH1 192.168.1.5</span>
+                                <span v-for="item in CheckedNodes">{{item}}</span>
                             </div>
                         </div>
                         <div class="topTen">
@@ -126,7 +140,7 @@
 <script src="js/Tdrag.js"></script>
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<script src="js/datapicker/bootstrap-datepicker.js"></script>
+<script src="js/datapicker/bootstrap-datetimepicker.js"></script>
 <script src="js/jquery.ztree.core.js"></script>
 <script src="js/jquery.ztree.excheck.js"></script>
 <script src="js/echarts.min.js"></script>
@@ -134,20 +148,154 @@
 <script src="js/ajaxMy.js"></script>
 <script src="js/url.js"></script>
 <script>
+    function formatDateTime_inital(timeStamp) {
+        var date = new Date();
+        date.setTime(timeStamp * 1000);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        return y + '-' + m + '-' + d+' '+h+':'+minute;
+    }
+    function formatDateTime(timeStamp) {
+        var date = new Date();
+        date.setTime(timeStamp * 1000);
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        var second = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        second = second < 10 ? ('0' + second) : second;
+        return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
+    }
+</script>
+<script>
     new Vue({
         el:'#example',
         data:{
             zNodes:[],  //用户组树
             topTen:[],
             topTenShow:true,
-            CheckedNodes:null
+            CheckedNodes:[],
+            valueType:1,
+            timeType:'current',
+            timer:'',
+            mychart:'',
+        },
+        computed:{
+            text:function () {
+                var str = '';
+                if(this.valueType == 1){  //字节数
+                    str = '字节数（Mbps）';
+                }else if(this.valueType == 2){  //报文数
+                    str = '报文数（Mbps）';
+                }
+                return str;
+            }
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
                 _this.zNodesList();
                 _this.top();
+                _this.initTree();  //默认选择前五个
+                console.log(this.CheckedNodes);
+                //初始化echarts
+                this.mychart = echarts.init(document.getElementById('main'));
+                this.mychart.setOption({
+                    title: {
+                        text: _this.text,
+                        textStyle:{
+                            //文字颜色
+                            color:'#333',
+                            //字体风格,'normal','italic','oblique'
+                            fontStyle:'normal',
+                            //字体粗细 'normal','bold','bolder','lighter',100 | 200 | 300 | 400...
+                            fontWeight:'normal',
+                            //字体大小
+                            fontSize:12
+                        },
+                        x:'7%',
+                        y:'5%'
+                    },
+                    tooltip : {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            label: {
+                                backgroundColor: '#6a7985'
+                            }
+                        }
+                    },
+                    legend: {
+                        data:[],
+                        y:'5%'
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '8%',
+                        containLabel: true
+                    },
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : [],
+                            splitLine:{
+                                show:true
+                            },
+                        }
+                    ],
+                    dataZoom: [
+                        {
+                            type: 'inside',
+                            start: 0,
+                            end: 100,
+                        },
+                        {
+                            show: true,
+                            type: 'slider',
+                            bottom:0,
+                            start: 0,
+                            end: 100,
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value'
+                        }
+                    ],
+                    series : [
+//                        {
+//                            name:'邮件营销',
+//                            type:'line',
+//                            stack: '总量',
+//
+//                            data:[120, 132, 101, 134, 90, 230, 210]
+//                        }
+                    ]
+                })
             })
+        },
+        watch:{
+            timeType:function (nvalue,ovalue) {
+                if(this.timer){
+                    clearInterval(this.timer);
+                    this.timer = '';
+                }
+            }
         },
         methods:{
             zNodesList:function () {  //获取用户组树 后台数据
@@ -178,19 +326,28 @@
                 }
                 $.fn.zTree.init($("#treeDemo"), setting, this.zNodes);
             },
-            onCheck:function (event, treeId, treeNode) {
-                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
-                var CheckedNodes = [];
-                for(var i = 0,Nodes=zTreeObject.getCheckedNodes(true); i<Nodes.length;i++){
-                    if(Nodes[i].level == 1){
-                        CheckedNodes.push(Nodes[i])
+            initTree:function () {  //默认选中前5个
+                var zTreeObject=$.fn.zTree.getZTreeObj("treeDemo");
+                var allNodes = zTreeObject.getNodes()
+                for(var i =0; i<allNodes.length;i++){
+                    if(i<5){
+                        this.CheckedNodes.push(allNodes[i].name)
+                        zTreeObject.checkNode(allNodes[i],true, true);
                     }
                 }
-                if(CheckedNodes.length>5){
+                //console.log(this.CheckedNodes)
+            },
+            onCheck:function (event, treeId, treeNode) {
+                var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
+                if(zTreeObject.getCheckedNodes(true).length>5){
                     zTreeObject.checkNode(treeNode,false, true);
                 }
-                this.CheckedNodes = zTreeObject.getCheckedNodes(true);
-                console.log(this.CheckedNodes)
+                var _this=this;
+                var nodes = zTreeObject.getCheckedNodes(true);
+                this.CheckedNodes=[];
+                nodes.forEach(function (v,i) {
+                    _this.CheckedNodes.push(v.name)
+                });
             },
             top:function () {
                 var _this = this;
@@ -199,6 +356,78 @@
                         _this.topTen = data.data;
                     }
                 })
+            },
+            echartsView:function () {
+               //1-数据处理
+                var timeValue = '';
+                var startDate = '';
+                var endDate ='';
+                //var time_interval = 5000; //时间间隔为5秒
+                var time_interval = 5000*60;
+                switch (this.timeType){
+                    case 'month':
+                        timeValue = $('.data1 .input-group.date input').val();
+                        if(this.validate(timeValue,'.data1')){
+                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
+                        }
+                        break;
+                    case 'week':
+                        timeValue = $('.data2 .input-group.date input').val();
+                        if(this.validate(timeValue,'.data2')){
+                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
+                        }
+                        break;
+                    case 'day':
+                        timeValue = $('.data3 .input-group.date input').val()
+                        if(this.validate(timeValue,'.data3')){
+                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
+                        }
+                        break;
+                    case 'current':
+                        startDate = $('.data4 .input-group.date input').val();
+                        startDateValue = formatDateTime(Date.parse(new Date(startDate)) / 1000);
+                        var t =(Date.parse(new Date(startDate)) / 1000 )+ time_interval/1000;
+                        endDate = formatDateTime(t);
+                        if(this.validate(startDate,'.data4')){
+                            var _this = this;
+                            this.echartsAjax(this.CheckedNodes,startDateValue,endDate,startDateValue);
+                            console.log("开始时间",startDateValue);
+                            console.log("结束时间",endDate);
+                            this.timer = setInterval(function () {
+                                t =t+ time_interval/1000;
+                                endDate = formatDateTime(t);
+                                _this.echartsAjax(this.CheckedNodes,startDateValue,endDate,startDateValue);
+                            },time_interval)
+                        }
+                        break;
+                }
+            },
+            validate:function (value,className) {
+                if(value){
+                    $(className).removeClass('error');
+                    return true;
+                }else{
+                    $(className).addClass('error');
+                    return false;
+                }
+    },
+            echartsAjax:function (itemList,startDate,endDate,timeValue) { //这里的timeValue 就是开始时间
+                var _this = this;
+                var u = url +"statisview/"+localStorage.getItem("userId")+"/getMesViewData/2";
+                var params = {
+                    endDate:endDate,
+                    itemList:itemList,
+                    startDate:startDate,
+                    timeType:this.timeType,
+                    timeValue:timeValue,
+                    valueType:this.valueType
+                }
+                ajaxPostObj(u,JSON.stringify(params),function (data) {
+                    console.log(data);
+//                    _this.myChart.setOption({
+//
+//                    });
+                })
             }
         }
     })
@@ -206,113 +435,35 @@
 <script>
 
     $(function () {
+        var timestamp =Date.parse(new Date())/1000; //当前时间戳
+        var date_now = formatDateTime_inital(timestamp);
+        $('.data4 input').val(date_now);
         $(".div1").Tdrag();
+        $('.data1 .input-group.date').datetimepicker({
+            startView:3,
+            minView:3,
+            format:"yyyy-mm",
+            autoclose: true,
+        });
+        $('.data2 .input-group.date').datetimepicker({
+            startView:2,
+            minView:1,
+            format:"yyyy-mm-dd hh",
+            autoclose: true,
+        });
+        $('.data3 .input-group.date').datetimepicker({
+            startView:2,
+            minView:2,
+            format:"yyyy-mm-dd",
+            autoclose: true,
+        });
+        $('.data4 .input-group.date').datetimepicker({
+            startView:0,
+            language: 'zh-CN',
+            autoclose: true,
+        });
 
-//        $(document).on("click", ".title .toggle", function () {
-//            var display = $(this).parent().next("div").css("display");
-//            if(display == 'block'){
-//                $(this).find("span").removeClass("fa-angle-up").addClass("fa-angle-down");
-//            }else{
-//                $(this).find("span").removeClass("fa-angle-down").addClass("fa-angle-up");
-//            }
-//            $(this).parent().next("div").slideToggle();
-//        });
-//        $('.input-group.date').datepicker({
-//            format: 'yyyy-mm-dd',
-//            autoclose: true
-//        });
     });
-    var myChart = echarts.init(document.getElementById('main'));
-    var option = {
-        title: {
-            text: '字节数（Mbps）',
-            textStyle:{
-                //文字颜色
-                color:'#333',
-                //字体风格,'normal','italic','oblique'
-                fontStyle:'normal',
-                //字体粗细 'normal','bold','bolder','lighter',100 | 200 | 300 | 400...
-                fontWeight:'normal',
-                //字体大小
-                fontSize:12
-            },
-            x:'7%',
-            y:'5%'
-        },
-        tooltip : {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'cross',
-                label: {
-                    backgroundColor: '#6a7985'
-                }
-            }
-        },
-        legend: {
-            data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎'],
-            y:'5%'
-        },
 
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        xAxis : [
-            {
-                type : 'category',
-                boundaryGap : false,
-                data : ['周一','周二','周三','周四','周五','周六','周日'],
-                splitLine:{
-                    show:true
-                },
-            }
-        ],
-        yAxis : [
-            {
-                type : 'value'
-            }
-        ],
-        series : [
-            {
-                name:'邮件营销',
-                type:'line',
-                stack: '总量',
-
-                data:[120, 132, 101, 134, 90, 230, 210]
-            },
-            {
-                name:'联盟广告',
-                type:'line',
-                stack: '总量',
-
-                data:[220, 182, 191, 234, 290, 330, 310]
-            },
-            {
-                name:'视频广告',
-                type:'line',
-                stack: '总量',
-
-                data:[150, 232, 201, 154, 190, 330, 410]
-            },
-            {
-                name:'直接访问',
-                type:'line',
-                stack: '总量',
-
-                data:[320, 332, 301, 334, 390, 330, 320]
-            },
-            {
-                name:'搜索引擎',
-                type:'line',
-                stack: '总量',
-
-
-                data:[820, 932, 901, 934, 1290, 1330, 1320]
-            }
-        ]
-    };
-    myChart.setOption(option);
 </script>
 </html>

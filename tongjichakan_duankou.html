@@ -185,11 +185,16 @@
             },
             onCheck:function (event, treeId, treeNode) {
                 var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
-                if(zTreeObject.getCheckedNodes(true).length>5){
+                var CheckedNodes = [];
+                for(var i = 0,Nodes=zTreeObject.getCheckedNodes(true); i<Nodes.length;i++){
+                    if(Nodes[i].level == 1){
+                        CheckedNodes.push(Nodes[i])
+                    }
+                }
+                if(CheckedNodes.length>5){
                     zTreeObject.checkNode(treeNode,false, true);
                 }
                 this.CheckedNodes = zTreeObject.getCheckedNodes(true);
-                console.log(this.CheckedNodes)
             },
             top:function () {
                 var _this = this;
