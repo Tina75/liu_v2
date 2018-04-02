@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e59202a1-362a-46c8-84ec-73811fa2fbcf" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/datapicker/bootstrap-datetimepicker.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/datapicker/css/bootstrap-datetimepicker.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/datapicker/css/bootstrap-datetimepicker.min.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/tongjichakan.css" afterPath="$PROJECT_DIR$/css/tongjichakan.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/url.js" afterPath="$PROJECT_DIR$/js/url.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tongjichakan_duankou.html" afterPath="$PROJECT_DIR$/tongjichakan_duankou.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tongjichakan_xieyi.html" afterPath="$PROJECT_DIR$/tongjichakan_xieyi.html" />
-    </list>
+    <list default="true" id="e59202a1-362a-46c8-84ec-73811fa2fbcf" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -602,12 +591,12 @@
       <workItem from="1522202322010" duration="11152000" />
       <workItem from="1522285635364" duration="19615000" />
       <workItem from="1522371463155" duration="18751000" />
-      <workItem from="1522630764627" duration="2164000" />
+      <workItem from="1522630764627" duration="2759000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="830319000" />
+    <option name="totallyTimeSpent" value="830914000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="1" />
