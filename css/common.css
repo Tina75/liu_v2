@@ -972,7 +972,7 @@ body  .layui-layer-btn a{
     cursor: pointer;
     position: relative;
 }
-.item-check-btn .icon-ok {
+.item-check-btn .ok {
     position: absolute;
     display: none;
     /*display: inline-block;*/
@@ -988,7 +988,7 @@ body  .layui-layer-btn a{
     /*background: #3EA8F6;*/
     border-color: #0078E6
 }
-.item-check-btn.check .icon-ok {
+.item-check-btn.check .ok {
     display: inline-block;
 }
 /*集群 服务状态 左右布局*/
@@ -1008,7 +1008,6 @@ body  .layui-layer-btn a{
     float: left;
     margin-left: -270px;
     margin-top:10px;
-    padding:10px;
     overflow-y: auto;
     font-size: 13px;
 }
@@ -1016,19 +1015,19 @@ body  .layui-layer-btn a{
     font-weight: bold;
     line-height: 30px;
     height: 30px;
+    padding:0 10px;
 }
-.server-left .server-list{
-    margin-left: 10px;
-}
+/*.server-left .server-list{*/
+    /*margin-left: 10px;*/
+/*}*/
 .server-left .server-list li{
+     padding:0 10px;
      line-height: 30px;
      height: 30px;
      cursor: pointer;
  }
-.server-left .server-list li a{
-    line-height: 30px;
-    height: 30px;
-    cursor: pointer;
+.server-left .server-list li:hover{
+    background: #ccc;
 }
 .server-left .server-list li.active{
     color: #0078E6;
@@ -1049,7 +1048,7 @@ body  .layui-layer-btn a{
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
-    background-color: #0078E6;
+    background-color: #C9DCEB;
     border-radius: 10px;
     float: right;
     margin-top: 11px;
@@ -1071,7 +1070,7 @@ body  .layui-layer-btn a{
     color: #F98011;
 }
 .server-right .hit_top_table{
-    height: 250px;
+    min-height: 1%;
     overflow-y: auto;
 }
 .server-right .hit_middle{
@@ -1211,4 +1210,27 @@ td.limitWidth div{
 .zTreeActive{
     color: #A60000;
     font-weight: bold
+}
+.searchEdit span::before{
+    margin-right: 3px;
+}
+.ztree li a.curSelectedNode{
+    height: 20px!important;
+    line-height: 20px;
+    color: inherit!important;
+    background-color: inherit!important;
+    border: none!important;
+    opacity: 1!important;
+    padding: 1px 3px 0 0!important;
+}
+.ztree li a{
+    vertical-align: middle!important;
+    cursor: inherit!important;
+}
+.ztree li a:hover{
+    text-decoration: none!important;
+}
+.ztree li a{
+    height: 20px!important;
+    line-height: 20px;
 }

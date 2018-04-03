@@ -6,6 +6,7 @@
     <link href="css/bootstrap.css" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/datapicker/datepicker3.css">
     <link rel="stylesheet" href="css/share.css">
     <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
@@ -66,19 +67,19 @@
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
                         <li class="pull-right" @click="deleteList" >
-                            <span class="fa fa-trash-o" :class="{active: selected.length>0}">删除</span>
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
                         </li>
                         <li class="pull-right" @click="copyList">
-                            <span class="fa fa-copy" :class="{active: selected.length>0}">复制</span>
+                            <span class="icon-icon-sy6" :class="{active: selected.length>0}">复制</span>
                         </li>
                         <li class="pull-right" @click="buControlPop">
-                            <span class="fa fa-play" :class="{active: selected.length==1}">布控</span>
+                            <span class="icon-icon-sy10" :class="{active: selected.length==1}">布控</span>
                         </li>
                         <li class="pull-right" @click="editPop">
-                            <span class="fa fa-pencil" :class="{active: selected.length==1}">编辑</span>
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
                         <li class="pull-right" @click="sharePop()">
-                            <span class="fa fa-share" :class="{active: selected.length>0}">分享</span>
+                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
                         </li>
                     </ul>
                 </div>
@@ -90,7 +91,7 @@
                         <tr>
                             <th style="width: 45px">
                                 <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
                             <th>编号</th>
@@ -104,7 +105,7 @@
                         <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
                             <td>{{index+1}}</td>

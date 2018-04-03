@@ -6,6 +6,7 @@
     <link href="css/bootstrap.css" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/animate.css">
 </head>
 <body class=" animated fadeInRight">
@@ -36,16 +37,16 @@
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
                         <li class="pull-right" @click="deleteList" >
-                            <span class="fa fa-trash-o" :class="{active: selected.length>0}" >删除</span>
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}" >删除</span>
                         </li>
                         <li class="pull-right" @click="editPop">
-                            <span class="fa fa-pencil" :class="{active: selected.length==1}">编辑</span>
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
                         <li class="pull-right" @click="changeType('open')">
-                            <span class="fa fa-check-circle" :class="{active: selected.length>0}">启用</span>
+                            <span class="icon-icon-sy23" :class="{active: selected.length>0}">启用</span>
                         </li>
                         <li class="pull-right" @click="changeType('close')">
-                            <span class="fa fa-ban" :class="{active: selected.length>0}">禁用</span>
+                            <span class="icon-icon-sy24" :class="{active: selected.length>0}">禁用</span>
                         </li>
                     </ul>
                 </div>
@@ -57,7 +58,7 @@
                         <tr>
                             <th style="width: 45px">
                                 <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
                             <th>编号</th>
@@ -74,7 +75,7 @@
                         <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
