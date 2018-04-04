@@ -157,3 +157,34 @@
 .error input{
     border: 1px solid red;
 }
+
+.hit .hit_top_Tittle{
+    overflow: hidden;
+    padding:12px 0;
+}
+.hit .hit_top_Tittle .title{
+    float: left;
+    cursor: pointer;
+}
+.hit .hit_top_Tittle .export{
+    float: right;
+    color: #F98011;
+}
+.hit .hit_top_table{
+    height: 300px;
+    overflow-y: auto;
+}
+.hit .hit_middle{
+    height: 150px;
+    overflow-y: auto;
+    border: 1px solid #E2E2E2;
+    margin-top: 10px;
+    /*border: 1px solid red;*/
+    /*border-top:none;*/
+}
+.hit .hit_bottom{
+    margin-top: 5px;
+    height: 150px;
+    overflow-y: auto;
+    border: 1px solid #E2E2E2;
+}

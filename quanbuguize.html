@@ -110,7 +110,7 @@
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td v-if="item.rule_Discription" class="checkDetail" @click="detail(item.rule_Discription)">{{item.ruleName}}</td>
+                            <td v-if="item.rule_Discription" class="checkDetail" @click="detail(item.rule_Discription,item.ruleName)">{{item.ruleName}}</td>
                             <td v-else>{{item.ruleName}}</td>
                             <td class="limitWidth">
                                 <div :title="item.ruleStr">
@@ -179,7 +179,7 @@
                     </div>
                     <div class="row"  >
                         <div class="col-md-10" style="padding-right: 0">
-                            <div class="form-group" >
+                            <div class="form-group errValidate" >
                                 <label for="task-desc" class="bold">规则内容:</label>
                                 <input type="text" class="form-control" v-model="item.ruleStr"  placeholder="在此输入内容...">
                             </div>
@@ -1195,6 +1195,12 @@
                 }
                 var isOk = item.isOk.ruleName;
                 if(isOk){
+                    if(!item.ruleStr){
+                        $(dom).parent().parent().parent().find('.errValidate').addClass('error')
+                        return false;
+                    }else{
+                        $(dom).parent().parent().parent().find('.errValidate').removeClass('error')
+                    }
                     ajaxPostObj(u,JSON.stringify(Rule),function (data) {
                         if(data.resultCode == ERR_OK ){
                             layer.alert("添加成功",function (i) {
@@ -1314,11 +1320,11 @@
                 this.currentIndex = index;
                 return false;
             },
-            detail:function (str) {
+            detail:function (str,title) {
                 this.popDetail.detail = str;
                 layer.open({
                     type: 1,
-                    title: ['详情'],
+                    title: [title],
                     closeBtn: 1,
                     btn:['关闭'],
                     btnAlign: 'c',

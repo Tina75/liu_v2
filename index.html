@@ -161,7 +161,15 @@
         // MetsiMenu
         $("#menu").metisMenu();
         document.getElementById("content-main").style.height = window.innerHeight-50+"px";
+        console.log($('.nav-second-level li'))
     });
+    $('.nav-second-level li a').click(function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        //alert(111);
+        $(".nav-second-level li a").removeClass('blue');
+        $(this).addClass('blue')
+    })
     //退出登陆
     function logout() {
         layer.confirm('您确定要登出吗？', {

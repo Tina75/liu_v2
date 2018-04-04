@@ -422,6 +422,9 @@
                     if(data.resultCode == ERR_OK ){
                         _this.list = data.data.userList;
                         _this.pages = parseInt(data.data.countPage);
+//                        if(_this.current_page>_this.pages){
+//                            _this.current_page = _this.pages;
+//                        }
                     }else{
                         layer.alert("数据请求失败");
                     }

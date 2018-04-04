@@ -229,6 +229,7 @@ nav{
     color: #333;
 }
 .metismenu > li.active .nav-second-level li a:hover,
+.metismenu > li.active .nav-second-level li a.blue,
 .metismenu > li.active .nav-second-level li a:focus{
     color: #0078E6;
 }
@@ -398,6 +399,7 @@ body.mini-navbar .nav-close{
     margin-right: 8px;
     margin-top:5px;
     cursor: pointer;
+    color: #ccc;
 }
 .search .searchEdit li .active{
     color: #ED8202;
@@ -1070,7 +1072,7 @@ body  .layui-layer-btn a{
     color: #F98011;
 }
 .server-right .hit_top_table{
-    min-height: 1%;
+    height: 150px;
     overflow-y: auto;
 }
 .server-right .hit_middle{
@@ -1188,7 +1190,7 @@ body  .layui-layer-btn a{
     color: red;
 }
 .error input{
-    border-color:red ;
+    border-color:red!important;
 }
 
 /*表格长度限制*/

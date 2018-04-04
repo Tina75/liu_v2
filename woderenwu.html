@@ -40,14 +40,14 @@
                         <input type="email" @keyup="cartView(1)" class="form-control" id="rule" v-model="taskConRuleId"
                                placeholder="关联规则">
                     </div>
-                    <div class="form-group">
-                        <label for="creater">创建人:</label>
-                        <select class="form-control" id="creater" v-model="taskCreateUserName">
-                            <option>admin</option>
-                            <option>上海</option>
-                            <option>广州</option>
-                        </select>
-                    </div>
+                    <!--<div class="form-group">-->
+                        <!--<label for="creater">创建人:</label>-->
+                        <!--<select class="form-control" id="creater" v-model="taskCreateUserName">-->
+                            <!--<option>admin</option>-->
+                            <!--<option>上海</option>-->
+                            <!--<option>广州</option>-->
+                        <!--</select>-->
+                    <!--</div>-->
                     <button type="button" class="btn btn-primary" @keyup="cartView(1)">确认</button>
                 </div>
                 <div class="searchEdit pull-right">
@@ -83,7 +83,7 @@
                             <th>编号</th>
                             <th>任务名称</th>
                             <th>关联规则</th>
-                            <th>创建人</th>
+                            <!--<th>创建人</th>-->
                             <th @click="sort" style="cursor: pointer">最新启动时间<span class="fa" :class="sortClass"></span>
                             </th>
                             <th>运行状态</th>
@@ -101,7 +101,7 @@
                             <td>{{index+1}}</td>
                             <td class="checkDetail" @click="detail(item.taskId)">{{item.task_Name}}</td>
                             <td>{{item.task_RuleName}}</td>
-                            <td>{{item.task_CreateUserName}}</td>
+                            <!--<td>{{item.task_CreateUserName}}</td>-->
                             <td>{{item.task_CurrentStartTime}}</td>
                             <td v-if="item.task_RunState == 1">启动任务</td>
                             <td v-else-if="item.task_RunState == 2">停止运行</td>
@@ -735,7 +735,7 @@
             list: [],   //展示数组
             sortFlag: undefined, //默认升序
             taskConRuleId: "",  //搜索项
-            taskCreateUserName: "", //搜索项
+            //taskCreateUserName: "", //搜索项
             taskName: "",     //搜索项
             current_page: 1, //当前页
             pageSize: 8,  //每页数据条数
@@ -856,7 +856,7 @@
                 //task/{userId}/queryPageTaskData/{type}/{currentPageNum}/{pageSize}?userName=ss
                 var taskFilter = {
                     taskConRuleId: this.taskConRuleId,
-                    taskCreateUserName: this.taskCreateUserName,
+                    taskCreateUserName: '',
                     taskName: this.taskName
                 }
                 ajaxPostObj(u, JSON.stringify(taskFilter), function (data) {

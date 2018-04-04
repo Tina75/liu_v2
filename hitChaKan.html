@@ -289,21 +289,6 @@
                     content: $('#detail')
                 });
             },
-            getMes:function () {
-                //http://localhost:8080/streamplatserver/statisview/{userId}/getMesListByTaskId/{taskId}
-                var _this = this;
-                var u = url +"statisview/"+localStorage.getItem('userId')+'/getMesListByTaskId/';
-                ajaxGet(u,function (data) {
-                    console.log(data)
-                    if(data.resultCode == ERR_OK ){
-                        _this.list = data.data;
-                        _this.rightView(_this.list[_this.currentIndex].taskId,0)
-
-                    }else{
-                        layer.alert("数据请求失败");
-                    }
-                });
-            }
         }
 
     })
