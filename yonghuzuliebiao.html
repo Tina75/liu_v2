@@ -10,15 +10,23 @@
     <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
     <link rel="stylesheet" href="css/animate.css">
     <link rel="stylesheet" href="css/common.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body class=" animated fadeInRight">
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
         <li :class="{active:currentIndex == 0}" ><a href="javascript:void(0)" @click.prevent="currentIndex=0" >用户组列表</a></li>
         <li v-for="(item,index) in navLI_1"  :class="{'active':currentIndex==index+1}">
-            <a href="javascript:void(0)"  @click.prevent.stop="demoClickLi(index+1)" >新建用户组
+            <a href="javascript:void(0)"  @click.prevent.stop="demoClickLi(index+1)" v-if="item.groupName">{{item.groupName}}
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+            <a href="javascript:void(0)"  @click.prevent.stop="demoClickLi(index+1)" v-else>新建用户组
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
         </li>
@@ -149,8 +157,8 @@
                                     </div>
                                 </div>
                                 <div class="right pull-right">
-                                    <div class="title">
-                                        已选用户：(<span>4</span>/<span>40</span>)
+                                    <div class="title" style="height:17px">
+                                        <!--已选用户：(<span>4</span>/<span>40</span>)-->
                                     </div>
                                     <div class="share_search">
                                         <input type="text" placeholder="查找联系人" v-model="item.search_right" @keyup="zNodes_search_right(currentIndex,item.search_right)">
@@ -232,58 +240,6 @@
 <script src="js/url.js"></script>
 <script src="js/jquery.ztree.core.js"></script>
 <script src="js/jquery.ztree.excheck.js"></script>
-<script>
-    function navLiSort(){
-        $(".nav-tabs a").each(function (i, n) {
-            $(n).attr("href", "#navTabs_" + i);
-        });
-        $(".tab-content>div").each(function (i, n) {
-            $(n).attr("id", "navTabs_" + i);
-        });
-    }
-//    $(function () {
-//        $(document).on("click",".nav-tabs li .add",function () {
-//            /*******排序**********/
-//            $(".nav-tabs a").each(function (i, n) {
-//                $(n).attr("href", "#navTabs_" + i);
-//            });
-//            $(".tab-content>div").each(function (i, n) {
-//                $(n).attr("id", "navTabs_" + i);
-//            });
-//            var index = $(this).parent().index(".nav-tabs li");
-//            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建任务 <span class="fa fa-close tabClose"></span></a></li>';
-//            var strContent = $("#profile").html();
-//            $(this).parent().before(str);
-//            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
-//            $(this).parent().prev().find('a').click();  //新增的active
-//
-//            zTree();
-//        });
-//        $(document).on("click", ".tabClose", function () {
-//            /*******排序**********/
-//            $(".nav-tabs a").each(function (i, n) {
-//                $(n).attr("href", "#navTabs_" + i);
-//            });
-//            $(".tab-content>div").each(function (i, n) {
-//                $(n).attr("id", "navTabs_" + i);
-//            });
-//
-//            if($(this).parent().parent().hasClass('active')){ //当前是active的被删除
-//                console.log($(this).parent().parent().prev());
-//                $(this).parent().parent().prev().find('a').click();
-//            }
-//            var index = $(this).parent().parent().index(".nav-tabs li");
-//            $(".tab-content>div").eq(index).remove();
-//            $(this).parent().parent().remove();
-//        });
-//        $(document).on("click",".taskModel li",function () {
-//            var target=$(this).attr("data-target");
-//            $(".taskModelContent>div").hide();
-//            $(".taskModelContent").find("."+target+"DIV").show();
-//        });
-//
-//    });
-</script>
 
 <script>
     //高亮样式
@@ -298,7 +254,7 @@
             sortFlag:undefined, //默认升序
             groupName:'', //搜索项
             current_page: 1, //当前页
-            pageSize:8,  //每页数据条数
+            pageSize:12,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
@@ -607,10 +563,10 @@
                 }
                 var isOk = item.isOk.groupName;
                 if(isOk){
-                    if(userIdList.length == 0){
-                        layer.alert("请选择用户");
-                        return;
-                    }
+//                    if(userIdList.length == 0){
+//                        layer.alert("请选择用户");
+//                        return;
+//                    }
                     ajaxPostArray(u,{userIdList:userIdList},function (data) {
                         if(data.resultCode == ERR_OK ){
                             layer.alert("添加成功",function (i) {

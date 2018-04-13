@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="css/share.css">
     <link rel="stylesheet" href="css/animate.css">
     <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+    <style>
        .sourceItem{
            margin:10px 0;
            overflow: hidden;
@@ -71,7 +76,7 @@
     </style>
 </head>
 <body class=" animated fadeInRight">
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">

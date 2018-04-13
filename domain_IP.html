@@ -2,43 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IP与地区对应关系图</title>
+    <title>域名与IP对应关系图</title>
     <link href="css/bootstrap.css" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/font-awesome.css">
-    <!--<link rel="stylesheet" href="css/datapicker/datepicker3.css">-->
-    <link rel="stylesheet" href="css/share.css">
-    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <link rel="stylesheet" href="css/font.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body >
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane active" id="home">
             <div class="search clearfix">
                 <div class="form-inline pull-left searchItems">
                     <div class="form-group">
-                        <label for="task">域名:</label>
-                        <input type="text" class="form-control" id="task" placeholder="请输入关键字">
+                        <label >域名:</label>
+                        <input type="text" @keyup="cartView(1)" v-model="domainName" class="form-control"  placeholder="请输入关键字">
                     </div>
-                    <button type="button" class="btn btn-primary">确认</button>
+                    <button type="button" @click="cartView(1)" class="btn btn-primary">确认</button>
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right">
-                            <span class="fa fa-trash-o active">新建</span>
+                        <li class="pull-right" @click="addPop">
+                            <span class="icon-icon-sy12 active">新建</span>
                         </li>
-                        <li class="pull-right" @click="edit()">
-                            <span class="fa fa-pencil active">编辑</span>
+                        <li class="pull-right fileParent">
+                            <span class="icon-icon-sy14 active">导入</span>
+                            <input type="file" name="excelFile" class="file" @change="importFile" id="excelFile">
                         </li>
-                        <li class="pull-right">
-                            <span class="fa fa-stop active">导入</span>
+                        <li class="pull-right" @click="editPop()">
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
-                        <li class="pull-right">
-                            <span class="fa fa-pause active">分享</span>
-                        </li>
-                        <li class="pull-right">
-                            <span class="fa fa-play active">删除</span>
+                        <li class="pull-right" @click="deleteList">
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
                         </li>
                     </ul>
                 </div>
@@ -50,12 +51,11 @@
                             <tr>
                                 <th style="width:5%">
                                     <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                        <span class="fa fa-check icon-ok"></span>
+                                        <span class="fa fa-check ok"></span>
                                     </div>
                                 </th>
                                 <th style="width:10%">编号</th>
                                 <th style="width:30%">域名</th>
-                                <th style="width:20%;border-right: 1px solid #E7E7E7">状态</th>
                                 <th >IP地址信息</th>
                             </tr>
                         </thead>
@@ -63,21 +63,16 @@
                         <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
-                            <td>1</td>
-                            <td @click="ipIndex=index" style="cursor: pointer">http://www.baidu.com <i class="fa fa-bookmark bule" aria-hidden="true"></i></td>
-                            <td class="checkDetail" @click="share()" style="border-right: 1px solid #E7E7E7">
-                                已分享
+                            <td>{{index+1}}</td>
+                            <td @click="ipIndex=index" :class="{bule:ipIndex==index}" :title="item.domainName" style="cursor: pointer">{{item.domainName}}
                             </td>
                             <td >
                                 <div class="ipShow" style="display: none" :class="{'show':ipIndex==index}">
-                                    <div >{{index}}</div>
                                     <ul>
-                                        <li>192.168.1.1,192.169.2.4,192.134.3.4</li>
-                                        <li>192.168.1.1,192.169.2.4,192.134.3.4</li>
-                                        <li>192.168.1.1,192.169.2.4,192.134.3.4</li>
+                                        <li v-for="list in item.ipStr.split(',')">{{list}}</li>
                                     </ul>
                                 </div>
                             </td>
@@ -85,60 +80,34 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="page clearfix" v-show="show">
+                <div class="page clearfix" >
                     <div class="pageCut">
                         每页
-                        <select name="" class="form-control pageSelect" >
-                            <option value="1">1</option>
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
                         </select>
                         条记录
                     </div>
-                    <div class="pagelist">
+                    <div class="pagelist" >
                         <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
-                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
                         <span class="ellipsis" v-show="efont">...</span>
                         <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
                               @click="jumpPage(num)">{{num}}</span>
                         <span class="ellipsis" v-show="ebehind">...</span>
 
                         <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
-                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
 
                         <span class="jumppoint">跳转到：</span>
-                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
-                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <!--分享弹窗-->
-    <div id="share" style="display: none">
-        <div class="share_peo clearfix">
-            <div class="left pull-left">
-                <div class="title">
-                    选择用户：
-                </div>
-                <div class="share_search">
-                    <input type="text" placeholder="查找联系人"  >
-                    <span class="fa fa-search"></span>
-                </div>
-                <div class="areas_list">
-                    <ul id="treeDemo" class="ztree"></ul>
-                </div>
-            </div>
-            <div class="right pull-right">
-                <div class="title">
-                    已选用户：(<span>4</span>/<span>40</span>)
-                </div>
-                <div class="share_search">
-                    <input type="text" placeholder="查找联系人">
-                    <span class="fa fa-search"></span>
-                </div>
-                <ul class="send_to">
-                    <li v-for="(item,index) in zTreeArr" @click="removeRight(index)">{{item}}</li>
-                </ul>
-                <!--<div class="close">全部删除</div>-->
             </div>
         </div>
     </div>
@@ -148,20 +117,57 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
-                        <label for="task-name" class="bold">域名:</label>
-                        <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                        <label class="bold">域名:</label>
+                        <input type="text" class="form-control" v-model="editList.domainName" placeholder="在此输入内容...">
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-9" style="padding-right: 10px">
+            <div class="row"   v-for="(item,index) in editList.ipStr" :key="index">
+                <div class="col-md-8" style="padding-right: 10px">
                     <div class="form-group">
-                        <label for="task-name" class="bold">IP:</label>
-                        <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                        <label  class="bold">IP:</label>
+                        <input type="text" class="form-control"  v-model="editList.ipStr[index]"   placeholder="在此输入内容...">
                     </div>
                 </div>
-                <div class="col-md-3" style="padding-left: 0;padding-right: 0;margin-top: 17px">
-                    <div class="addBtn"><i class="fa fa-plus" aria-hidden="true"></i>新增</div>
+                <div class="col-md-2" style="padding-left: 0;padding-right: 0;margin-top: 17px">
+                    <div class="addBtn" style="color: #ED8202" @click="editList.ipStr.push('')">
+                        <i class="fa fa-plus" aria-hidden="true"></i>新增
+                    </div>
+                </div>
+                <div class="col-md-2" v-if="index!=0" style="padding-left: 0;padding-right: 0;margin-top: 17px">
+                    <div class="addBtn"  @click="editList.ipStr.splice(index,1)">
+                        <i class="icon-icon-sy7"></i>删除
+                    </div>
+                </div>
+            </div>
+            <!--</div>-->
+        </div>
+    </div>
+    <!--新增-->
+    <div id="add" style="display: none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bold">域名:</label>
+                        <input type="text" class="form-control" v-model="addList.domainName" placeholder="在此输入内容...">
+                    </div>
+                </div>
+            </div>
+            <div class="row"  v-for="(item,index) in addList.ipStr" :key="index">
+                <div class="col-md-8" style="padding-right: 10px">
+                    <div class="form-group">
+                        <label  class="bold">IP:</label>
+                        <input type="text" class="form-control"  v-model="addList.ipStr[index]"   placeholder="在此输入内容...">
+                    </div>
+                </div>
+                <div class="col-md-2" style="padding-left: 0;padding-right: 0;margin-top: 17px">
+                    <div class="addBtn" style="color: #ED8202" @click="addList.ipStr.push('')"><i class="fa fa-plus"></i>新增</div>
+                </div>
+                <div class="col-md-2" v-if="index!=0" style="padding-left: 0;padding-right: 0;margin-top: 17px">
+                    <div class="addBtn"  @click="addList.ipStr.splice(index,1)">
+                        <i class="icon-icon-sy7"></i>删除
+                    </div>
                 </div>
             </div>
             <!--</div>-->
@@ -173,36 +179,41 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<!--<script src="js/My97DatePicker/WdatePicker.js"></script>-->
-<!--<script src="js/datapicker/bootstrap-datepicker.js"></script>-->
 <script src="js/vue.js"></script>
-<script src="js/mockData.js"></script>
-<script src="js/jquery.ztree.core.js"></script>
-<script src="js/jquery.ztree.excheck.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
 <script>
     // 创建根实例
     new Vue({
         el: '#example',
         data: {
             list: [],   //展示数组
+            domainName:'', //搜索项目
             current_page: 1, //当前页
+            pageSize:12,  //每页数据条数
             pages: 0, //总页数
-            changePage:0,//跳转页
+            changePage:'',//跳转页
             checkAll:false,
-            zNodes:[],
-            zTreeArr:[],  //树形结构右侧,
-            ipIndex:0
+            selected:[],    //选中项
+            ipIndex:0,
+            editList:{
+                id:'',
+                domainName:'',
+                ipStr:[]
+            },
+            addList:{
+                domainName:'',
+                ipStr:['']
+            },
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
-                this.cartView(false);
-                this.zTree();
+                _this.cartView(_this.current_page);
             })
         },
         computed:{
             show:function(){
-                console.log(this.pages && this.pages !=1);
                 return this.pages && this.pages !=1
             },
             pstart: function() {
@@ -245,40 +256,26 @@
                     left++;
                 }
                 return ar;
-            },
+            }
         },
         methods: {
-            cartView: function (flag) {
-                //console.log(this.username);
-                if (flag) { //搜索
-                    this.current_page = 1;
-                }
+            cartView: function (cPage) {
                 var _this = this;
-                //模拟数据
-                _this.list = data.Renwugunali;
-                _this.pages = data.CountPage;
-//                $.ajax({
-//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
-//                    type:'post',
-//                    dataType:'json',
-//                    data: {
-//                        PAGE: _this.current_page - 1,
-//                        task_name:'',
-//                        creater: ''
-//                    },
-//                    success: function(data){ //成功的回调函数的处理
-//                        _this.list = data.Renwugunali;
-//                        _this.pages = data.CountPage;
-//                    },
-//                    error:function(errorData){
-//                        if(errorData.readyState=='0'){
-//                            layer.close(index);
-//                            layer.alert('请先连接服务器');
-//                        }
-//                    }
-//                });
+                var u = url +"knowledge/"+localStorage.getItem('userId')+
+                    "/getIPDomainPageData/"+this.current_page+'/'+this.pageSize+'?userName='+localStorage.getItem('userName')+
+                    '&domainName='+this.domainName;
+                ajaxPost(u,{},function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.ipDomainList;
+                        _this.pages = parseInt(data.data.countPage);
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
             },
             selectedList: function (item) {
+                var _this=this;
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -286,6 +283,13 @@
                     item.checked = !item.checked;
                 }
                 this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isAll: function () {  //全选
                 var _this = this;
@@ -297,7 +301,13 @@
                         item.checked = _this.checkAll;
                     }
                 });
-                console.log(_this.list);
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isCheckAll: function () {
                 var flag = true;
@@ -314,82 +324,50 @@
 
             },
             jumpPage: function(id) {
-                this.current_page = id;
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+
             },
-            pageAjax:function () {
-                alert(this.current_page);
-            },
-            detail:function () {
-                layer.open({
-                    type: 1,
-                    title: ['详情'],
-                    closeBtn: 1,
-                    btn:['关闭'],
-                    btnAlign: 'c',
-                    area: ['600px', '410px'],
-                    skin: 'detailPop', //没有背景色
-                    shadeClose: true,
-                    content: $('#detail')
+            deleteList:function () {
+                //knowledge/{userId}/deleteIPDomainList?idList=42cc0f5f9a644c1e
+                var _this=this;
+                var idList = [];
+                this.selected.forEach(function (item) {
+                    idList.push(item.id);
                 });
-            },
-            share:function () {
-                layer.open({
-                    type: 1,
-                    title: ['分享'],
-                    closeBtn: 1,
-                    btn:['确定','取消'],
-                    btnAlign: 'c',
-                    area: ['800px', '440px'],
-                    skin: '', //没有背景色
-                    shade: 0,
-                    content: $('#share')
-                });
-            },
-            zTree:function () {
-                this.zNodes=["A1","A2","B1","B2","C1","C2","D1","D2"];
-                var zNodes = [
-                    {name:'全部用户',open:true,children:[
-                        {name:"A组用户", open:true, children:[
-                            {name:"A1"}, {name:"A2"}]},
-                        {name:"B组用户", open:true, children:[
-                            {name:"B1"}, {name:"B2"}]},
-                        {name:"C组用户", open:true, children:[
-                            {name:"C1"}, {name:"C2"}]},
-                        {name:"D组用户", open:true, children:[
-                            {name:"D1"}, {name:"D2"}]
-                        }
-                    ]}
-                ];
-                var setting = {
-                    check:{
-                        enable: true,
-                        chkStyle : "checkbox"
-                    },
-                    view: {
-                        showIcon: false
-                    },
-                    callback: {
-                        onCheck:  this.onCheck
-                    }
-                };
-                $.fn.zTree.init($("#treeDemo"), setting, zNodes);
-            },
-            onCheck:function () {
-                var zTree = $.fn.zTree.getZTreeObj("treeDemo").getNodesByFilter(this.filter);
-                var str = "";
-                this.zTreeArr=[];
-                for (var i=0;i<zTree.length;i++) {
-                    if(zTree[i].name !=null)
-                        this.zTreeArr.push(zTree[i].name);
+                if(idList.length>0){
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        ajaxGetArray(url+"knowledge/"+localStorage.getItem('userId')+"/deleteIPDomainList",{idList:idList},function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("删除成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
                 }
             },
-            filter:function (node) {   //过滤器直选中2级节点累加
-                return (node.level == 2 && node.checked == true);
-            },
-            removeRight:function (i) {
-                this.zTreeArr.splice(i,1);
-            },
-            edit:function () {
+            editPop:function () {
+                var _this=this;
+                if(this.selected.length == 1){
+                    this.editList.id = this.selected[0].id;
+                    this.editList.domainName = this.selected[0].domainName;
+                    this.editList.ipStr = this.selected[0].ipStr.split(',');
+                }
                 layer.open({
                     type: 1,
                     title: ['编辑'],
@@ -399,7 +377,100 @@
                     area: ['450px', '300px'],
                     skin: '', //没有背景色
                     shade: 0,
-                    content: $('#edit')
+                    content: $('#edit'),
+                    yes:function () {
+                        _this.edit(); //没有加验证
+
+                    }
+                });
+            },
+            edit:function () {
+                var _this = this;
+                //knowledge/{userId}/editeIpDoMainInfo/{id}
+                var u = url +"knowledge/"+localStorage.getItem("userId")+"/editeIpDoMainInfo/"+this.editList.id;
+                if(!this.editList.domainName){
+                    layer.alert('域名不能为空');
+                    return
+                }
+                var ipDomainInfo = {
+                    ipStr:this.editList.ipStr.join(','),
+                    domainName:this.editList.domainName
+                }
+                ajaxPostObj(u,JSON.stringify(ipDomainInfo),function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("修改成功",function () {
+                            _this.cartView(_this.current_page);
+                            _this.selected = [];
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            addPop:function () {
+                var _this = this;
+                //初始化
+                this.addList={
+                    domainName:'',
+                        ipStr:['']
+                };
+                layer.open({
+                    type: 1,
+                    title: ['新增'],
+                    closeBtn: 1,
+                    btn:['确定','取消'],
+                    btnAlign: 'c',
+                    area: ['450px', '300px'],
+                    skin: '', //没有背景色
+                    shade: 0,
+                    content: $('#add'),
+                    yes:function () {
+                        _this.add();
+                    }
+                });
+            },
+            add:function () {
+                var _this = this;
+                var u = url +"knowledge/"+localStorage.getItem("userId")+"/addNewIpDoMainInfo?userName="+
+                    localStorage.getItem('userName');
+                if(!this.addList.domainName){
+                    layer.alert('域名不能为空');
+                    return
+                }
+                var ipDomainInfo = {
+                    createUserName:localStorage.getItem("userName"),
+                    ipStr:this.addList.ipStr.join(','),
+                    domainName:this.addList.domainName,
+                }
+                ajaxPostObj(u,JSON.stringify(ipDomainInfo),function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("新增成功",function () {
+                            _this.cartView(_this.current_page);
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            importFile:function () {
+                var formData = new FormData();
+                formData.append('excelFile',$('#excelFile')[0].files[0]);
+                //knowledge/{userId}/importIPDomainInfo?userName=lwx
+                $.ajax({
+                    url: url+'knowledge/'+localStorage.getItem('userId')+'/importIPDomainInfo?userName='+localStorage.getItem('userName'),
+                    type: 'POST',
+                    cache: false,
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                }).done(function(res) {
+                    layer.alert(res.message);
+                }).fail(function(res) {
+                    layer.alert('导入失败');
                 });
             },
         }

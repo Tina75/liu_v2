@@ -6,13 +6,15 @@
     <link href="css/bootstrap.css" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/font-awesome.css">
-    <!--<link rel="stylesheet" href="css/datapicker/datepicker3.css">-->
-    <link rel="stylesheet" href="css/share.css">
-    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
-    <!--<link rel="stylesheet" href="css/animate.css">-->
+    <link rel="stylesheet" href="css/font.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane active" id="home">
@@ -20,30 +22,31 @@
                 <div class="form-inline pull-left searchItems">
                     <div class="form-group">
                         <label for="task">IP段:</label>
-                        <input type="text" class="form-control" id="task" placeholder="请输入关键字">
+                        <input type="text" v-model="IpRangeStr" @keyup="cartView(1)" class="form-control" id="task" placeholder="请输入IP段">
                     </div>
                     <div class="form-group">
                         <label for="rule">地区:</label>
-                        <input type="email" class="form-control" id="rule" placeholder="请输入地区">
+                        <input type="email" v-model="provenceName" @keyup="cartView(1)" class="form-control" id="rule" placeholder="请输入地区">
                     </div>
-                    <button type="button" class="btn btn-primary">确认</button>
+                    <button type="button" class="btn btn-primary" @click="cartView(1)">确认</button>
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right">
-                            <span class="fa fa-trash-o active">新建</span>
+                        <li class="pull-right" @click="addPop">
+                            <span class="icon-icon-sy12 active">新建</span>
                         </li>
-                        <li class="pull-right" @click="edit()">
-                            <span class="fa fa-pencil active">编辑</span>
+                        <li class="pull-right fileParent">
+                            <span class="icon-icon-sy14 active">导入</span>
+                            <input type="file" name="excelFile" class="file" @change="importFile" id="excelFile">
                         </li>
-                        <li class="pull-right">
-                            <span class="fa fa-stop active">导入</span>
+                        <li class="pull-right" @click="editPop">
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
-                        <li class="pull-right">
-                            <span class="fa fa-pause active">分享</span>
+                        <li class="pull-right"  @click="sharePop()">
+                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
                         </li>
-                        <li class="pull-right">
-                            <span class="fa fa-play active">删除</span>
+                        <li class="pull-right" @click="deleteList">
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
                         </li>
                     </ul>
                 </div>
@@ -55,7 +58,7 @@
                         <tr>
                             <th style="width: 45px">
                                 <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
                             <th>编号</th>
@@ -65,76 +68,53 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="item in list">
+                        <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
-                            <td>1</td>
-                            <td>192.168.1.1 <i class="fa fa-bookmark bule" aria-hidden="true"></i></td>
-                            <td>河北省</td>
-                            <td class="checkDetail" @click="share()">
-                                已分享
+                            <td>{{index+1}}</td>
+                            <!-- property 1 系统自带 2 用户创建-->
+                            <td :title="item.iprange">
+                                <i v-if="item.property==1" class="fa fa-bookmark bule" style="margin-right: 5px"></i>
+                                {{item.iprange}}</td>
+                            <td>{{item.provenceName}}</td>
+                            <td>
+                                <span v-if="item.state==2">已分享</span>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="page clearfix" v-show="show">
+                <div class="page clearfix" >
                     <div class="pageCut">
                         每页
-                        <select name="" class="form-control pageSelect" >
-                            <option value="1">1</option>
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
                         </select>
                         条记录
                     </div>
-                    <div class="pagelist">
+                    <div class="pagelist" >
                         <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
-                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
                         <span class="ellipsis" v-show="efont">...</span>
                         <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
                               @click="jumpPage(num)">{{num}}</span>
                         <span class="ellipsis" v-show="ebehind">...</span>
 
                         <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
-                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
 
                         <span class="jumppoint">跳转到：</span>
-                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
-                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <!--分享弹窗-->
-    <div id="share" style="display: none">
-        <div class="share_peo clearfix">
-            <div class="left pull-left">
-                <div class="title">
-                    选择用户：
-                </div>
-                <div class="share_search">
-                    <input type="text" placeholder="查找联系人"  >
-                    <span class="fa fa-search"></span>
-                </div>
-                <div class="areas_list">
-                    <ul id="treeDemo" class="ztree"></ul>
-                </div>
-            </div>
-            <div class="right pull-right">
-                <div class="title">
-                    已选用户：(<span>4</span>/<span>40</span>)
-                </div>
-                <div class="share_search">
-                    <input type="text" placeholder="查找联系人">
-                    <span class="fa fa-search"></span>
-                </div>
-                <ul class="send_to">
-                    <li v-for="(item,index) in zTreeArr" @click="removeRight(index)">{{item}}</li>
-                </ul>
-                <!--<div class="close">全部删除</div>-->
             </div>
         </div>
     </div>
@@ -144,20 +124,118 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
-                        <label for="task-name" class="bold">原名称:</label>
-                        <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                        <label class="bold">地区:</label>
+                        <select class="form-control" v-model="editList.provenceName">
+                            <option value="北京市">北京市</option>
+                            <option value="天津市">天津市</option>
+                            <option value="上海市">上海市</option>
+                            <option value="重庆市">重庆市</option>
+                            <option value="河北省">河北省</option>
+                            <option value="河南省">河南省</option>
+                            <option value="云南省">云南省</option>
+                            <option value="辽宁省">辽宁省</option>
+                            <option value="黑龙江省">黑龙江省</option>
+                            <option value="湖南省">湖南省</option>
+                            <option value="安徽省">安徽省</option>
+                            <option value="山东省">山东省</option>
+                            <option value="新疆维吾尔">新疆维吾尔</option>
+                            <option value="江苏省">江苏省</option>
+                            <option value="浙江省">浙江省</option>
+                            <option value="江西省">江西省</option>
+                            <option value="湖北省">湖北省</option>
+                            <option value="广西壮族">广西壮族</option>
+                            <option value="甘肃省">甘肃省</option>
+                            <option value="山西省">山西省</option>
+                            <option value="内蒙古">内蒙古</option>
+                            <option value="陕西省">陕西省</option>
+                            <option value="吉林省">吉林省</option>
+                            <option value="福建省">福建省</option>
+                            <option value="贵州省">贵州省</option>
+                            <option value="广东省">广东省</option>
+                            <option value="青海省">青海省</option>
+                            <option value="西藏">西藏</option>
+                            <option value="四川省">四川省</option>
+                            <option value="宁夏回族">宁夏回族</option>
+                            <option value="海南省">海南省</option>
+                            <option value="台湾省">台湾省</option>
+                            <option value="香港特别行政区">香港特别行政区</option>
+                            <option value="澳门特别行政区">澳门特别行政区</option>
+                        </select>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-9" style="padding-right: 10px">
+            <div class="row" >
+                <div class="col-md-12" style="padding-right: 10px">
                     <div class="form-group">
-                        <label for="task-name" class="bold">新名称:</label>
-                        <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+                        <label  class="bold">IP:</label>
+                        <div class="clearfix">
+                            <input v-model="editList.iprange.ip1" type="text" class="form-control pull-left" style="width: 48%" placeholder="在此输入内容...">
+                            <span class="pull-left" style="width:4%;text-align: center;line-height: 34px ">-</span>
+                            <input v-model="editList.iprange.ip2" type="text" class="form-control pull-right" style="width: 48%" placeholder="在此输入内容...">
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3" style="padding-left: 0;padding-right: 0;margin-top: 17px">
-                    <div class="addBtn"><i class="fa fa-plus" aria-hidden="true"></i>新增</div>
+            </div>
+        </div>
+    </div>
+    <!--新增-->
+    <div id="add" style="display: none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="bold">地区:</label>
+                        <!--<input type="text" class="form-control" v-model="addList.provenceName" placeholder="在此输入内容...">-->
+                        <select class="form-control" v-model="addList.provenceName">
+                            <option value="">请选择省份</option>
+                            <option value="北京市">北京市</option>
+                            <option value="天津市">天津市</option>
+                            <option value="上海市">上海市</option>
+                            <option value="重庆市">重庆市</option>
+                            <option value="河北省">河北省</option>
+                            <option value="河南省">河南省</option>
+                            <option value="云南省">云南省</option>
+                            <option value="辽宁省">辽宁省</option>
+                            <option value="黑龙江省">黑龙江省</option>
+                            <option value="湖南省">湖南省</option>
+                            <option value="安徽省">安徽省</option>
+                            <option value="山东省">山东省</option>
+                            <option value="新疆维吾尔">新疆维吾尔</option>
+                            <option value="江苏省">江苏省</option>
+                            <option value="浙江省">浙江省</option>
+                            <option value="江西省">江西省</option>
+                            <option value="湖北省">湖北省</option>
+                            <option value="广西壮族">广西壮族</option>
+                            <option value="甘肃省">甘肃省</option>
+                            <option value="山西省">山西省</option>
+                            <option value="内蒙古">内蒙古</option>
+                            <option value="陕西省">陕西省</option>
+                            <option value="吉林省">吉林省</option>
+                            <option value="福建省">福建省</option>
+                            <option value="贵州省">贵州省</option>
+                            <option value="广东省">广东省</option>
+                            <option value="青海省">青海省</option>
+                            <option value="西藏">西藏</option>
+                            <option value="四川省">四川省</option>
+                            <option value="宁夏回族">宁夏回族</option>
+                            <option value="海南省">海南省</option>
+                            <option value="台湾省">台湾省</option>
+                            <option value="香港特别行政区">香港特别行政区</option>
+                            <option value="澳门特别行政区">澳门特别行政区</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row"  >
+                <div class="col-md-12" style="padding-right: 10px">
+                    <div class="form-group">
+                        <label  class="bold">IP段:</label>
+                        <div class="clearfix">
+                            <input v-model="addList.iprange.ip1" type="text" class="form-control pull-left" style="width: 48%" placeholder="在此输入内容...">
+                            <span class="pull-left" style="width:4%;text-align: center;line-height: 34px ">-</span>
+                            <input v-model="addList.iprange.ip2" type="text" class="form-control pull-right" style="width: 48%" placeholder="在此输入内容...">
+                        </div>
+                    </div>
                 </div>
             </div>
             <!--</div>-->
@@ -169,35 +247,47 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<!--<script src="js/My97DatePicker/WdatePicker.js"></script>-->
-<!--<script src="js/datapicker/bootstrap-datepicker.js"></script>-->
 <script src="js/vue.js"></script>
-<script src="js/mockData.js"></script>
-<script src="js/jquery.ztree.core.js"></script>
-<script src="js/jquery.ztree.excheck.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
 <script>
     // 创建根实例
     new Vue({
         el: '#example',
         data: {
             list: [],   //展示数组
+            IpRangeStr:'',  //搜索项目
+            provenceName:'', //搜索项目
             current_page: 1, //当前页
+            pageSize:12,  //每页数据条数
             pages: 0, //总页数
-            changePage:0,//跳转页
+            changePage:'',//跳转页
             checkAll:false,
-            zNodes:[],
-            zTreeArr:[]  //树形结构右侧
+            selected:[],    //选中项
+            editList:{
+                provenceName:'',
+                iprange:{
+                    ip1:'',
+                    ip2:''
+                },
+                ip_placeId:''
+            },
+            addList:{
+                provenceName:'',
+                iprange:{
+                    ip1:'',
+                    ip2:''
+                }
+            }
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
-                this.cartView(false);
-                this.zTree();
+                _this.cartView(_this.current_page);
             })
         },
         computed:{
             show:function(){
-                console.log(this.pages && this.pages !=1);
                 return this.pages && this.pages !=1
             },
             pstart: function() {
@@ -240,40 +330,28 @@
                     left++;
                 }
                 return ar;
-            },
+            }
         },
         methods: {
-            cartView: function (flag) {
-                //console.log(this.username);
-                if (flag) { //搜索
-                    this.current_page = 1;
-                }
+            cartView: function (cPage) {
                 var _this = this;
+                //knowledge/{userId}/getIPPlaceData/{currentPage}/{pageSize}?IpRangeStr=1&provenceName=%E7%9C%81
                 //模拟数据
-                _this.list = data.Renwugunali;
-                _this.pages = data.CountPage;
-//                $.ajax({
-//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
-//                    type:'post',
-//                    dataType:'json',
-//                    data: {
-//                        PAGE: _this.current_page - 1,
-//                        task_name:'',
-//                        creater: ''
-//                    },
-//                    success: function(data){ //成功的回调函数的处理
-//                        _this.list = data.Renwugunali;
-//                        _this.pages = data.CountPage;
-//                    },
-//                    error:function(errorData){
-//                        if(errorData.readyState=='0'){
-//                            layer.close(index);
-//                            layer.alert('请先连接服务器');
-//                        }
-//                    }
-//                });
+                var u = url +"knowledge/"+localStorage.getItem('userId')+
+                    "/getIPPlaceData/"+this.current_page+'/'+this.pageSize+'?IpRangeStr='+this.IpRangeStr+
+                    '&provenceName='+this.provenceName;
+                ajaxPost(u,{},function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.ipPlaceList;
+                        _this.pages = parseInt(data.data.countPage);
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
             },
             selectedList: function (item) {
+                var _this=this;
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -281,6 +359,13 @@
                     item.checked = !item.checked;
                 }
                 this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isAll: function () {  //全选
                 var _this = this;
@@ -292,7 +377,13 @@
                         item.checked = _this.checkAll;
                     }
                 });
-                console.log(_this.list);
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isCheckAll: function () {
                 var flag = true;
@@ -309,82 +400,76 @@
 
             },
             jumpPage: function(id) {
-                this.current_page = id;
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+
             },
-            pageAjax:function () {
-                alert(this.current_page);
-            },
-            detail:function () {
-                layer.open({
-                    type: 1,
-                    title: ['详情'],
-                    closeBtn: 1,
-                    btn:['关闭'],
-                    btnAlign: 'c',
-                    area: ['600px', '410px'],
-                    skin: 'detailPop', //没有背景色
-                    shadeClose: true,
-                    content: $('#detail')
+            deleteList:function () {
+                //http://localhost:8080/streamplatserver/knowledge/{userId}/deleteIPPlace?ip_placeIdList=11331dfff3
+                var _this=this;
+                var ip_placeIdList = [];
+                this.selected.forEach(function (item) {
+                    ip_placeIdList.push(item.ip_placeId);
                 });
-            },
-            share:function () {
-                layer.open({
-                    type: 1,
-                    title: ['分享'],
-                    closeBtn: 1,
-                    btn:['确定','取消'],
-                    btnAlign: 'c',
-                    area: ['800px', '440px'],
-                    skin: '', //没有背景色
-                    shade: 0,
-                    content: $('#share')
-                });
-            },
-            zTree:function () {
-                this.zNodes=["A1","A2","B1","B2","C1","C2","D1","D2"];
-                var zNodes = [
-                    {name:'全部用户',open:true,children:[
-                        {name:"A组用户", open:true, children:[
-                            {name:"A1"}, {name:"A2"}]},
-                        {name:"B组用户", open:true, children:[
-                            {name:"B1"}, {name:"B2"}]},
-                        {name:"C组用户", open:true, children:[
-                            {name:"C1"}, {name:"C2"}]},
-                        {name:"D组用户", open:true, children:[
-                            {name:"D1"}, {name:"D2"}]
-                        }
-                    ]}
-                ];
-                var setting = {
-                    check:{
-                        enable: true,
-                        chkStyle : "checkbox"
-                    },
-                    view: {
-                        showIcon: false
-                    },
-                    callback: {
-                        onCheck:  this.onCheck
-                    }
-                };
-                $.fn.zTree.init($("#treeDemo"), setting, zNodes);
-            },
-            onCheck:function () {
-                var zTree = $.fn.zTree.getZTreeObj("treeDemo").getNodesByFilter(this.filter);
-                var str = "";
-                this.zTreeArr=[];
-                for (var i=0;i<zTree.length;i++) {
-                    if(zTree[i].name !=null)
-                        this.zTreeArr.push(zTree[i].name);
+                if(ip_placeIdList.length>0){
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        ajaxGetArray(url+"knowledge/"+localStorage.getItem('userId')+"/deleteIPPlace",{ip_placeIdList:ip_placeIdList},function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("删除成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
+                }else{
+                    return
                 }
             },
-            filter:function (node) {   //过滤器直选中2级节点累加
-                return (node.level == 2 && node.checked == true);
+            sharePop:function () {
+                var _this=this;
+                var ip_placeIdList = [];
+                this.selected.forEach(function (item) {
+                    ip_placeIdList.push(item.ip_placeId);
+                });
+                if(this.selected.length > 0){
+                    ajaxGetArray(url+"knowledge/"+localStorage.getItem('userId')+"/sharedIPPlace",
+                        {ip_placeIdList:ip_placeIdList},function (data) {
+                        //console.log(data);
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("分享成功");
+                        }else{
+                            layer.alert("删除失败");
+                        }
+                    });
+                }
             },
-            removeRight:function (i) {
-                this.zTreeArr.splice(i,1);
-            },
-            edit:function () {
+            editPop:function () {
+                var _this=this;
+                if(this.selected.length == 1){
+                    this.editList.ip_placeId = this.selected[0].ip_placeId;
+                    this.editList.provenceName = this.selected[0].provenceName;
+                    console.log(this.selected[0].iprange.split('-'));
+                    if(this.selected[0].iprange.split('-').length==1){
+                        this.editList.iprange.ip1 = this.selected[0].iprange.split('-')[0];
+                    }else if(this.selected[0].iprange.split('-').length==2){
+                        this.editList.iprange.ip1 = this.selected[0].iprange.split('-')[0];
+                        this.editList.iprange.ip2 = this.selected[0].iprange.split('-')[1];
+                    }
+                }
                 layer.open({
                     type: 1,
                     title: ['编辑'],
@@ -394,9 +479,130 @@
                     area: ['450px', '300px'],
                     skin: '', //没有背景色
                     shade: 0,
-                    content: $('#edit')
+                    content: $('#edit'),
+                    yes:function () {
+                        _this.edit();
+                    }
                 });
-            }
+            },
+            edit:function () {
+                var _this = this;
+                var u = url +"knowledge/"+localStorage.getItem("userId")+"/editeIPPlaceInfo/"+this.editList.ip_placeId;
+                var iprange = '';
+                if(this.addList.iprange.ip2){
+                    iprange = this.editList.iprange.ip1 + '-' +
+                        this.editList.iprange.ip2;
+                }else{
+                    iprange = this.editList.iprange.ip1;
+                }
+                var ipPlaceInfo = {
+                    iprange:iprange,
+                    provenceName:this.editList.provenceName
+                }
+                ajaxPostObj(u,JSON.stringify(ipPlaceInfo),function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("修改成功",function () {
+                            _this.cartView(_this.current_page);
+                            _this.selected = [];
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            addPop:function () {
+                var _this = this;
+                //初始化
+                this.addList={
+                    provenceName:'',
+                    iprange:{
+                        ip1:'',
+                        ip2:''
+                    }
+                }
+                layer.open({
+                    type: 1,
+                    title: ['新增'],
+                    closeBtn: 1,
+                    btn:['确定','取消'],
+                    btnAlign: 'c',
+                    area: ['450px', '250px'],
+                    skin: '', //没有背景色
+                    shade: 0,
+                    content: $('#add'),
+                    yes:function () {
+//                        var isOk = true;
+//                        _this.$refs.addDom.forEach(function (v,i) {
+//                            $(v).find('input').trigger('focus');
+//                            $(v).find('input').trigger('blur');
+//                            if($(v).hasClass('error')){
+//                                isOk = false;
+//                                return false
+//                            }
+//                        })
+//                        if(isOk){
+                            _this.add();
+//                        }
+                    }
+                });
+            },
+            add:function () {
+                var _this = this;
+                var u = url +"knowledge/"+localStorage.getItem("userId")+"/addIPPlaceInfo";
+                var iprange = '';
+                if(this.addList.iprange.ip2){
+                    iprange = this.addList.iprange.ip1 + '-' +
+                        this.addList.iprange.ip2;
+                }else{
+                    iprange = this.addList.iprange.ip1;
+                }
+                var ipPlaceInfo = {
+                    createUserId:localStorage.getItem("userId"),
+                    iprange:iprange,
+                    provenceName:this.addList.provenceName,
+                    property:2,  //2用户创建  1系统自带
+                    state:1
+                }
+                ajaxPostObj(u,JSON.stringify(ipPlaceInfo),function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("新增成功",function () {
+                            _this.cartView(_this.current_page);
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
+            },
+            importFile:function () {
+                var formData = new FormData();
+                formData.append('excelFile',$('#excelFile')[0].files[0]);
+                $.ajax({
+                    url: url+'knowledge/'+localStorage.getItem('userId')+'/importIPPlaceInfo',
+                    type: 'POST',
+                    cache: false,
+                    data: formData,
+                    processData: false,
+                    contentType: false
+                }).done(function(res) {
+                    layer.alert(res.message);
+                }).fail(function(res) {
+                    layer.alert('导入失败');
+                });
+            },
+//            vailIP:function (index,item,ref) {  //验证布控任务名称
+//                var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/;
+//                var dom = (ref == 'editDom'?this.$refs.editDom[index]:this.$refs.addDom[index]);
+//                if(reg.test(item)){
+//                    $(dom).removeClass('error')
+//                }else{
+//                    $(dom).addClass('error')
+//                }
+//
+//            },
         }
 
     })

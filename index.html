@@ -122,7 +122,7 @@
                     <ul class="clearfix lists">
                         <li class="pull-right">
                             <span class="glyphicon glyphicon-user user" aria-hidden="true"></span>
-                            <b data-toggle="dropdown" style="cursor: pointer">admin</b>
+                            <b data-toggle="dropdown" style="cursor: pointer" id="user"></b>
                             <span class="caret" data-toggle="dropdown" style="cursor: pointer"></span>
                             <ul class="dropdown-menu">
                                 <li onclick="logout()"><a href="javascript:void(0)">退出登录</a></li>
@@ -132,8 +132,8 @@
                                 <!--<li><a href="#">22</a></li>-->
                             </ul>
                         </li>
-                        <li class="pull-right">
-                            2017-09-11 00:00:00
+                        <li class="pull-right" id="time">
+
                         </li>
                         <li class="pull-right">
                             系统状态：<b>在线</b>
@@ -160,9 +160,31 @@
     $(document).ready(function () {
         // MetsiMenu
         $("#menu").metisMenu();
+        //计算高度
         document.getElementById("content-main").style.height = window.innerHeight-50+"px";
-        console.log($('.nav-second-level li'))
+        //修改用户名称
+        var user = localStorage.getItem('userName');
+        $("#user").html(user);
     });
+    //时间显示
+    timeFormate();
+    function timeFormate() {
+        var date = new Date();
+        var y = date.getFullYear();
+        var m = date.getMonth()+1;
+        m = m < 10 ? ('0'+m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0'+d) :d;
+        var h = date.getHours(); //0-23
+        h = h < 10 ? ('0'+h) :h;
+        var minute = date.getMinutes();
+        minute = minute < 10 ? ('0'+ minute) : minute;
+        var second = date.getSeconds();
+        second = second < 10 ? ('0'+ second) : second;
+        var str = y + '-' + m + '-' +d +' ' +h + ':' + minute +':' +second;
+        $("#time").html(str);
+        setTimeout(timeFormate,1000)
+    }
     $('.nav-second-level li a').click(function (e) {
         e.stopPropagation();
         e.preventDefault();

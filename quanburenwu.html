@@ -9,20 +9,28 @@
     <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/datapicker/datepicker3.css">
     <link rel="stylesheet" href="css/animate.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body class=" animated fadeInRight">
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
         <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0">全部任务</a>
         </li>
         <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
-            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)">新建任务
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.task_Name">{{item.task_Name}}
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>新建任务
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
         </li>
-        <li><span class="fa fa-plus add" @click="add($event.target)"></span></li>
+        <li v-if="navLI.length<8"><span class="fa fa-plus add" @click="add($event.target)"></span></li>
     </ul>
 
     <!-- Tab panes -->
@@ -294,8 +302,8 @@
                                             <div class="form-group">
                                                 <select class="form-control" v-model="item.pre_condition.parentTaskId">
                                                     <option disabled value="">请选择</option>
-                                                    <option v-for="i in buControlSelectList" :value="i.taskId">
-                                                        i.task_Name
+                                                    <option v-for="i in buControlSelectList" :value="i">
+                                                        {{i.task_Name}}
                                                     </option>
                                                 </select>
                                             </div>
@@ -333,7 +341,7 @@
                                                         </select>
                                                         <span>月</span>
                                                     </div>
-                                                    <span>次</span>
+                                                    <span style="vertical-align: top">次</span>
                                                 </div>
                                                 <div class="col-md-2" style="padding-left: 0">
                                                     <label class="radio-inline">
@@ -609,7 +617,7 @@
                                             <select class="form-control"
                                                     v-model="popDetail.control.pre_condition.parentTaskId">
                                                 <option disabled value="">请选择</option>
-                                                <option v-for="i in buControlSelectList" :value="i.taskId">i.task_Name
+                                                <option v-for="i in buControlSelectList" :value="i.taskId">{{i.task_Name}}
                                                 </option>
                                             </select>
                                         </div>
@@ -738,7 +746,7 @@
             taskCreateUserName: "", //搜索项
             taskName: "",     //搜索项
             current_page: 1, //当前页
-            pageSize: 8,  //每页数据条数
+            pageSize: 12,  //每页数据条数
             pages: 0, //总页数
             changePage: 0,//跳转页
             checkAll: false,
@@ -999,7 +1007,8 @@
                     matchdata_DealType: simple.matchdata.matchdata_DealType,
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
-                    parentTaskId: simple.pre_condition.parentTaskId,
+                    parentTaskId: simple.pre_condition.parentTaskId.taskId,
+                    task_RuleName: simple.pre_condition.parentTaskId.task_Name,
                     taskId: '',
                     task_CreateTime: '',
                     task_CreateUserName: localStorage.getItem("userName"),
@@ -1033,7 +1042,7 @@
                                 layer.close(i);
                             });
                         } else {
-                            layer.alert("数据请求失败");
+                            layer.alert(data.message);
                         }
                     });
                 }
@@ -1234,7 +1243,7 @@
                     DatePicker(".data_1 .input-group.date", ".data_2 .input-group.date");
                     layer.open({
                         type: 1,
-                        title: ['编辑'],
+                        title: ['编辑('+this.popDetail.control.task_Name+')'],
                         closeBtn: 1,
                         btn: ['确定', '取消'],
                         btnAlign: 'c',

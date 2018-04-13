@@ -8,15 +8,25 @@
     <link rel="stylesheet" href="css/font-awesome.css">
     <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/animate.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body class=" animated fadeInRight">
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
         <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0" >用户列表</a></li>
         <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
-            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" >新建用户
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.userName">
+                {{item.userName}}
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>
+                新建用户
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
         </li>
@@ -342,7 +352,7 @@
             sortFlag:undefined, //默认升序
             userNameFilter:'', //搜索项
             current_page: 1, //当前页
-            pageSize:8,  //每页数据条数
+            pageSize:12,  //每页数据条数
             pages: 0, //总页数
             changePage:'',//跳转页
             checkAll:false,

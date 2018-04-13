@@ -10,9 +10,14 @@
     <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
     <link rel="stylesheet" href="css/animate.css">
     <link rel="stylesheet" href="css/tongjichakan.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body class=" animated fadeInRight">
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
@@ -85,7 +90,7 @@
                                 </div>
                                 <div v-show="timeType == 'current'" class="data4"  style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
                                     <div class="input-group date"  >
-                                        <input type="text"   class="form-control" placeholder="开始时间">
+                                        <input type="text" v-model="currentDate"   class="form-control" placeholder="开始时间">
                                         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                                     </div>
                                 </div>
@@ -141,6 +146,7 @@
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/datapicker/bootstrap-datetimepicker.js"></script>
+<script src="js/datapicker/bootstrap-datetimepicker.zh-CN.js"></script>
 <script src="js/jquery.ztree.core.js"></script>
 <script src="js/jquery.ztree.excheck.js"></script>
 <script src="js/echarts.min.js"></script>
@@ -148,21 +154,6 @@
 <script src="js/ajaxMy.js"></script>
 <script src="js/url.js"></script>
 <script>
-    function formatDateTime_inital(timeStamp) {
-        var date = new Date();
-        date.setTime(timeStamp * 1000);
-        var y = date.getFullYear();
-        var m = date.getMonth() + 1;
-        m = m < 10 ? ('0' + m) : m;
-        var d = date.getDate();
-        d = d < 10 ? ('0' + d) : d;
-        var h = date.getHours();
-        h = h < 10 ? ('0' + h) : h;
-        var minute = date.getMinutes();
-        var second = date.getSeconds();
-        minute = minute < 10 ? ('0' + minute) : minute;
-        return y + '-' + m + '-' + d+' '+h+':'+minute;
-    }
     function formatDateTime(timeStamp) {
         var date = new Date();
         date.setTime(timeStamp * 1000);
@@ -203,6 +194,19 @@
             timeType:'current',
             timer:'',
             mychart:'',
+            currentDate:''
+        },
+        mounted: function () {
+            var _this = this;
+            this.$nextTick(function () {
+                _this.zNodesList();
+                _this.top();
+                //初始化echarts
+                _this.echartsInit();
+                //默认展示
+                _this.dateDefind();
+                _this.echartsView()
+            })
         },
         computed:{
             text:function () {
@@ -218,21 +222,18 @@
         watch:{
             timeType:function (nvalue,ovalue) {
                 if(this.timer){
+                    this.currentDate = '';
+                    clearInterval(this.timer);
+                    this.timer = '';
+                }
+            },
+            currentDate:function (nvalue, ovalue) {
+                console.log("===========时间改变了================");
+                if (this.timer&&ovalue) {
                     clearInterval(this.timer);
                     this.timer = '';
                 }
             }
-        },
-        mounted: function () {
-            var _this = this;
-            this.$nextTick(function () {
-                _this.zNodesList();
-                _this.top();
-                //初始化echarts
-                _this.echartsInit();
-                //默认展示
-                _this.echartsView()
-            })
         },
         methods:{
             zNodesList:function () {  //获取用户组树 后台数据
@@ -296,9 +297,7 @@
             },
             echartsInit:function () {
                 //默认初始时间
-                var timestamp =Date.parse(new Date())/1000; //当前时间戳
-                var date_now = formatDateTime_inital(timestamp);
-                $('.data4 input').val(date_now);
+                this.currentDate = this.dateNow();
                 this.mychart = echarts.init(document.getElementById('main'));
                 this.mychart.setOption({
                     title: {
@@ -374,13 +373,49 @@
                     ]
                 })
             },
+            dateNow:function () {
+                var date;
+                date= new Date();
+                var y = date.getFullYear();
+                var m = date.getMonth() + 1;
+                m = m < 10 ? ('0' + m) : m;
+                var d = date.getDate();
+                d = d < 10 ? ('0' + d) : d;
+                var h = date.getHours();
+                h = h < 10 ? ('0' + h) : h;
+                var minute = date.getMinutes();
+                var second = date.getSeconds();
+                minute = minute < 10 ? ('0' + minute) : minute;
+                second = second < 10 ? ('0' + second) : second;
+                return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+            },
+            dateDefind:function(){
+                var  s;
+                var self = this;
+                s = self.dateNow();
+                self.dateValue = s;
+                //初始化
+                $('.data4 .input-group.date').datetimepicker({
+                    startView: 0,
+                    language: 'zh-CN',
+                    format: 'yyyy-mm-dd hh:ii:ss',
+                    todayBtn: 1,
+                    autoclose: 1
+                });
+                //当选择器隐藏时，讲选择框只赋值给data里面的time
+                $('.data4 .input-group.date').datetimepicker()
+                    .on('hide', function (ev) {
+                        var value = $(".data4 input").val();
+                        self.currentDate = value;
+                    });
+            },
             echartsView:function () {
                //1-数据处理
                 var timeValue = '';
                 var startDate = '';
                 var endDate ='';
-                //var time_interval = 5000; //时间间隔为5秒
-                var time_interval = 5000*60;
+                var time_interval = 5000; //时间间隔为5秒
+//                var time_interval = 5000*60;
                 switch (this.timeType){
                     case 'month':
                         timeValue = $('.data1 .input-group.date input').val();
@@ -401,18 +436,17 @@
                         }
                         break;
                     case 'current':
-                        startDate = $('.data4 .input-group.date input').val();
-                        console.log(startDate)
+                        startDate = this.currentDate;
                         startDateValue = formatDateTime(Date.parse(new Date(startDate)) / 1000);
                         var t =(Date.parse(new Date(startDate)) / 1000 )+ time_interval/1000;
                         endDate = formatDateTime(t);
-                        if(this.validate(startDate,'.data4')){
+                        if(this.validate(this.currentDate,'.data4')){
                             var _this = this;
                             this.echartsAjax(this.CheckedNodes,startDateValue,endDate,startDateValue);
                             this.timer = setInterval(function () {
                                 t =t+ time_interval/1000;
                                 endDate = formatDateTime(t);
-                                _this.echartsAjax(this.CheckedNodes,startDateValue,endDate,startDateValue);
+                                _this.echartsAjax(_this.CheckedNodes,startDateValue,endDate,startDateValue);
                             },time_interval)
                         }
                         break;
@@ -461,9 +495,6 @@
                             }
                             index++;
                         }
-
-                        console.log(series);
-                        console.log(_this.text)
                         _this.mychart.setOption({
                             title: {
                                 text: _this.text
@@ -507,11 +538,6 @@
             startView:2,
             minView:2,
             format:"yyyy-mm-dd",
-            autoclose: true,
-        });
-        $('.data4 .input-group.date').datetimepicker({
-            startView:0,
-            language: 'zh-CN',
             autoclose: true,
         });
 

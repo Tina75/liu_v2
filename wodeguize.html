@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
     <link rel="stylesheet" href="css/animate.css">
     <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+    <style>
         /*******布控弹窗样式微调******/
         .form-control{
             /*height: 26px;*/
@@ -34,17 +39,22 @@
     </style>
 </head>
 <body class=" animated fadeInRight">
-<div class="container-fluid" id="example">
+<div class="container-fluid" id="example" v-cloak>
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0" >我的规则</a></li>
+        <li :class="{active:currentIndex == 0}">
+            <a href="javascript:void(0)" @click.prevent="currentIndex=0" >我的规则</a></li>
         <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
-            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" >新建规则
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.ruleName">{{item.ruleName}}
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>
+                新建规则
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
         </li>
-        <li><span class="fa fa-plus add" @click="add($event.target)"></span></li>
+        <li v-if="navLI.length<8"><span class="fa fa-plus add" @click="add($event.target)"></span></li>
     </ul>
 
     <!-- Tab panes -->
@@ -513,7 +523,7 @@
                                         <div class="form-group">
                                             <select class="form-control" v-model="popDetail.control.pre_condition.parentTaskId">
                                                 <option disabled value="">请选择</option>
-                                                <option v-for="i in buControlSelectList" :value="i.taskId">i.task_Name</option>
+                                                <option v-for="i in buControlSelectList" :value="i.taskId">{{i.task_Name}}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -984,7 +994,7 @@
             ruleName:'',  //搜索项
             ruleStr:'',   //搜索项
             current_page: 1, //当前页
-            pageSize:8,  //每页数据条数
+            pageSize:12,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
@@ -1344,7 +1354,7 @@
                     this.popDetail.edit.express.tree = JSON.parse(JSON.stringify(this.express));
                     layer.open({
                         type: 1,
-                        title: ['编辑'],
+                        title: ['编辑('+this.popDetail.edit.ruleName+')'],
                         closeBtn: 1,
                         btn:['确定','取消'],
                         btnAlign: 'c',
@@ -1512,17 +1522,18 @@
                 var _this=this;
                 var ruleIdList = [];
                 this.selected.forEach(function (item) {
-                    ruleIdList.push(item.ruleId);
+                    ruleIdList.push({ruleId:item.ruleId,task_RuleName:item.ruleName});
                 });
                 //数据清空
                 this.buControlReset();
                 if(this.selected.length==1){
-                    var task_RuleId = ruleIdList[0];
+                    var task_RuleId = ruleIdList[0].ruleId;
+                    var task_RuleName = ruleIdList[0].task_RuleName;
                     //时间控件
                     DatePicker(".data_1 .input-group.date",".data_2 .input-group.date");
                     layer.open({
                         type: 1,
-                        title: ['布控'],
+                        title: ['布控('+this.selected[0].ruleName+')'],
                         closeBtn: 1,
                         btn:['确定','取消'],
                         btnAlign: 'c',
@@ -1531,9 +1542,11 @@
                         shadeClose: true,
                         content: $('#buControl'),
                         yes:function () {
-                            _this.buControl(task_RuleId);
+                            _this.buControl(task_RuleId,task_RuleName);
                         }
                     });
+                }else{
+                    return
                 }
             },
             buControlSelect:function () { //布控前置条件的下拉列表
@@ -1545,7 +1558,7 @@
                     }
                 });
             },
-            buControl:function (task_RuleId) {
+            buControl:function (task_RuleId,task_RuleName) {
                 var _this = this;
                 var u = url +"rule/"+localStorage.getItem("userId")+"/controlRuleInTask/"
                     +task_RuleId;
@@ -1561,6 +1574,8 @@
                         simple.pre_condition.task_StartHZ.month+"月";
                 }
                 var taskInfo = {
+                    task_CreateUserName:localStorage.getItem('userName'), //当前系统的用户名
+                    task_RuleName:task_RuleName,        //布控的时候选择的规则名称
                     matchdata_DealTable:simple.matchdata.matchdata_DealTable,
                     matchdata_DealType:simple.matchdata.matchdata_DealType,
                     missdata_DealTable:simple.missdata.missdata_DealTable,
@@ -1596,6 +1611,7 @@
                         }
                     });
                 }
+
             },
             vailusername:function (dom,item) {
                 var task_Name = item.task_Name;

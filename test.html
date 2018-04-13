@@ -5,16 +5,29 @@
     <title>Title</title>
 </head>
 <body>
-    <div>
-        <label>
-            <input type="checkbox"> 所有比例
-        </label>
-        <label>
-            <input type="checkbox"> 16:9
-        </label>
-        <label>
-            <input type="checkbox"> 18:9
-        </label>
-    </div>
+
 </body>
+<script>
+    var newDate = new Date();
+    var timeStamp = Date.parse(newDate);
+    var timeAfter = newDate.setTime(timeStamp)
+    console.log(newDate);
+    console.log(timeStamp);
+    console.log(timeAfter);
+    function timeFormate(date) {
+        var y = date.getFullYear();
+        var m = data.getMonth()+1;
+        m = m < 10 ? ('0'+m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0'+d) :d;
+        var h = date.getHours(); //0-23
+        h = h < 10 ? ('0'+h) :h;
+        var minute = date.getMinutes();
+        minute = minute < 10 ? ('0'+ minute) : minute;
+        var second = date.getSeconds();
+        second = second < 10 ? ('0'+ second) : second;
+        return y + '-' + m + '-' +d +' ' +h + ':' + minute +':' +second;
+
+    }
+</script>
 </html>

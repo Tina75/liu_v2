@@ -150,7 +150,7 @@ body {
 
 .wrapper{
     height: 100%;
-    overflow-x: hidden;
+    /*overflow-x: hidden;*/
     /*position: relative;*/
 }
 nav{
@@ -328,6 +328,7 @@ body.mini-navbar .nav-close{
     display: block;
     padding: 16px 15px;
     font-weight: normal;
+    color: #0078E6;
 }
  body>.container-fluid{
     padding:15px;
@@ -1094,6 +1095,7 @@ body  .layui-layer-btn a{
     font-weight: bold;
 }
 .addBtn{
+    cursor: pointer;
     padding: 7px 0;
     border: 1px solid #DEDEDE;
     background: #F0EAF4;
@@ -1102,6 +1104,7 @@ body  .layui-layer-btn a{
     width: 87%;
 }
 .addBtn>i{
+    cursor: pointer;
     margin-right: 5px;
 }
 .show{
@@ -1111,7 +1114,7 @@ body  .layui-layer-btn a{
     position: absolute;
     top:35px;
     bottom: 1%;
-    left: 65%;
+    left: 44%;
     right: 0;
     padding-left: 10px;
     background: #fff;
@@ -1235,4 +1238,21 @@ td.limitWidth div{
 .ztree li a{
     height: 20px!important;
     line-height: 20px;
+}
+/*文件上传*/
+.fileParent{
+    position: relative;
+}
+.file{
+    position: absolute;
+    width: 40px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+}
+[v-cloak] {
+    display: none;
+}
+.table-responsive{
+    height: 470px;
 }

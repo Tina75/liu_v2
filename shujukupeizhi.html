@@ -6,11 +6,9 @@
     <link href="css/bootstrap.css" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/animate.css">
     <style>
-        .test{
-             margin-top: 22px;
-         }
         .test > button{
             padding: 6px 12px;
             border-radius: 0;
@@ -19,8 +17,13 @@
             border: 1px solid transparent;
             margin-right: 10px;
         }
-        .test > a >span{
+        .test > .fa-check{
             color: #00B83F;
+            margin-right: 3px;
+        }
+        .test  >.fa-close{
+            color: red;
+            margin-right: 3px;
         }
         .database .layui-layer-wrap{
             height: 100%;
@@ -55,28 +58,38 @@
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#home" data-toggle="tab">数据库配置</a></li>
-        <!--<li><a href="#profile" data-toggle="tab">我的任务</a></li>-->
-        <li><span class="fa fa-plus add"></span></li>
+        <li :class="{active:currentIndex == 0}">
+            <a href="javascript:void(0)" @click.prevent="currentIndex=0" >数据库配置</a></li>
+        </li>
+        <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
+            <!--<a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.ruleName">{{item.ruleName}}-->
+                <!--<span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>-->
+            <!--</a>-->
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)">
+                新建数据库
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+        </li>
+        <li><span class="fa fa-plus add" @click="add($event.target)"></span></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
-        <div class="tab-pane active" id="home">
+        <div class="tab-pane" :class="{active:currentIndex == 0}">
             <div class="search clearfix">
                 <div class="form-inline pull-left searchItems">
                     <div class="form-group">
                         <label for="task">数据库名称:</label>
-                        <input type="text" class="form-control" id="task" placeholder="请输入关键字">
+                        <input type="text" v-model="dbName" @keyup="cartView(1)" class="form-control" id="task" placeholder="请输入关键字">
                     </div>
-                    <button type="button" class="btn btn-primary">确认</button>
+                    <button type="button" class="btn btn-primary" @click="cartView(1)">确认</button>
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right">
-                            <span class="fa fa-refresh active">刷新</span>
-                        </li>
-                        <li class="pull-right">
-                            <span class="fa fa-trash-o active">删除</span>
+                        <!--<li class="pull-right">-->
+                            <!--<span class="fa fa-refresh active">刷新</span>-->
+                        <!--</li>-->
+                        <li class="pull-right" @click="deleteList" >
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
                         </li>
                     </ul>
                 </div>
@@ -88,7 +101,7 @@
                         <tr>
                             <th style="width: 45px">
                                 <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
                             <th>编号</th>
@@ -101,96 +114,112 @@
                         <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td class="checkDetail" @click="detail()">00001</td>
+                            <td class="checkDetail" @click="detail(item)">{{item.db_name}}</td>
                             <td class="checkDetail" @click="database()">查看详情</td>
-                            <td>已连接</td>
+                            <td>{{item.con_state}}</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="page clearfix" v-show="show">
+                <div class="page clearfix" >
                     <div class="pageCut">
                         每页
-                        <select name="" class="form-control pageSelect" >
-                            <option value="1">1</option>
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
                         </select>
                         条记录
                     </div>
-                    <div class="pagelist">
+                    <div class="pagelist" >
                         <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
-                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
                         <span class="ellipsis" v-show="efont">...</span>
                         <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
                               @click="jumpPage(num)">{{num}}</span>
                         <span class="ellipsis" v-show="ebehind">...</span>
 
                         <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
-                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
 
                         <span class="jumppoint">跳转到：</span>
-                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
-                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!--新建任务-->
-    <div  id="profile" style="display: none">
-        <div class="add-target">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="task-name" class="bold">IP地址:</label>
-                            <input type="text" class="form-control" id="task-name" placeholder="在此输入内容...">
+        <!--新建任务-->
+        <div  v-if="navLI_1.length!=0"  v-for="(item,index) in navLI_1" v-show="currentIndex==index+1" :key="index"   :class="{'active':currentIndex==index+1}" >
+            <div class="add-target">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label  class="bold">IP地址:</label>
+                                <input type="text" class="form-control" v-model="item.db_ip"  placeholder="在此输入内容...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="task-desc" class="bold">端口号:</label>
+                                <input type="number" class="form-control" v-model="item.db_port" id="task-desc" placeholder="在此输入内容...">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="task-desc" class="bold">端口号:</label>
-                            <input type="text" class="form-control" id="task-desc" placeholder="在此输入内容...">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label  class="bold">账号:</label>
+                                <input type="text" class="form-control" v-model="item.db_username"  placeholder="在此输入内容...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label  class="bold">密码:</label>
+                                <input type="password" class="form-control" v-model="item.db_password"   placeholder="在此输入内容...">
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label  class="bold">账号:</label>
-                            <input type="text" class="form-control"  placeholder="在此输入内容...">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label  class="bold">数据库类型:</label>
+                                <select class="form-control" v-model="item.db_type">
+                                    <option value="1">mysql</option>
+                                    <option value="2">oracle</option>
+                                    <option value="3">sqlserver</option>
+                                    <option value="4">db2</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label  class="bold">数据库名称:</label>
+                                <input type="password" class="form-control" v-model="item.db_name"   placeholder="在此输入内容...">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label  class="bold">密码:</label>
-                            <input type="password" class="form-control"  placeholder="在此输入内容...">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="test">
+                                <button @click="testLink(item,$event.target,currentIndex)">测试连接</button>
+                                <!--<a href="javascript:void(0)">-->
+                                <!--</a>-->
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label  class="bold">数据库类型:</label>
-                            <select class="form-control" >
-                                <option value="1">1</option>
-                            </select>
+                    <div class="row">
+                        <div class="col-md-12 YoN_button" style="margin-top:30px">
+                            <button class="y" @mousedown="addNewRule(item,currentIndex,$event.target)">确定</button>
+                            <button class="n" @click="tabClose(index+1)">取消</button>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="test">
-                            <button >测试连接</button>
-                            <a href="javascript:void(0)"><span class="fa fa-check"></span>连接成功</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 YoN_button" style="margin-top:30px">
-                        <button class="y">确定</button>
-                        <button class="n">取消</button>
                     </div>
                 </div>
             </div>
@@ -202,17 +231,17 @@
             <div class="row">
                 <div class="col-md-6">
                     <b>IP地址：</b>
-                    <span>192.168.1.2</span>
+                    <span>{{dataDetail.db_ip}}</span>
                 </div>
                 <div class="col-md-6">
                     <b>端口号：</b>
-                    <span>ETE 192.168.1.2</span>
+                    <span>{{dataDetail.db_port}}</span>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <b>数据库类型：</b>
-                    <span>mysql</span>
+                    <span>{{dataDetail.db_type}}</span>
                 </div>
             </div>
         </div>
@@ -259,64 +288,33 @@
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/vue.js"></script>
-<script src="js/mockData.js"></script>
-<script>
-    $(function () {
-        $(document).on("click",".nav-tabs li .add",function () {
-            /*******排序**********/
-            $(".nav-tabs a").each(function (i, n) {
-                $(n).attr("href", "#navTabs_" + i);
-            });
-            $(".tab-content>div").each(function (i, n) {
-                $(n).attr("id", "navTabs_" + i);
-            });
-            var index = $(this).parent().index(".nav-tabs li");
-            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建数据库 <span class="fa fa-close tabClose"></span></a></li>';
-            var strContent = $("#profile").html();
-            //console.log(strContent);
-            $(this).parent().before(str);
-            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
-        });
-        $(document).on("click", ".tabClose", function () {
-            /*******排序**********/
-            $(".nav-tabs a").each(function (i, n) {
-                $(n).attr("href", "#navTabs_" + i);
-            });
-            $(".tab-content>div").each(function (i, n) {
-                $(n).attr("id", "navTabs_" + i);
-            });
-
-            if($(this).parent().parent().hasClass('active')){ //当前是active的被删除
-                console.log($(this).parent().parent().prev());
-                $(this).parent().parent().prev().find('a').click();
-            }
-            var index = $(this).parent().parent().index(".nav-tabs li");
-            $(".tab-content>div").eq(index).remove();
-            $(this).parent().parent().remove();
-        });
-        $(document).on("click",".taskModel li",function () {
-            var target=$(this).attr("data-target");
-            $(".taskModelContent>div").hide();
-            $(".taskModelContent").find("."+target+"DIV").show();
-        });
-
-    });
-</script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
 <script>
     // 创建根实例
     new Vue({
         el: '#example',
         data: {
             list: [],   //展示数组
+            dbName:'',  //搜索项目
             current_page: 1, //当前页
+            pageSize:12,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
+            navLI:[{}],
+            currentIndex:0,
+            selected:[],    //选中项
+            dataDetail:{
+                db_ip:'',
+                db_port:'',
+                db_type:''
+            }
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
-                this.cartView(false);
+                this.cartView(1);
 
             })
         },
@@ -366,39 +364,29 @@
                 }
                 return ar;
             },
+            navLI_1:function () {
+                return this.navLI.slice(1);
+            },
         },
         methods: {
-            cartView: function (flag) {
-                //console.log(this.username);
-                if (flag) { //搜索
-                    this.current_page = 1;
-                }
+            cartView:  function (cPage) {
                 var _this = this;
+                //db/{userId}/showDb/{currentPage}/{pageSize}?dbName=stre
                 //模拟数据
-                _this.list = data.Renwugunali;
-                _this.pages = data.CountPage;
-//                $.ajax({
-//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
-//                    type:'post',
-//                    dataType:'json',
-//                    data: {
-//                        PAGE: _this.current_page - 1,
-//                        task_name:'',
-//                        creater: ''
-//                    },
-//                    success: function(data){ //成功的回调函数的处理
-//                        _this.list = data.Renwugunali;
-//                        _this.pages = data.CountPage;
-//                    },
-//                    error:function(errorData){
-//                        if(errorData.readyState=='0'){
-//                            layer.close(index);
-//                            layer.alert('请先连接服务器');
-//                        }
-//                    }
-//                });
+                var u = url +"db/"+localStorage.getItem("userId")+"/showDb/"
+                    +cPage+"/"+this.pageSize+"?dbName="+this.dbName;
+                ajaxGet(u,function (data) {
+                    console.log(data);
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.dbInfoList;
+                        _this.pages = parseInt(data.data.countPage);
+                    }else{
+                        layer.alert("数据请求失败");
+                    }
+                });
             },
             selectedList: function (item) {
+                var _this=this;
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -406,6 +394,13 @@
                     item.checked = !item.checked;
                 }
                 this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isAll: function () {  //全选
                 var _this = this;
@@ -417,7 +412,13 @@
                         item.checked = _this.checkAll;
                     }
                 });
-                console.log(_this.list);
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isCheckAll: function () {
                 var flag = true;
@@ -434,12 +435,22 @@
 
             },
             jumpPage: function(id) {
-                this.current_page = id;
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+
             },
-            pageAjax:function () {
-                alert(this.current_page);
+            demoClickLi:function(index) {
+                this.currentIndex = index;
+                return false;
             },
-            detail:function () {
+            detail:function (item) {
+                this.dataDetail.db_ip = item.db_ip;
+                this.dataDetail.db_port = item.db_port;
+                this.dataDetail.db_type = item.db_type;
                 layer.open({
                     type: 1,
                     title: ['详情'],
@@ -464,7 +475,117 @@
                     shadeClose: true,
                     content: $('#database')
                 });
-            }
+            },
+            deleteList:function () {
+                //http://localhost:8080/streamplatserver/db/{userId}/deleteDBList?dbIdList=c538230ec2f54150%2C133ddsgsdssf
+                var _this=this;
+                var dbIdList = [];
+                this.selected.forEach(function (item) {
+                    dbIdList.push(item.db_id);
+                });
+                if(this.selected.length>0){
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        var u = url+"db/"+localStorage.getItem("userId")+"/deleteDBList?dbIdList="+dbIdList;
+                        ajaxGet(u,function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("删除成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
+                }else{
+                    return
+                }
+            },
+            add:function (dom) {
+                var index = $(dom).parent().index(".nav-tabs li");
+                this.navLI.push({
+                    "db_ip": "",//数据库IP
+                    "db_name": "",//数据库名称
+                    "db_password": "",//数据库密码
+                    "db_port": "",//数据库端口
+                    "db_type": 1,//数据库类型
+                    "db_username": "",//数据库用户名
+                    "con_state":0
+                });
+                this.currentIndex = index;
+            },
+            addNewRule:function (item,index,dom) {
+                var _this = this;
+                var u = url +'db/'+localStorage.getItem("userId")+'/addNewDBInfo';
+                var dbInfo={
+                    "db_ip": item.db_ip,//数据库IP
+                    "db_name": item.db_name,//数据库名称
+                    "db_password": item.db_password,//数据库密码
+                    "db_port": item.db_port,//数据库端口
+                    "db_type": item.db_type,//数据库类型
+                    "db_username": item.db_username,//数据库用户名
+                    "con_state":item.con_state
+                }
+                //模拟失去焦点
+                ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
+                    console.log(data)
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("添加成功",function (i) {
+                            _this.cartView(_this.current_page);
+                            _this.selected=[];
+                            _this.tabClose(index);
+                            layer.close(i);
+                        })
+                    }else{
+                        layer.alert(data.message);
+                    }
+                })
+
+            },
+            testLink:function (item,dom,index) {
+                var _this = this;
+                var u = url +'db/'+localStorage.getItem("userId")+'/testDBConnection';
+                var dbInfo={
+                    "db_ip": item.db_ip,//数据库IP
+                    "db_name": item.db_name,//数据库名称
+                    "db_password": item.db_password,//数据库密码
+                    "db_port": item.db_port,//数据库端口
+                    "db_type": item.db_type,//数据库类型
+                    "db_username": item.db_username//数据库用户名
+                }
+                ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
+                    console.log(data)
+                    if(data.data){ //true
+                        $(dom).nextAll().remove();
+                        $(dom).after('<span class="fa fa-check">连接成功</span>')
+                        this.navLI[index].con_state = 1;
+                    }else{
+                        //layer.alert(data.message);
+                        $(dom).nextAll().remove();
+                        $(dom).after('<span class="fa fa-close">连接失败</span>')
+                        console.log(_this.navLI)
+                        _this.navLI[index].con_state = 0;
+                    }
+                })
+            },
+            tabClose:function (index) {
+                if(this.navLI.length>1){
+                    this.navLI.splice(index,1);
+                    if(this.currentIndex == index){ //当前为激活状态,关闭后选择前一个标签
+                        this.currentIndex = index-1;
+                    }else if(this.currentIndex > index){  //选择后前一个tab
+                        this.currentIndex--;
+                    }
+                }
+
+            },
         }
 
     })
