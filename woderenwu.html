@@ -88,7 +88,7 @@
                                     <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th  style="width: 6%">编号</th>
                             <th>任务名称</th>
                             <th>关联规则</th>
                             <!--<th>创建人</th>-->
@@ -107,7 +107,7 @@
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td class="checkDetail" @click="detail(item.taskId)">{{item.task_Name}}</td>
+                            <td class="checkDetail" @click="detail(item.taskId,item.task_Name)">{{item.task_Name}}</td>
                             <td>{{item.task_RuleName}}</td>
                             <!--<td>{{item.task_CreateUserName}}</td>-->
                             <td>{{item.task_CurrentStartTime}}</td>
@@ -115,7 +115,7 @@
                             <td v-else-if="item.task_RunState == 2">停止运行</td>
                             <td v-else-if="item.task_RunState == 3">暂停运行</td>
                             <td v-else="item.task_RunState">未运行</td>
-                            <td class="checkDetail" @click="detail(item.taskId)">查看详情</td>
+                            <td class="checkDetail" >查看详情</td>
                             <td class="progressContainer">
                                 <div class="progress ">
                                     <div :style="{width: parseInt(item.task_RunProgress)+'%'}"
@@ -302,8 +302,8 @@
                                             <div class="form-group">
                                                 <select class="form-control" v-model="item.pre_condition.parentTaskId">
                                                     <option disabled value="">请选择</option>
-                                                    <option v-for="i in buControlSelectList" :value="i">
-                                                        i.task_Name
+                                                    <option v-for="i in buControlSelectList" :value="i.taskId">
+                                                        {{i.task_Name}}
                                                     </option>
                                                 </select>
                                             </div>
@@ -746,7 +746,7 @@
             //taskCreateUserName: "", //搜索项
             taskName: "",     //搜索项
             current_page: 1, //当前页
-            pageSize: 12,  //每页数据条数
+            pageSize: 14,  //每页数据条数
             pages: 0, //总页数
             changePage: 0,//跳转页
             checkAll: false,
@@ -883,10 +883,15 @@
                 } else {
                     this.sortFlag = !this.sortFlag;
                 }
+                this.list.forEach(function (v,i) {  //null => ""
+                    if(v.task_CurrentStartTime ==null ){
+                        v.task_CurrentStartTime = "";
+                    }
+                })
                 if (this.sortFlag) { //true 升序
-                    this.list.sort(compare_asc("create_Time"));
+                    this.list.sort(compare_asc("task_CurrentStartTime"));
                 } else {
-                    this.list.sort(compare_des("create_Time"));
+                    this.list.sort(compare_des("task_CurrentStartTime"));
                 }
             },
             selectedList: function (item) {
@@ -1007,8 +1012,8 @@
                     matchdata_DealType: simple.matchdata.matchdata_DealType,
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
-                    parentTaskId: simple.pre_condition.parentTaskId.taskId,
-                    task_RuleName: simple.pre_condition.parentTaskId.task_Name,
+                    parentTaskId: simple.pre_condition.parentTaskId,
+                    task_RuleName: '',
                     taskId: '',
                     task_CreateTime: '',
                     task_CreateUserName: localStorage.getItem("userName"),
@@ -1024,6 +1029,10 @@
                     task_StartTime: $(dom).parent().parent().parent().find(".start").val(),
                     task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
                 }
+                //simple.pre_condition.parentTaskId.taskId
+                //通过taskId对应前置条件task_RuleName
+                //模拟失去焦点
+                taskInfo.task_RuleName= this.taskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $(dom).parent().parent().parent().find(".validateTask");
                 for (var i = 0; i < input.length; i++) {
@@ -1047,6 +1056,15 @@
                     });
                 }
             },
+            taskIdToName:function (id) {
+                var name = '';
+                this.buControlSelectList.forEach(function (v,i) {
+                    if(v.taskId == id){
+                        name = v.task_Name
+                    }
+                })
+                return name;
+            },
             tabClose: function (index) {
                 if (this.navLI.length > 1) {
                     this.navLI.splice(index, 1);
@@ -1062,24 +1080,24 @@
                 this.currentIndex = index;
                 return false;
             },
-            detail: function (taskId) {
+            detail: function (taskId,task_Name) {
                 var _this = this;
                 var u = url + "task/" + localStorage.getItem("userId") + "/getTaskDetailsInfo/" + taskId;
                 ajaxGet(u, function (data) {
                     console.log(data);
                     if (data.resultCode == ERR_OK) {
                         _this.popDetail.detail = data.data;
-                        _this.detailPop();
+                        _this.detailPop(task_Name);
                     }else{
                         layer.alert(data.message)
                     }
                 });
             },
-            detailPop: function () {
+            detailPop: function (task_Name) {
                 console.log(this.popDetail.detail)
                 layer.open({
                     type: 1,
-                    title: ['详情'],
+                    title: ['详情 - '+task_Name],
                     closeBtn: 1,
                     btn: ['关闭'],
                     btnAlign: 'c',
@@ -1221,9 +1239,9 @@
                 }else{
                     this.popDetail.control.pre_condition.task_StartType = item.task_StartType;
                     this.popDetail.control.pre_condition.parentTaskId = item.parentTaskId;
-                    this.popDetail.control.pre_condition.task_StartHZ.hour = item.task_StartHZ.slice(0,hourIndex-1);
-                    this.popDetail.control.pre_condition.task_StartHZ.day = item.task_StartHZ.slice(hourIndex+1,dayIndex-1);
-                    this.popDetail.control.pre_condition.task_StartHZ.month = item.task_StartHZ.slice(dayIndex+1,monthIndex-1);
+                    this.popDetail.control.pre_condition.task_StartHZ.hour = item.task_StartHZ.slice(0,hourIndex);
+                    this.popDetail.control.pre_condition.task_StartHZ.day = item.task_StartHZ.slice(hourIndex+2,dayIndex);
+                    this.popDetail.control.pre_condition.task_StartHZ.month = item.task_StartHZ.slice(dayIndex+1,monthIndex);
                 }
                 this.popDetail.control.matchdata.matchdata_DealType = item.matchdata_DealType;
                 this.popDetail.control.matchdata.matchdata_DealTable = item.matchdata_DealTable;
@@ -1243,7 +1261,7 @@
                     DatePicker(".data_1 .input-group.date", ".data_2 .input-group.date");
                     layer.open({
                         type: 1,
-                        title: ['编辑('+this.popDetail.control.task_Name+')'],
+                        title: ['编辑 - '+this.popDetail.control.task_Name],
                         closeBtn: 1,
                         btn: ['确定', '取消'],
                         btnAlign: 'c',
@@ -1278,6 +1296,7 @@
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
                     parentTaskId: simple.pre_condition.parentTaskId,
+                    task_RuleName: '',
                     taskId: '',
                     task_CreateTime: '',
                     task_CreateUserName: localStorage.getItem("userName"),
@@ -1293,6 +1312,7 @@
                     task_StartTime: document.getElementById("start").value,
                     task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
                 }
+                taskInfo.task_RuleName= this.taskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $("#buControl").find(".validate");
                 for (var i = 0; i < input.length; i++) {

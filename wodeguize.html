@@ -104,7 +104,7 @@
                                     <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th  style="width: 6%">编号</th>
                             <th>规则名称</th>
                             <th style="width: 300px">规则表达式</th>
                             <th @click="sort" style="cursor: pointer">创建时间<span class="fa" :class="sortClass"></span></th>
@@ -994,7 +994,7 @@
             ruleName:'',  //搜索项
             ruleStr:'',   //搜索项
             current_page: 1, //当前页
-            pageSize:12,  //每页数据条数
+            pageSize:14,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
@@ -1354,7 +1354,7 @@
                     this.popDetail.edit.express.tree = JSON.parse(JSON.stringify(this.express));
                     layer.open({
                         type: 1,
-                        title: ['编辑('+this.popDetail.edit.ruleName+')'],
+                        title: ['编辑 - '+this.popDetail.edit.ruleName],
                         closeBtn: 1,
                         btn:['确定','取消'],
                         btnAlign: 'c',
@@ -1533,7 +1533,7 @@
                     DatePicker(".data_1 .input-group.date",".data_2 .input-group.date");
                     layer.open({
                         type: 1,
-                        title: ['布控('+this.selected[0].ruleName+')'],
+                        title: ['布控 - '+this.selected[0].ruleName],
                         closeBtn: 1,
                         btn:['确定','取消'],
                         btnAlign: 'c',
@@ -1607,7 +1607,7 @@
                                 layer.closeAll();
                             });
                         }else{
-                            layer.alert("数据请求失败");
+                            layer.alert(data.message);
                         }
                     });
                 }

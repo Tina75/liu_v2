@@ -18,7 +18,7 @@
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#home" data-toggle="tab">命中查看</a></li>
+        <li class="active"><a href="javascript:void(0)" data-toggle="tab">命中查看</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -46,12 +46,12 @@
                                     <thead>
                                     <tr>
                                         <!--<th style="width: 45px">-->
-                                            <!--<input type="checkbox" name="btSelectAll" @click="isAll()">-->
-                                            <!--<div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">-->
-                                                <!--<span class="fa fa-check icon-ok"></span>-->
-                                            <!--</div>-->
+                                        <!--<input type="checkbox" name="btSelectAll" @click="isAll()">-->
+                                        <!--<div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">-->
+                                        <!--<span class="fa fa-check icon-ok"></span>-->
+                                        <!--</div>-->
                                         <!--</th>-->
-                                        <th>编号</th>
+                                        <th style="width: 6%">编号</th>
                                         <th>时间</th>
                                         <th>源IP</th>
                                         <th>源端口</th>
@@ -65,17 +65,17 @@
                                     <tbody >
                                     <tr v-for="(item,index) in tableList">
                                         <!--<td>-->
-                                            <!--<div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >-->
-                                                <!--<span class="fa fa-check icon-ok"></span>-->
-                                            <!--</div>-->
+                                        <!--<div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >-->
+                                        <!--<span class="fa fa-check icon-ok"></span>-->
+                                        <!--</div>-->
                                         <!--</td>-->
                                         <td>{{index+1}}</td>
                                         <td>{{item.message_getTime}}</td>
-										<td>{{item.message_src_ip}}</td>
+                                        <td>{{item.message_src_ip}}</td>
                                         <td>{{item.message_src_port}}</td>
-										<td>{{item.message_dst_ip}}</td>
-										<td>{{item.message_dst_port}}</td>
-										<td>{{item.message_protor}}</td>
+                                        <td>{{item.message_dst_ip}}</td>
+                                        <td>{{item.message_dst_port}}</td>
+                                        <td>{{item.message_protor}}</td>
                                         <td>{{item.message_length}}</td>
                                         <td class="limitWidth">
                                             <div>{{item.message_content}}</div>
@@ -178,20 +178,20 @@
             exportHref:function () {
 
                 var str = `${url}statisview/${localStorage.getItem('userId')}/exportMesListByTaskId/${this.list[this.currentIndex].taskId}?taskName=${this.list[this.currentIndex].taskName}`;
-               //console.log(str);
+                //console.log(str);
                 return str;
             }
         },
         mounted: function () {
-            //var _this = this;
+            var _this = this;
             this.$nextTick(function () {
-                this.leftList();  //左侧任务列表
+                _this.leftList();  //左侧任务列表
             })
         },
         methods: {
             leftList: function () {
                 var _this = this;
-               //http://localhost:8080/streamplatserver/rule/{userId}/query	TaskList
+                //http://localhost:8080/streamplatserver/rule/{userId}/query	TaskList
                 var u = url +"statisview/"+localStorage.getItem('userId')+'/getTaskItemInfo';
                 ajaxGet(u,function (data) {
                     console.log(data)

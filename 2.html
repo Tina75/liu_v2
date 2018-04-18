@@ -2,62 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css">
+    <title>Document</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        #outer{
+            width:180px;
+            height:180px;
+            margin:50px auto;
+            border:10px solid #000;
+            background:orange;
+            padding:50px;
+        }
+        #inner{
+            width:80px;
+            height:80px;
+            padding:50px;
+            border:10px solid #000;
+            background:green;
+        }
+        #center{
+            width:50px;
+            height:50px;
+            border:10px solid #000;
+            background:red;
+        }
+    </style>
 </head>
 <body>
-<div class="frame">
-    <button onclick="show()">展示节点树</button>
-    <button onclick="addTree()">新增ul结构</button>
-    <div class="father">
-        <ul  class="ztree"></ul>
+<div id="outer">
+    <div id="inner">
+        <div id="center"></div>
     </div>
 </div>
-</body>
-<script src="js/jquery.min.js"></script>
-<script src="js/jquery.ztree.core.js"></script>
-<script src="js/jquery.ztree.excheck.js"></script>
+
 <script>
-    var zTreeObj;
-    var zTreeArr=[];
-    // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
-    var setting = {
-        check:{
-            enable: true,
-            chkStyle : "checkbox"
-        },
-        view: {
-            showIcon: false
-        },
-//        callback: {
-//            onCheck:  onCheck
-//        }
-    };
-    // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
-    var zNodes = [
-        {name:'全部用户',open:true,children:[
-            {name:"A组用户", open:true, children:[
-                {name:"A1"}, {name:"A2"}]},
-            {name:"B组用户", open:true, children:[
-                {name:"B1"}, {name:"B2"}]},
-            {name:"C组用户", open:true, children:[
-                {name:"C1"}, {name:"C2"}]},
-            {name:"D组用户", open:true, children:[
-                {name:"D1"}, {name:"D2"}]
-            }
-        ]}
-    ];
-    function filter(node) {   //过滤器直选中2级节点累加
-        return (node.level == 2 && node.checked == true);
-    }
-    function show() {
-        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
-        console.log(zTreeObj)
-    }
-    function addTree() {
-        $(".father").find("ul").attr("id","treeDemo");
-        console.log($("#treeDemo"))
-        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
-    }
+    var outer = document.getElementById('outer');
+    var inner = document.getElementById('inner');
+    var center = document.getElementById('center');
+
+    outer.style.position = "relative";//这样inner和center的参照物都是outer
+    //console.log(center.offsetParent);//outer
+    //console.log(inner.offsetParent);//outer
+    console.log(outer.offsetTop);//body
+//    outer.style.position = "relative";//
+//    inner.style.position = "relative";
+//    center.offsetParent//inner
+//    inner.offsetParent//outer
+//    outer.offsetParent//body
 </script>
+</body>
 </html>

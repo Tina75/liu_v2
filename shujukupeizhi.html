@@ -9,21 +9,32 @@
     <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/animate.css">
     <style>
+        .test{
+            margin-top: 22px;
+        }
         .test > button{
-            padding: 6px 12px;
+            width: 100%;
+            height: 31px;
+            /*padding: 6px 12px;*/
             border-radius: 0;
             color: #fff;
             background: #ED8105;
             border: 1px solid transparent;
-            margin-right: 10px;
+            /*margin-right: 10px;*/
         }
-        .test > .fa-check{
+        .facheck{
+            position: absolute;
+            top:65px;
+            left: 9px;
             color: #00B83F;
-            margin-right: 3px;
+            /*margin-right: 3px;*/
         }
-        .test  >.fa-close{
+        .faclose{
+            position: absolute;
+            top:65px;
+            left: 9px;
             color: red;
-            margin-right: 3px;
+            /*margin-right: 3px;*/
         }
         .database .layui-layer-wrap{
             height: 100%;
@@ -41,12 +52,15 @@
         }
         .database .left .litle,.database .right .litle{
             font-weight: bold;
-            height: 35px;
-            line-height: 35px;
+            height: 30px;
+            line-height: 30px;
+        }
+        .database .left ul li{
+            cursor: pointer;
         }
         .database .left ul li,.database .right ul li{
-            line-height: 30px;
-            height: 30px;
+            line-height: 24px;
+            height: 24px;
         }
         .database .left ul li.active{
             color: #0078E6;
@@ -104,7 +118,7 @@
                                     <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th  style="width: 6%">编号</th>
                             <th>数据库名称</th>
                             <th>数据库查看</th>
                             <th>状态</th>
@@ -119,8 +133,9 @@
                             </td>
                             <td>{{index+1}}</td>
                             <td class="checkDetail" @click="detail(item)">{{item.db_name}}</td>
-                            <td class="checkDetail" @click="database()">查看详情</td>
-                            <td>{{item.con_state}}</td>
+                            <td class="checkDetail" @click="database(item)">查看详情</td>
+                            <td v-if="item.con_state==0">未连接</td>
+                            <td v-else-if="item.con_state==1">已连接</td>
                         </tr>
                         </tbody>
                     </table>
@@ -188,8 +203,8 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
+                        <div class="col-md-5">
+                            <div class="form-group" style="position: relative">
                                 <label  class="bold">数据库类型:</label>
                                 <select class="form-control" v-model="item.db_type">
                                     <option value="1">mysql</option>
@@ -197,21 +212,22 @@
                                     <option value="3">sqlserver</option>
                                     <option value="4">db2</option>
                                 </select>
+                                <span class="fa fa-close faclose" v-if="item.con_state===0">连接失败</span>
+                                <span class="fa fa-check facheck" v-else-if="item.con_state===1">连接成功</span>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="padding-left: 0">
+                            <div class="test">
+                                <button @click="testLink(item,$event.target,currentIndex)">
+                                    <span class="icon-icon-sy22" style="margin-right: 4px"></span>测试连接</button>
+                                <!--<a href="javascript:void(0)">-->
+                                <!--</a>-->
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label  class="bold">数据库名称:</label>
-                                <input type="password" class="form-control" v-model="item.db_name"   placeholder="在此输入内容...">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="test">
-                                <button @click="testLink(item,$event.target,currentIndex)">测试连接</button>
-                                <!--<a href="javascript:void(0)">-->
-                                <!--</a>-->
+                                <input type="text" class="form-control" v-model="item.db_name"   placeholder="在此输入内容...">
                             </div>
                         </div>
                     </div>
@@ -251,33 +267,13 @@
         <div class="left">
             <div class="litle">数据表列表</div>
             <ul>
-                <li class="active">sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
+                <li :class="{active:index == tableIndex}" @click="tableValue(index)" v-for="(item,index) in tableInfo">{{item.tableName}}</li>
             </ul>
         </div>
         <div class="right">
-            <div class="litle">字段列表</div>
+            <div class="litle">{{tableValueTitle}} 字段列表</div>
             <ul>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
-                <li>sql</li>
+                <li v-for="list in tableValueList">{{list}}</li>
             </ul>
         </div>
     </div>
@@ -298,7 +294,7 @@
             list: [],   //展示数组
             dbName:'',  //搜索项目
             current_page: 1, //当前页
-            pageSize:12,  //每页数据条数
+            pageSize:14,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
@@ -309,13 +305,16 @@
                 db_ip:'',
                 db_port:'',
                 db_type:''
-            }
+            },
+            tableInfo:[],
+            tableIndex:0,
+            tableValueList:[],
+            tableValueTitle:''
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
                 this.cartView(1);
-
             })
         },
         computed:{
@@ -453,7 +452,7 @@
                 this.dataDetail.db_type = item.db_type;
                 layer.open({
                     type: 1,
-                    title: ['详情'],
+                    title: ['详情 - '+item.db_name],
                     closeBtn: 1,
                     btn:['关闭'],
                     btnAlign: 'c',
@@ -463,18 +462,57 @@
                     content: $('#detail')
                 });
             },
-            database:function () {
-                layer.open({
-                    type: 1,
-                    title: ['详情'],
-                    closeBtn: 1,
-                    btn:['确定','取消'],
-                    btnAlign: 'c',
-                    area: ['600px', '500px'],
-                    skin: 'database', //没有背景色
-                    shadeClose: true,
-                    content: $('#database')
-                });
+            database:function (item) {
+                this.tableIndex = 0;  //每次点击设置为0
+                this.tableInfo = [];
+                this.tableValueList=[];
+                this.tableValueTitle = '';
+                this.getDBTableInfo(item);
+                setTimeout(function () {
+                    layer.open({
+                        type: 1,
+                        title: ['详情 - ' +item.db_name],
+                        closeBtn: 1,
+                        btn:['关闭'],
+                        btnAlign: 'c',
+                        area: ['600px', '500px'],
+                        skin: 'database', //没有背景色
+                        shadeClose: true,
+                        content: $('#database'),
+                        yes:function () {
+                            layer.closeAll();
+                        }
+                    });
+                },0)
+
+            },
+            getDBTableInfo:function (item) {
+                var _this = this;
+                var u = url +'db/'+localStorage.getItem("userId")+'/getDBTableInfo';
+                var dbInfo={
+                    "db_ip": item.db_ip,//数据库IP
+                    "db_name": item.db_name,//数据库名称
+                    "db_password": item.db_password,//数据库密码
+                    "db_port": item.db_port,//数据库端口
+                    "db_type": item.db_type,//数据库类型
+                    "db_username": item.db_username,//数据库用户名
+                }
+                ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        _this.tableInfo = data.data;
+                        if(_this.tableInfo[_this.tableIndex].length!=0){
+                            _this.tableValueList = _this.tableInfo[_this.tableIndex].column;
+                            _this.tableValueTitle = _this.tableInfo[_this.tableIndex].tableName;
+                        }
+                    }else{
+                        layer.alert(data.message);
+                    }
+                })
+            },
+            tableValue:function (index) {
+                this.tableIndex = index;
+                this.tableValueList = this.tableInfo[this.tableIndex].column;
+                this.tableValueTitle = this.tableInfo[this.tableIndex].tableName;
             },
             deleteList:function () {
                 //http://localhost:8080/streamplatserver/db/{userId}/deleteDBList?dbIdList=c538230ec2f54150%2C133ddsgsdssf
@@ -517,7 +555,7 @@
                     "db_port": "",//数据库端口
                     "db_type": 1,//数据库类型
                     "db_username": "",//数据库用户名
-                    "con_state":0
+                    "con_state":''
                 });
                 this.currentIndex = index;
             },
@@ -563,14 +601,14 @@
                 ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
                     console.log(data)
                     if(data.data){ //true
-                        $(dom).nextAll().remove();
-                        $(dom).after('<span class="fa fa-check">连接成功</span>')
+//                        $(dom).nextAll().remove();
+//                        $(dom).after('<span class="fa fa-check">连接成功</span>')
                         this.navLI[index].con_state = 1;
                     }else{
                         //layer.alert(data.message);
-                        $(dom).nextAll().remove();
-                        $(dom).after('<span class="fa fa-close">连接失败</span>')
-                        console.log(_this.navLI)
+//                        $(dom).nextAll().remove();
+//                        $(dom).after('<span class="fa fa-close">连接失败</span>')
+//                        console.log(_this.navLI)
                         _this.navLI[index].con_state = 0;
                     }
                 })

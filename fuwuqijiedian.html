@@ -18,33 +18,42 @@
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#home" data-toggle="tab">服务器节点</a></li>
-        <!--<li><a href="#profile" data-toggle="tab">我的任务</a></li>-->
-        <li><span class="fa fa-plus add"></span></li>
+        <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)"  @click.prevent="currentIndex=0">服务器节点</a></li>
+        <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.sys_serverName">
+                {{item.sys_serverName}}
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>
+                新建服务器
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+        </li>
+        <li v-if="navLI.length<8"><span class="fa fa-plus add" @click="add($event.target)"></span></li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div class="tab-pane active" id="home">
+        <div class="tab-pane" :class="{active:currentIndex == 0}"  >
             <div class="search clearfix">
                 <div class="form-inline pull-left searchItems">
                     <div class="form-group">
                         <label for="name">名称:</label>
-                        <input type="text" class="form-control" id="name" placeholder="请输入关键字">
+                        <input type="text" @keyup="cartView(1)" v-model="serverName"  class="form-control" id="name" placeholder="请输入关键字">
                     </div>
                     <div class="form-group">
                         <label for="IP">IP:</label>
-                        <input type="text" class="form-control" id="IP" placeholder="请输入关键字">
+                        <input type="text" @keyup="cartView(1)" v-model="ipAddr" class="form-control" id="IP" placeholder="请输入关键字">
                     </div>
-                    <button type="button" class="btn btn-primary">确认</button>
+                    <button type="button" @click="cartView(1)" class="btn btn-primary">确认</button>
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right">
-                            <span class="fa fa-trash-o active">删除</span>
+                        <li class="pull-right" @click="deleteList" >
+                            <span class="fa fa-trash-o" :class="{active: selected.length>0}">删除</span>
                         </li>
-                        <li class="pull-right">
-                            <span class="fa fa-pencil active">编辑</span>
+                        <li class="pull-right" @click="editPop">
+                            <span class="fa fa-pencil" :class="{active: selected.length==1}">编辑</span>
                         </li>
                     </ul>
                 </div>
@@ -56,10 +65,10 @@
                         <tr>
                             <th style="width: 45px">
                                 <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th  style="width: 6%">编号</th>
                             <th>名称</th>
                             <th>IP</th>
                             <th>状态</th>
@@ -72,135 +81,96 @@
                         <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td>服务器p1</td>
-                            <td>192.168.1.2</td>
-                            <td class="grey">离线</td>
-                            <td>10%</td>
-                            <td>10%</td>
-                            <td>10%</td>
+                            <td>{{item.sys_serverName}}</td>
+                            <td>{{item.sys_serverIp}}</td>
+                            <td>{{item.state}}</td>
+                            <td>{{item.cpuUsage}}</td>
+                            <td>{{item.mesUsage}}</td>
+                            <td>{{item.diskUsage}}</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="page clearfix" v-show="show">
+                <div class="page clearfix" >
                     <div class="pageCut">
                         每页
-                        <select name="" class="form-control pageSelect" >
-                            <option value="1">1</option>
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
                         </select>
                         条记录
                     </div>
-                    <div class="pagelist">
+                    <div class="pagelist" >
                         <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
-                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
                         <span class="ellipsis" v-show="efont">...</span>
                         <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
                               @click="jumpPage(num)">{{num}}</span>
                         <span class="ellipsis" v-show="ebehind">...</span>
 
                         <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
-                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
 
                         <span class="jumppoint">跳转到：</span>
-                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
-                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!--新建任务-->
-    <div  id="profile" style="display: none">
-        <div class="add-target">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="nName" class="bold">名称:</label>
-                            <input type="text" class="form-control" id="nName" placeholder="在此输入内容...">
+        <!--新建任务-->
+        <div  v-if="navLI_1.length!=0"  v-for="(item,index) in navLI_1" v-show="currentIndex==index+1" :key="index"   :class="{'active':currentIndex==index+1}" >
+            <div class="add-target">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nName" class="bold">名称:</label>
+                                <input type="text" @blur="vailruleName($event.target,item)" class="form-control validateRule" v-model="item.sys_serverName" id="nName" placeholder="在此输入内容...">
+                                <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nIP" class="bold">IP:</label>
+                                <input type="text" class="form-control" v-model="item.sys_serverIp"  id="nIP" placeholder="在此输入内容...">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="nIP" class="bold">IP:</label>
-                            <input type="text" class="form-control" id="nIP" placeholder="在此输入内容...">
+                    <div class="row">
+                        <div class="col-md-12 YoN_button" style="margin-top:30px">
+                            <button class="y" @mousedown="addNewServer(item,currentIndex,$event.target)">确定</button>
+                            <button class="n" @click="tabClose(index+1)">取消</button>
                         </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 YoN_button" style="margin-top:30px">
-                        <button class="y">确定</button>
-                        <button class="n">取消</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!--弹框-->
-    <div id="detail" style="display: none">
+    <div id="edit" style="display: none">
         <div class="container-fluid">
-            <div class="title">本次任务运行信息</div>
-            <!--<div class="content">-->
             <div class="row">
                 <div class="col-md-6">
-                    <b>开始时间：</b>
-                    <span>2017-07-07 10:15</span>
+                    <div class="form-group">
+                        <label for="nName" class="bold">名称:</label>
+                        <input type="text"  class="form-control validateRule" v-model="editList.sys_serverName" id="nName" placeholder="在此输入内容...">
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <b>结束时间：</b>
-                    <span>2017-07-07 10:15</span>
+                    <div class="form-group">
+                        <label for="nIP" class="bold">IP:</label>
+                        <input type="text" class="form-control" v-model="editList.sys_serverIp"  id="nIP" placeholder="在此输入内容...">
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <b>cpu占用：</b>
-                    <span>10%</span>
-                </div>
-                <div class="col-md-6">
-                    <b>内存占用：</b>
-                    <span>10%</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <b>运行时间：</b>
-                    <span>00:15:00</span>
-                </div>
-            </div>
-            <!--</div>-->
-            <div class="title">任务属性</div>
-            <!--<div class="content">-->
-            <div class="row">
-                <div class="col-md-6">
-                    <b>创建时间：</b>
-                    <span>2017-07-07 10:15</span>
-                </div>
-                <div class="col-md-6">
-                    <b>创建人：</b>
-                    <span>admin</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <b>调度信息：</b>
-                    <span>单次</span>
-                </div>
-                <div class="col-md-6">
-                    <b>运行次数：</b>
-                    <span>第一次</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <b>关联规则：</b>
-                    <span>aa</span>
-                </div>
-            </div>
-            <!--</div>-->
         </div>
     </div>
 </div>
@@ -210,70 +180,37 @@
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/vue.js"></script>
-<script src="js/mockData.js"></script>
-<script>
-    $(function () {
-        $(document).on("click",".nav-tabs li .add",function () {
-            /*******排序**********/
-            $(".nav-tabs a").each(function (i, n) {
-                $(n).attr("href", "#navTabs_" + i);
-            });
-            $(".tab-content>div").each(function (i, n) {
-                $(n).attr("id", "navTabs_" + i);
-            });
-            var index = $(this).parent().index(".nav-tabs li");
-            var str = '<li><a href="#navTabs_' + index + '" data-toggle="tab">新建任务 <span class="fa fa-close tabClose"></span></a></li>';
-            var strContent = $("#profile").html();
-            //console.log(strContent);
-            $(this).parent().before(str);
-            $(".tab-content").append('<div  class="tab-pane" id="navTabs_' + index + '">' + strContent + '</div>')
-        });
-        $(document).on("click", ".tabClose", function () {
-            /*******排序**********/
-            $(".nav-tabs a").each(function (i, n) {
-                $(n).attr("href", "#navTabs_" + i);
-            });
-            $(".tab-content>div").each(function (i, n) {
-                $(n).attr("id", "navTabs_" + i);
-            });
-
-            if($(this).parent().parent().hasClass('active')){ //当前是active的被删除
-                console.log($(this).parent().parent().prev());
-                $(this).parent().parent().prev().find('a').click();
-            }
-            var index = $(this).parent().parent().index(".nav-tabs li");
-            $(".tab-content>div").eq(index).remove();
-            $(this).parent().parent().remove();
-        });
-        $(document).on("click",".taskModel li",function () {
-            var target=$(this).attr("data-target");
-            $(".taskModelContent>div").hide();
-            $(".taskModelContent").find("."+target+"DIV").show();
-        });
-
-    });
-</script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
 <script>
     // 创建根实例
     new Vue({
         el: '#example',
         data: {
             list: [],   //展示数组
+            ipAddr:'', //搜索项
+            serverName:'',  //搜素项
             current_page: 1, //当前页
+            pageSize:14,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
+            navLI:[{}],
+            currentIndex:0,
+            selected:[],    //选中项
+            editList:{
+                sys_serverName:'',
+                sys_serverIp:''
+            }
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
-                this.cartView(false);
-
+                _this.cartView(_this.current_page);
             })
         },
         computed:{
             show:function(){
-                console.log(this.pages && this.pages !=1);
                 return this.pages && this.pages !=1
             },
             pstart: function() {
@@ -317,39 +254,44 @@
                 }
                 return ar;
             },
+            navLI_1:function () {
+                return this.navLI.slice(1);
+            }
         },
         methods: {
-            cartView: function (flag) {
-                //console.log(this.username);
-                if (flag) { //搜索
-                    this.current_page = 1;
-                }
+            cartView:  function (cPage) {
                 var _this = this;
                 //模拟数据
-                _this.list = data.Renwugunali;
-                _this.pages = data.CountPage;
-//                $.ajax({
-//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
-//                    type:'post',
-//                    dataType:'json',
-//                    data: {
-//                        PAGE: _this.current_page - 1,
-//                        task_name:'',
-//                        creater: ''
-//                    },
-//                    success: function(data){ //成功的回调函数的处理
-//                        _this.list = data.Renwugunali;
-//                        _this.pages = data.CountPage;
-//                    },
-//                    error:function(errorData){
-//                        if(errorData.readyState=='0'){
-//                            layer.close(index);
-//                            layer.alert('请先连接服务器');
-//                        }
-//                    }
-//                });
+                //http://localhost:8080/streamplatserver/node/433f19a6de35442b/getNodeServerItem/1/5
+                var u = url +"node/"+localStorage.getItem("userId")+"/getNodeServerItem/"
+                    +cPage+"/"+this.pageSize;
+                var filter={
+                    "ipAddr":this.ipAddr,
+                    "serverName": this.serverName
+                }
+                ajaxPostObj(u,JSON.stringify(filter),function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.serverInfoList;
+                        _this.pages = parseInt(data.data.countPage);
+                    }else{
+                        layer.alert(data.message);
+                    }
+                });
+            },
+            sort:function () {
+                if(typeof this.sortFlag == "undefined"){
+                    this.sortFlag=true;
+                }else{
+                    this.sortFlag=!this.sortFlag;
+                }
+                if(this.sortFlag){ //true 升序
+                    this.list.sort(compare_asc("create_Time"));
+                }else{
+                    this.list.sort(compare_des("create_Time"));
+                }
             },
             selectedList: function (item) {
+                var _this=this;
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -357,6 +299,13 @@
                     item.checked = !item.checked;
                 }
                 this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isAll: function () {  //全选
                 var _this = this;
@@ -368,7 +317,13 @@
                         item.checked = _this.checkAll;
                     }
                 });
-                console.log(_this.list);
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isCheckAll: function () {
                 var flag = true;
@@ -385,24 +340,220 @@
 
             },
             jumpPage: function(id) {
-                this.current_page = id;
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+
             },
-            pageAjax:function () {
-                alert(this.current_page);
-            },
-            detail:function () {
-                layer.open({
-                    type: 1,
-                    title: ['详情'],
-                    closeBtn: 1,
-                    btn:['关闭'],
-                    btnAlign: 'c',
-                    area: ['600px', '410px'],
-                    skin: 'detailPop', //没有背景色
-                    shadeClose: true,
-                    content: $('#detail')
+            add:function (dom) {
+                var index = $(dom).parent().index(".nav-tabs li");
+                this.navLI.push({
+                    sys_serverIp:'',
+                    sys_serverName:'',
+                    sys_serverPWD:'',
+                    sys_serverUserName:'',
+                    isOk:{
+                        sys_serverName:false,
+//                        sys_serverIp:false
+                    }
                 });
-            }
+                this.currentIndex = index;
+            },
+            addNewServer:function (item,index,dom) {
+                var _this = this;
+                var u = url +'node/'+localStorage.getItem("userId")+'/addNewServer';
+                var syServerInfo = {
+                    "sys_serverIp": item.sys_serverIp,
+                    "sys_serverName": item.sys_serverName,
+                    "sys_serverPWD": "root",
+                    "sys_serverUserName": "root"
+                }
+                //模拟失去焦点
+                var input = $(dom).parent().parent().parent().find(".validateRule");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = item.isOk.sys_serverName;
+                if(isOk){
+                    ajaxPostObj(u,JSON.stringify(syServerInfo),function (data) {
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("添加成功",function (i) {
+                                _this.cartView(_this.current_page);
+                                _this.selected=[];
+                                _this.tabClose(index);
+                                layer.close(i);
+                            })
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    })
+                }
+            },
+            vailruleName:function (dom,item) {  //验证布控任务名称
+                var sys_serverName = item.sys_serverName;
+                var span = dom.nextElementSibling;
+                if(sys_serverName==""){
+                    item.isOk.sys_serverName = false;
+                    this.valiWays(span,"规则名不能为空",false);
+                    return;
+                }
+                if(sys_serverName.length>20){
+                    item.isOk.sys_serverName = false;
+                    this.valiWays(span,"长度只能在20个字符之间",false);
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(sys_serverName)){
+                    item.isOk.sys_serverName = true;
+                    this.valiWays(span,'',true);
+                    return;
+                }else{
+                    item.isOk.sys_serverName = false;
+                    this.valiWays(span,"格式错误，仅支持汉字、字母、数字、“-”“_”的组合",false);
+                    return;
+                }
+
+            },
+            valiWays:function (span,str,flag) {
+                span.innerHTML = str;
+                if(flag){
+                    removeClass(span.parentElement, "error")
+                }else{ //增加error
+                    addClass( span.parentElement, "error")
+                }
+
+            },
+            addNewRule:function (item,index,dom) {
+                console.log(this.navLI[index])
+                var _this = this;
+                var u = url +'node/'+localStorage.getItem("userId")+'/addNewServer';
+                var syServerInfo = {
+                    create_UserId: localStorage.getItem("userId"),
+                    create_UserName: localStorage.getItem("userName"),
+                    ruleName: item.ruleName,
+                    ruleStr: item.ruleStr,
+                    rule_Discription: item.rule_Discription
+                }
+                //模拟失去焦点
+                var input = $(dom).parent().parent().parent().find(".validateRule");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = item.isOk.ruleName;
+                if(isOk){
+                    if(!item.ruleStr){
+                        $(dom).parent().parent().parent().find('.errValidate').addClass('error')
+                        return false;
+                    }else{
+                        $(dom).parent().parent().parent().find('.errValidate').removeClass('error')
+                    }
+                    ajaxPostObj(u,JSON.stringify(Rule),function (data) {
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("添加成功",function (i) {
+                                _this.cartView(_this.current_page);
+                                _this.selected=[];
+                                _this.tabClose(index);
+                                layer.close(i);
+                            })
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    })
+                }
+            },
+            tabClose:function (index) {
+                if(this.navLI.length>1){
+                    this.navLI.splice(index,1);
+                    if(this.currentIndex == index){ //当前为激活状态,关闭后选择前一个标签
+                        this.currentIndex = index-1;
+                    }else if(this.currentIndex > index){  //选择后前一个tab
+                        this.currentIndex--;
+                    }
+                }
+
+            },
+            demoClickLi:function(index) {
+                this.currentIndex = index;
+                return false;
+            },
+            deleteList:function () {
+                var _this=this;
+                var idList = [];
+                //streamplatserver/node/433f19a6de35442b/deleteServerList?idList=e5e0e389c2ee4f6a%2Cdf3c49801071461d
+                this.selected.forEach(function (item) {
+                    idList.push(item.id);
+                });
+                if(this.selected.length>0){
+                    layer.confirm('您确定要删除吗？', {
+                        btn: ['确定','取消'] //按钮
+                    }, function(){
+                        var u = url+"rule/"+localStorage.getItem("userId")+"/deleteRuleByRuleIdList";
+                        ajaxGetArray(u,{idList:idList},function (data) {
+                            if(data.resultCode == ERR_OK ){
+                                var index=layer.alert("删除成功",function () {
+                                    _this.cartView(_this.current_page);
+                                    _this.selected = [];
+                                    _this.checkAll = false;
+                                    layer.close(index);
+                                });
+
+                            }else{
+                                layer.alert(data.message);
+                            }
+                        });
+                    }, function(){
+                        layer.closeAll();
+                    });
+                }
+            },
+            editPop:function () {
+                var _this=this;
+                var ruleIdList = [];
+                this.selected.forEach(function (item) {
+                    ruleIdList.push(item);
+                });
+                if(this.selected.length==1){
+                    this.editList.sys_serverName = ruleIdList[0].sys_serverName;
+                    this.editList.sys_serverIp = ruleIdList[0].sys_serverIp;
+                    layer.open({
+                        type: 1,
+                        title: ['编辑 - '+this.editList.sys_serverName],
+                        closeBtn: 1,
+                        btn:['确定','取消'],
+                        btnAlign: 'c',
+                        area: ['500px', '220px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#edit'),
+                        yes:function () {
+                            _this.edit(ruleIdList[0].id);
+                        }
+                    });
+                }
+            },
+            edit:function (serverId) {
+                var _this = this;
+                //node/{userId}/editeServerInfo/{serverId}?serverName=%E44%B9%E4%BA0&userName=root&passWord=root&ip=192.168.1.1
+                //模拟数据
+                var u = url +"node/"+localStorage.getItem("userId")+"/editeServerInfo/"
+                    +serverId+'?serverName='+this.editList.sys_serverName+'&ip='+this.editList.sys_serverIp
+                    +'&userName=root&passWord=root';
+                ajaxGet(u,function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        layer.alert("修改成功",function () {
+                            _this.cartView(_this.current_page);
+                            _this.selected = [];
+                            layer.closeAll();
+                        });
+                    }else{
+                        layer.alert(data.message);
+                    }
+                });
+            },
         }
 
     })

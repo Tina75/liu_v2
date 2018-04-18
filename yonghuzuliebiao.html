@@ -254,7 +254,7 @@
             sortFlag:undefined, //默认升序
             groupName:'', //搜索项
             current_page: 1, //当前页
-            pageSize:12,  //每页数据条数
+            pageSize:14,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
@@ -487,7 +487,7 @@
                     _this.editTreeInit();
                     layer.open({
                         type: 1,
-                        title: ['详情'],
+                        title: ['编辑 - '+ _this.editList.groupName],
                         closeBtn: 1,
                         btn:['确定','关闭'],
                         btnAlign: 'c',
@@ -551,7 +551,7 @@
             },
             addNewGroup:function (item,index,dom) {
                 var _this = this;
-                var u = url +'user/addNewGroup/'+item.groupName;
+                var u = url +'user/addNewGroup/';
                 console.log(item.groupName);
                 var userIdList = this.userIdList("treeDemo"+index);
                 //模拟失去焦点
@@ -563,11 +563,8 @@
                 }
                 var isOk = item.isOk.groupName;
                 if(isOk){
-//                    if(userIdList.length == 0){
-//                        layer.alert("请选择用户");
-//                        return;
-//                    }
-                    ajaxPostArray(u,{userIdList:userIdList},function (data) {
+                    //groupName={groupName
+                    ajaxPostArray(u,{userIdList:userIdList,groupName:item.groupName},function (data) {
                         if(data.resultCode == ERR_OK ){
                             layer.alert("添加成功",function (i) {
                                 _this.cartView(_this.current_page);

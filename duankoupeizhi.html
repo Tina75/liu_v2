@@ -15,11 +15,16 @@
         .treeContent>ul,.treeContent .net,.treeContent .type{
             float: left;
             width: 33.3%;
-            overflow-x: auto;
         }
         .treeContent li{
             min-height: 30px;
             line-height: 30px;
+        }
+        .treeContent li ul li{
+            height: 30px;
+        }
+        .ztree li a{
+            padding-top: 0;
         }
     </style>
 </head>
@@ -36,12 +41,21 @@
         <div class="tab-pane active" id="home">
             <div class="treeContent clearfix">
                 <ul id="treeDemo" class="ztree" style="margin-top:12px"></ul>
-                <div class="net">
+                <div class="net" >
                     <div style="font-weight: bold">网络适配器</div>
-                    <div class="netContent"></div>
+                    <div class="netContent" id="net">
+                        <ul id="adapterName" style="position: relative">
+                            <li v-for="item in list">{{item.adapterName}}</li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="type">
                     <div style="font-weight: bold">端口类型</div>
+                    <div class="netContent">
+                        <ul id="type" style="position: relative">
+                            <li v-for="item in list">{{item.type}}</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -58,13 +72,15 @@
 <script src="js/jquery.ztree.core.js"></script>
 <script src="js/jquery.ztree.excheck.js"></script>
 <script>
+    function filter(node) {
+        return (node.level == 2 && node.name.indexOf("test")>-1);
+    }
     // 创建根实例
     new Vue({
         el: '#example',
         data: {
             zNodes:[],
-            netList:[],
-            typeList:[]
+            list:[]
         },
         mounted: function () {
             this.$nextTick(function () {
@@ -81,7 +97,7 @@
                     if (data.length != 0) {
                         for (var i = 0; i < data.length; i++) {
                             _this.zNodes.push({
-                                open: true,
+                                open: false,
                                 name: data[i].serverName + ' ' + data[i].serverIP,
                                 serverId: data[i].serverId,
                                 children: []
@@ -99,30 +115,44 @@
             },
             treeShow: function () {
                 var setting = {
-                    check: {
-                        enable: true,
-                        chkStyle: "checkbox"
-                    },
                     view: {
                         showIcon: false,
                     },
                     callback: {
-                        onCheck: this.onCheck,
+                        onExpand: this.zTreeOnExpand,
+                        onCollapse: this.zTreeOnCollapse,
+                        beforeExpand: this.zTreeBeforeExpand
                     }
                 }
                 $.fn.zTree.init($("#treeDemo"), setting, this.zNodes);
             },
-            onCheck: function (event, treeId, treeNode) {
-                var _this = this;
-                //http://localhost:8080/streamplatserver/db/{userId}/getAdAndTypeInfo/{portId}
-                if(treeNode.level==1&&treeNode.checked){
-                    ajaxGetAsync(url + "db/" + localStorage.getItem('userId') + '/getAdAndTypeInfo/'+treeNode.portId, function (data) {
-                        if (data.resultCode == ERR_OK) {
-                            console.log(data);
-                        }
-                    })
-                }
+            zTreeBeforeExpand:function () {
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                zTree.expandAll(false);
             },
+            zTreeOnExpand: function (event, treeId, treeNode) {
+                var _this = this;
+                var portIdList = [];
+                var totalTop = document.getElementById(treeNode.tId).offsetTop;
+                var netTop = document.getElementById("net").offsetTop;
+                var height = totalTop - netTop + 30;
+                document.getElementById("adapterName").style.top = height+'px';
+                document.getElementById("type").style.top = height+'px';
+                console.log(treeNode);
+                treeNode.children.forEach(function (v) {
+                    portIdList.push(v.portId)
+                });
+                var u =url + "db/" + localStorage.getItem('userId') + '/getAdAndTypeInfo?portIdList='+portIdList
+                ajaxGet(u, function (data) {
+                    console.log(data);
+                    if (data.resultCode == ERR_OK) {
+                        _this.list = data.data;
+                    }
+                })
+            },
+            zTreeOnCollapse:function (event, treeId, treeNode) {
+                this.list = [];
+            }
         }
 
     })

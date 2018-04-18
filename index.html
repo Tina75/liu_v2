@@ -161,6 +161,8 @@
         // MetsiMenu
         $("#menu").metisMenu();
         //计算高度
+        console.log("==============");
+        console.log(window.innerHeight);
         document.getElementById("content-main").style.height = window.innerHeight-50+"px";
         //修改用户名称
         var user = localStorage.getItem('userName');

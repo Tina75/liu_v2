@@ -61,9 +61,6 @@ input{
     border-radius: 0!important;
     /*-webkit-appearance:none;*/
 }
-/*select{*/
-    /*-webkit-appearance:none;*/
-/*}*/
 input:focus{
 
     /*outline: none!important;*/
@@ -77,13 +74,16 @@ select{
     appearance:none;
     -moz-appearance:none;
     -webkit-appearance:none;
+    background: none;
     background:url(../image/arrow_down.png)  no-repeat 90% center!important;
     padding-right:14px!important;// 留出来下拉箭头的位置
 }
 select.form-control{
     background:url(../image/arrow_down.png)  no-repeat 98% center!important;
 }
-
+select.caret_position{
+    background:url(../image/arrow_down.png)  no-repeat 90% center!important;
+}
 li {
     list-style: none;
 }
@@ -1007,7 +1007,7 @@ body  .layui-layer-btn a{
 .server-left{
     width: 250px;
     border: 1px solid #E6E6E6;
-    height: 570px;
+    height: 100%;
     float: left;
     margin-left: -270px;
     margin-top:10px;
@@ -1192,7 +1192,7 @@ body  .layui-layer-btn a{
 .error>span{
     color: red;
 }
-.error input{
+.error input,.error select{
     border-color:red!important;
 }
 
@@ -1254,5 +1254,9 @@ td.limitWidth div{
     display: none;
 }
 .table-responsive{
-    height: 470px;
+    height: 531px;
 }
+/*-------------------------------4.13新添加----------------------------------------*/
+select::-ms-expand{
+    display:none;
+}/*ie11浏览器下拉框样式*/

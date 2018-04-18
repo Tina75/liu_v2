@@ -165,7 +165,7 @@
                                         <div class="name_checked clearfix" @click=" item.groupIdStr.isShow = !item.groupIdStr.isShow;">
                                             <span class="pull-left" v-show="item.groupIdStr.groupObj.length == 0">选择组</span>
                                             <div class="checkedItem pull-left" v-show="item.groupIdStr.groupObj.length != 0">
-                                                <span  v-for="name in item.groupIdStr.groupObj">{{name.groupName}}，</span>
+                                                <span  v-for="(name,l) in item.groupIdStr.groupObj">{{name.groupName}},</span>
                                             </div>
                                             <i class="fa  pull-right"  :class="{'fa-angle-up':item.groupIdStr.isShow,'fa-angle-down':!item.groupIdStr.isShow}"></i>
                                         </div>
@@ -272,7 +272,7 @@
                                 <div class="name_checked clearfix" @click="editList.isShow = !editList.isShow;">
                                     <span class="pull-left" v-show="editList.userGroupInfoList.length==0">选择组</span>
                                     <div class="checkedItem pull-left" v-show="editList.userGroupInfoList.length != 0">
-                                        <span  v-for="name in editList.userGroupInfoList">{{name.groupName}}，</span>
+                                        <span  v-for="(name,l) in editList.userGroupInfoList">{{name.groupName}},</span>
                                     </div>
                                     <i class="fa  pull-right"  :class="{'fa-angle-up':editList.isShow,'fa-angle-down':!editList.isShow}"></i>
                                 </div>
@@ -352,7 +352,7 @@
             sortFlag:undefined, //默认升序
             userNameFilter:'', //搜索项
             current_page: 1, //当前页
-            pageSize:12,  //每页数据条数
+            pageSize:14,  //每页数据条数
             pages: 0, //总页数
             changePage:'',//跳转页
             checkAll:false,
@@ -739,10 +739,9 @@
                     _this.editList = arr[0];
                     this.$set(_this.editList, "isShow", false);
                     this.$set(_this.editList, "isOk", {userName:false,email:false,phoneNum:false});
-                    console.log(_this.editList);
                     layer.open({
                         type: 1,
-                        title: ['详情'],
+                        title: ['编辑 - '+ _this.editList.userName],
                         closeBtn: 1,
                         btn:['确定','关闭'],
                         btnAlign: 'c',

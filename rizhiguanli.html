@@ -19,43 +19,43 @@
     <!--页签-->
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#home" data-toggle="tab">日志管理</a></li>
+        <li class="active"><a href="javascript:void(0)" >日志管理</a></li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div class="tab-pane active" id="home">
+        <div class="tab-pane active" >
             <div class="search clearfix">
                 <div class="form-inline pull-left searchItems">
                     <div class="form-group">
                         <label >用户名称:
-                            <input type="text" class="form-control"  placeholder="请输入关键字">
+                            <input type="text" @keyup="cartView(1)"  v-model="userName" class="form-control"  placeholder="请输入关键字">
                         </label>
                     </div>
                     <div class="form-group">
                         <label >操作状态:
-                            <select class="form-control">
-                                <option>admin</option>
-                                <option>上海</option>
-                                <option>广州</option>
+                            <select class="form-control" @change="cartView(1)"  v-model="operatorState">
+                                <option value="">请选择状态</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
                             </select>
                         </label>
                     </div>
                     <div class="form-group">
                         <label >操作时间:
                             <div class="input-group">
-                                <input type="text" class="form-control begin_time" placeholder="开始时间">
+                                <input type="text" id="startTime" class="form-control begin_time" placeholder="开始时间">
                                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                             </div>
                         </label>
                     </div>
                     <div class="form-group">
                         <div class="input-group">
-                            <input type="text" class="form-control end_time" placeholder="结束时间">
+                            <input type="text" id="endTime" class="form-control end_time" placeholder="结束时间">
                             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary">确认</button>
+                    <button type="button" @click="cartView(1)" class="btn btn-primary">确认</button>
                 </div>
             </div>
             <div class="tableContainer">
@@ -65,10 +65,10 @@
                         <tr>
                             <th style="width: 45px">
                                 <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th  style="width: 6%">编号</th>
                             <th>用户名</th>
                             <th>内容</th>
                             <th>操作时间<span class="fa fa-sort"></span></th>
@@ -76,17 +76,18 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="item in list">
+                        <tr v-for="(item,index) in list">
                             <td>
                                 <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check icon-ok"></span>
+                                    <span class="fa fa-check ok"></span>
                                 </div>
                             </td>
-                            <td>1</td>
-                            <td>admin</td>
-                            <td>修改密码</td>
-                            <td>217-10-15 10:15:12</td>
-                            <td>成功</td>
+                            <td>{{index+1}}</td>
+                            <td>{{item.log_UserName}}</td>
+                            <td>{{item.log_Content}}</td>
+                            <td>{{item.log_Time}}</td>
+                            <td v-if="item.log_OPState==0">成功</td>
+                            <td v-else>失败</td>
                         </tr>
                         </tbody>
                     </table>
@@ -124,10 +125,10 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/layer/layer.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<!--<script src="js/My97DatePicker/WdatePicker.js"></script>-->
 <script src="js/datapicker/bootstrap-datepicker.js"></script>
 <script src="js/vue.js"></script>
-<script src="js/mockData.js"></script>
+<script src="js/ajaxMy.js"></script>
+<script src="js/url.js"></script>
 <script>
     function DatePicker(beginSelector,endSelector){
         // 仅选择日期
@@ -173,7 +174,10 @@
         el: '#example',
         data: {
             list: [],   //展示数组
+            operatorState:'', //搜索项
+            userName:'',  //搜素项目
             current_page: 1, //当前页
+            pageSize:14,  //每页数据条数
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
@@ -181,8 +185,7 @@
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
-                this.cartView(false);
-
+                _this.cartView(_this.current_page);
             })
         },
         computed:{
@@ -229,40 +232,44 @@
                     left++;
                 }
                 return ar;
-            },
+            }
         },
         methods: {
-            cartView: function (flag) {
-                //console.log(this.username);
-                if (flag) { //搜索
-                    this.current_page = 1;
-                }
+            cartView:  function (cPage) {
                 var _this = this;
                 //模拟数据
-                _this.list = data.Renwugunali;
-                _this.pages = data.CountPage;
-//                $.ajax({
-//                    url: "http://192.168.1.28:8080/SYSystem/renwuguanli/showAllrenwu",
-//                    type:'post',
-//                    dataType:'json',
-//                    data: {
-//                        PAGE: _this.current_page - 1,
-//                        task_name:'',
-//                        creater: ''
-//                    },
-//                    success: function(data){ //成功的回调函数的处理
-//                        _this.list = data.Renwugunali;
-//                        _this.pages = data.CountPage;
-//                    },
-//                    error:function(errorData){
-//                        if(errorData.readyState=='0'){
-//                            layer.close(index);
-//                            layer.alert('请先连接服务器');
-//                        }
-//                    }
-//                });
+                ///log/{userId}/getLogList/{currentPage}/{pageSize}
+                var u = url +"log/"+localStorage.getItem("userId")+"/getLogList/"
+                    +cPage+"/"+this.pageSize;
+                var logFilter={
+                    "endTime": $("#endTime").val(),//结束时间
+                    "operatorState": this.operatorState,//操作状态
+                    "startTime": $("#startTime").val(),//开始时间
+                    "userName": this.userName //用户名称
+                }
+                ajaxPostObj(u,JSON.stringify(logFilter),function (data) {
+                    if(data.resultCode == ERR_OK ){
+                        _this.list = data.data.logList;
+                        _this.pages = parseInt(data.data.countPage);
+                    }else{
+                        layer.alert(data.message);
+                    }
+                });
+            },
+            sort:function () {
+                if(typeof this.sortFlag == "undefined"){
+                    this.sortFlag=true;
+                }else{
+                    this.sortFlag=!this.sortFlag;
+                }
+                if(this.sortFlag){ //true 升序
+                    this.list.sort(compare_asc("create_Time"));
+                }else{
+                    this.list.sort(compare_des("create_Time"));
+                }
             },
             selectedList: function (item) {
+                var _this=this;
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -270,6 +277,13 @@
                     item.checked = !item.checked;
                 }
                 this.isCheckAll();
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isAll: function () {  //全选
                 var _this = this;
@@ -281,7 +295,13 @@
                         item.checked = _this.checkAll;
                     }
                 });
-                console.log(_this.list);
+                //复选框选中项
+                _this.selected = [];
+                this.list.forEach(function (item) {
+                    if(item.checked){
+                        _this.selected.push(item);
+                    }
+                });
             },
             isCheckAll: function () {
                 var flag = true;
@@ -298,11 +318,14 @@
 
             },
             jumpPage: function(id) {
-                this.current_page = id;
+                if(id <=this.pages){
+                    this.current_page = id;
+                    this.cartView(this.current_page);
+                }else{
+                    layer.alert("超出最大页数")
+                }
+
             },
-            pageAjax:function () {
-                alert(this.current_page);
-            }
         }
 
     })

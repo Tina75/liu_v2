@@ -17,7 +17,7 @@
     </ul>
 
     <!-- Tab panes -->
-    <div class="tab-content">
+    <div class="tab-content" id="content" style="padding-bottom: 0">
         <div class="tab-pane active server" id="home" style="height: 100%">
             <div class="server-left">
                 <div class="server-litle" style="font-weight: bold;color: #000;">知识库列表</div>
@@ -27,7 +27,7 @@
                     <li><a href="virtual_state.html" class="J_menuItem">虚拟身份对应关系库</a></li>
                 </ul>
             </div>
-            <div class="server-right" style="height:61rem;">
+            <div class="server-right" style="height:100%;">
                 <iframe id="J_iframe" width="100%" height="100%" src="IP_address.html" frameborder="0" ></iframe>
             </div>
         </div>
@@ -39,6 +39,12 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/vue.js"></script>
 <script>
+    $(document).ready(function () {
+        //计算高度
+        var htmlHeight = window.innerHeight;
+        document.getElementById("example").style.height = htmlHeight+"px";
+        document.getElementById("content").style.height = htmlHeight-15*2-44+"px";
+    });
     $(".J_menuItem").on('click',function(){
         $(this).parent().parent().find("li").removeClass("active");
         $(this).parent().toggleClass("active");
