@@ -2,29 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e59202a1-362a-46c8-84ec-73811fa2fbcf" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/reset_Password.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/2.html" afterPath="$PROJECT_DIR$/2.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IP_address.html" afterPath="$PROJECT_DIR$/IP_address.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/common.css" afterPath="$PROJECT_DIR$/css/common.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/login.css" afterPath="$PROJECT_DIR$/css/login.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/domain_IP.html" afterPath="$PROJECT_DIR$/domain_IP.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fuwuguangtai.html" afterPath="$PROJECT_DIR$/fuwuguangtai.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fuwuqijiedian.html" afterPath="$PROJECT_DIR$/fuwuqijiedian.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hitChaKan.html" afterPath="$PROJECT_DIR$/hitChaKan.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/login.html" afterPath="$PROJECT_DIR$/login.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/quanbuguize.html" afterPath="$PROJECT_DIR$/quanbuguize.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/quanburenwu.html" afterPath="$PROJECT_DIR$/quanburenwu.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/rizhiguanli.html" afterPath="$PROJECT_DIR$/rizhiguanli.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/shujukupeizhi.html" afterPath="$PROJECT_DIR$/shujukupeizhi.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/shujuyuanpeizhi.html" afterPath="$PROJECT_DIR$/shujuyuanpeizhi.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tongjichakan_duankou.html" afterPath="$PROJECT_DIR$/tongjichakan_duankou.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tongjichakan_xieyi.html" afterPath="$PROJECT_DIR$/tongjichakan_xieyi.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/virtual_state.html" afterPath="$PROJECT_DIR$/virtual_state.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wodeguize.html" afterPath="$PROJECT_DIR$/wodeguize.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/woderenwu.html" afterPath="$PROJECT_DIR$/woderenwu.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/yonghuliebiao.html" afterPath="$PROJECT_DIR$/yonghuliebiao.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/yonghuzuliebiao.html" afterPath="$PROJECT_DIR$/yonghuzuliebiao.html" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -458,7 +436,7 @@
       <workItem from="1524185672416" duration="56000" />
       <workItem from="1524187638490" duration="21024000" />
       <workItem from="1524445319663" duration="19638000" />
-      <workItem from="1524533924411" duration="8788000" />
+      <workItem from="1524533924411" duration="8842000" />
     </task>
     <task id="LOCAL-00001" summary="daily">
       <created>1523598359688</created>
@@ -474,11 +452,18 @@
       <option name="project" value="LOCAL" />
       <updated>1524033353407</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="daily">
+      <created>1524554028505</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1524554028505</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1141010000" />
+    <option name="totallyTimeSpent" value="1141064000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="0" />
@@ -751,6 +736,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="455">
           <caret line="185" column="30" lean-forward="true" selection-start-line="185" selection-start-column="30" selection-end-line="185" selection-end-column="30" />
+          <folding />
         </state>
       </provider>
     </entry>
