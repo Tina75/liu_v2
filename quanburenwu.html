@@ -50,10 +50,9 @@
                     </div>
                     <div class="form-group">
                         <label for="creater">创建人:</label>
-                        <select class="form-control caret_position" id="creater" v-model="taskCreateUserName" >
-                            <option>admin</option>
-                            <option>上海</option>
-                            <option>广州</option>
+                        <select class="form-control caret_position" id="creater" v-model="taskCreateUserName" @change="cartView(1)" >
+                            <option value="">请选择创建人</option>
+                            <option :value="item" v-for="item in taskCreateUserNameList">{{item}}</option>
                         </select>
                     </div>
                     <button type="button" class="btn btn-primary" @keyup="cartView(1)">确认</button>
@@ -745,6 +744,7 @@
             taskConRuleId: "",  //搜索项
             taskCreateUserName: "", //搜索项
             taskName: "",     //搜索项
+            taskCreateUserNameList:[], //用户下拉框
             current_page: 1, //当前页
             pageSize: 14,  //每页数据条数
             pages: 0, //总页数
@@ -790,11 +790,13 @@
                 }, //编辑
             },
             buControlSelectList: [], //布控前置条件列表,
-            ruleItem: []  //关联规则列表
+            ruleItem: [],  //关联规则列表
+            userName:localStorage.getItem('userName')
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
+                _this.queryUserNameList();
                 _this.cartView(_this.current_page);
                 _this.buControlSelect();
                 _this.getRuleItem();
@@ -868,12 +870,24 @@
                     taskName: this.taskName
                 }
                 ajaxPostObj(u, JSON.stringify(taskFilter), function (data) {
-                    console.log(data);
                     if (data.resultCode == ERR_OK) {
                         _this.list = data.data.taskList;
                         _this.pages = parseInt(data.data.countNum);
                     } else {
                         layer.alert("数据请求失败");
+                    }
+                });
+            },
+            queryUserNameList:function () {
+                http://localhost:8080/streamplatserver/user/queryUserNameList
+                var _this = this;
+                var u = url + "user/queryUserNameList";
+                ajaxGet(u, function (data) {
+                    console.log(data);
+                    if (data.resultCode == ERR_OK) {
+                        _this.taskCreateUserNameList = data.data;
+                    }else{
+                        layer.alert(data.message)
                     }
                 });
             },
@@ -895,7 +909,10 @@
                 }
             },
             selectedList: function (item) {
-                var _this = this;
+                var _this=this;
+                if(this.userName !=item.task_CreateUserName){
+                    return
+                }
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -906,39 +923,44 @@
                 //复选框选中项
                 _this.selected = [];
                 this.list.forEach(function (item) {
-                    if (item.checked) {
+                    if(item.checked){
                         _this.selected.push(item);
                     }
                 });
             },
             isAll: function () {  //全选
                 var _this = this;
-                this.checkAll = !this.checkAll;
+                this.checkAll=!this.checkAll;
                 _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
+                    if(_this.userName ==item.task_CreateUserName){
+                        if (typeof item.checked == "undefined") {
+                            _this.$set(item, "checked", _this.checkAll);
+                        } else {
+                            item.checked = _this.checkAll;
+                        }
                     }
                 });
                 //复选框选中项
                 _this.selected = [];
                 this.list.forEach(function (item) {
-                    if (item.checked) {
+                    if(item.checked){
                         _this.selected.push(item);
                     }
                 });
             },
             isCheckAll: function () {
+                var _this=this;
                 var flag = true;
                 this.list.forEach(function (item) {
-                    if (!item.checked) {
-                        flag = false;
+                    if(_this.userName ==item.task_CreateUserName){
+                        if(!item.checked){
+                            flag = false;
+                        }
                     }
                 })
-                if (flag) {
+                if(flag){
                     this.checkAll = true;
-                } else {
+                }else{
                     this.checkAll = false;
                 }
 
@@ -1013,14 +1035,15 @@
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
                     parentTaskId: simple.pre_condition.parentTaskId,
-                    task_RuleName: '', //id对应的值
+                    parentTaskName:'',
+                    task_RuleName: '', //task_RuleId对应的值
+                    task_RuleId: simple.task_RuleId,
                     taskId: '',
                     task_CreateTime: '',
                     task_CreateUserName: localStorage.getItem("userName"),
                     task_Descrption: simple.task_Descrption,
                     task_EndTime:$(dom).parent().parent().parent().find(".end").val(),
                     task_Name: simple.task_Name,
-                    task_RuleId: simple.task_RuleId,
                     task_RunProgress: '',
                     task_RunState: '',
                     task_RunTimes: '',
@@ -1029,10 +1052,10 @@
                     task_StartTime: $(dom).parent().parent().parent().find(".start").val(),
                     task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
                 }
-                //simple.pre_condition.parentTaskId.taskId
                 //通过taskId对应前置条件task_RuleName
                 //模拟失去焦点
-                taskInfo.task_RuleName= this.taskIdToName(simple.pre_condition.parentTaskId);
+                taskInfo.task_RuleName= this.taskIdToName(simple.task_RuleId);
+                taskInfo.parentTaskName= this.parentTaskIdToName(simple.pre_condition.parentTaskId);
                 var input = $(dom).parent().parent().parent().find(".validateTask");
                 for (var i = 0; i < input.length; i++) {
                     $(input[i]).trigger('focus');
@@ -1056,6 +1079,15 @@
                 }
             },
             taskIdToName:function (id) {
+                var name = '';
+                this.ruleItem.forEach(function (v,i) {
+                    if(v.ruleId == id){
+                        name = v.ruleName
+                    }
+                })
+                return name;
+            },
+            parentTaskIdToName:function (id) {
                 var name = '';
                 this.buControlSelectList.forEach(function (v,i) {
                     if(v.taskId == id){
@@ -1160,6 +1192,8 @@
                 var _this = this;
                 var u = url + "rule/" + localStorage.getItem("userId") + "/queryTaskList";
                 ajaxGet(u, function (data) {
+                    console.log("前置条件下拉");
+                    console.log(data);
                     if (data.resultCode == ERR_OK) {
                         _this.buControlSelectList = data.data;
                     }
@@ -1169,6 +1203,7 @@
                 var _this = this;
                 var u = url + "task/" + localStorage.getItem("userId") + "/getRuleItem";
                 ajaxGet(u, function (data) {
+                    console.log("关联规则");
                     console.log(data);
                     if (data.resultCode == ERR_OK) {
                         _this.ruleItem = data.data;
@@ -1295,7 +1330,8 @@
                     matchdata_DealType: simple.matchdata.matchdata_DealType,
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
-                    parentTaskId: simple.pre_condition.parentTaskId.taskId,
+                    parentTaskId: simple.pre_condition.parentTaskId,
+                    parentTaskName:'',
                     task_RuleName: '',
                     taskId: '',
                     task_CreateTime: '',
@@ -1303,7 +1339,7 @@
                     task_Descrption: simple.task_Descrption,
                     task_EndTime: document.getElementById("end").value,
                     task_Name: simple.task_Name,
-                    task_RuleId: item.task_RuleId,
+                    task_RuleId: simple.task_RuleId,
                     task_RunProgress: '',
                     task_RunState: '',
                     task_RunTimes: '',
@@ -1312,7 +1348,8 @@
                     task_StartTime: document.getElementById("start").value,
                     task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
                 }
-                taskInfo.task_RuleName= this.taskIdToName(simple.pre_condition.parentTaskId);
+                taskInfo.task_RuleName= this.taskIdToName(simple.task_RuleId);
+                taskInfo.parentTaskName= this.parentTaskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $("#buControl").find(".validate");
                 for (var i = 0; i < input.length; i++) {

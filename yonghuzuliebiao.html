@@ -65,7 +65,7 @@
                                     <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th width="6%">编号</th>
                             <th>用户组名称</th>
                             <th @click="sort" style="cursor: pointer">创建时间<span class="fa" :class="sortClass"></span></th>
                             <th>用户</th>
@@ -165,7 +165,7 @@
                                         <span class="fa fa-search" @click="zNodes_search_right(currentIndex,item.search_right)"></span>
                                     </div>
                                     <ul class="send_to">
-                                        <li v-for="(item,index) in item.selected"  @click="removeRight(item,'treeDemo'+currentIndex)" v-if="item.level==2">{{item.name}}</li>
+                                        <li v-for="(item,index) in item.selected"  @click="removeRight(item,'treeDemo'+currentIndex)" v-if="item.level==1">{{item.name}}</li>
                                     </ul>
                                     <!--<div class="close">全部删除</div>-->
                                 </div>
@@ -190,7 +190,8 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="task-name" class="bold">用户组:</label>
-                        <input type="text" v-model="editList.groupName"  class="form-control" id="task-name" placeholder="在此输入内容...">
+                        <input type="text" @blur="valiGroupName($event.target,editList)"  v-model="editList.groupName"  class="form-control validate" id="task-name" placeholder="在此输入内容...">
+                        <span class="form-account-error"></span>
                     </div>
                 </div>
                 <div class="col-md-6"></div>
@@ -220,7 +221,7 @@
                                 <span class="fa fa-search" @click="zNodes_search_right('',search_right)"></span>
                             </div>
                             <ul class="send_to">
-                                <li v-for="(item,index) in zTreeArr" :class="{zTreeActive:item.zTreeActive}" @click="removeRight(item,'treeDemo')" v-if="item.level==2">{{item.name}}</li>
+                                <li v-for="(item,index) in zTreeArr" :class="{zTreeActive:item.zTreeActive}" @click="removeRight(item,'treeDemo')" v-if="item.level==1">{{item.name}}</li>
                             </ul>
                             <!--<div class="close">全部删除</div>-->
                         </div>
@@ -261,7 +262,10 @@
             navLI:[{}],
             currentIndex:0,
             selected:[],    //表格选中项
-            editList:{},   //编辑参数
+            editList:{
+                groupName:'',
+                isOk:{userName:false},
+            },   //编辑参数
             zNodes:[],  //用户组树
             zTreeArr:[],  //编辑中选中项
             search_left:'',
@@ -278,7 +282,6 @@
         },
         computed:{
             show:function(){
-               // console.log(this.pages && this.pages !=1);
                 return this.pages && this.pages !=1
             },
             pstart: function() {
@@ -457,19 +460,19 @@
                     }, function(){
                         layer.closeAll();
                     });
-                }else{
-                    return
                 }
             },
-            editTreeInit:function () {
+            editTreeInit:function (treeInitDate) {
                 var zTreeObject=$.fn.zTree.getZTreeObj("treeDemo");
                 var zTreeGetNode = zTreeObject.getNodes();
-                var groupName = this.editList.groupName;
+                console.log(zTreeGetNode)
+                console.log(treeInitDate);
                 for(var i = 0,tree = zTreeGetNode[0].children; i < tree.length; i++){
-                    if(groupName == tree[i].name && tree[i].level == 1){
-                        zTreeObject.checkNode(tree[i],true, true);
+                    for(var j = 0; j < treeInitDate.inGroupUserNams.length; j++){
+                        if(tree[i].name == treeInitDate.inGroupUserNams[j]){
+                            zTreeObject.checkNode(tree[i],true, true);
+                        }
                     }
-
                 }
                 this.zTreeArr = zTreeObject.getCheckedNodes(true);
             },
@@ -482,9 +485,9 @@
                     arr.push(item);
                 });
                 if(arr.length==1){
-                    _this.editList = arr[0];
+                    _this.editList.groupName = arr[0].groupName;
                     //编辑显示之前的选中项
-                    _this.editTreeInit();
+                    _this.editTreeInit(arr[0]);
                     layer.open({
                         type: 1,
                         title: ['编辑 - '+ _this.editList.groupName],
@@ -496,39 +499,46 @@
                         shadeClose: true,
                         content: $('#edit'),
                         yes:function () {
-                            _this.edit();
+                            _this.edit(arr[0].groupId);
                         }
                     });
-                }else{
-                    return;
                 }
             },
-            edit:function () {
+            edit:function (groupId) {
                 var _this=this;
-                var u = url+"user/editeGroupDetails/"+this.editList.groupName+"/"+this.editList.groupId;
+                var u = url+"user/editeGroupDetails/"+this.editList.groupName+"/"+groupId;
                 var userIdList = this.userIdList("treeDemo");
-                ajaxPostArray(u,{userIdList:userIdList},function (data) {
-                    if(data.resultCode == ERR_OK ){
-                        layer.alert("修改成功",function () {
-                            _this.cartView(_this.current_page);
-                            _this.selected = [];
-                            layer.closeAll();
-                        });
-                    }else{
-                        layer.alert(data.message);
-                    }
-                });
+                //模拟失去焦点
+                var input = $("#edit").find(".validate");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = this.editList.groupName;
+                if(isOk){
+                    ajaxPostArray(u,{userIdList:userIdList},function (data) {
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("修改成功",function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                layer.closeAll();
+                            });
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    });
+                }
+
             },
             userIdList:function (treeId) {
                 var arr = [];
                 var zTreeObject=$.fn.zTree.getZTreeObj(treeId);
                 var arrSel = zTreeObject.getCheckedNodes(true); //选择项
                 for(var k=0;k<arrSel.length;k++){
-                    if(arrSel[k].level == 2){
+                    if(arrSel[k].level == 1){
                         arr.push(arrSel[k].userId);
                     }
                 }
-                console.log(arr);
                 return arr;
             },
             add:function (dom) {
@@ -552,11 +562,9 @@
             addNewGroup:function (item,index,dom) {
                 var _this = this;
                 var u = url +'user/addNewGroup/';
-                console.log(item.groupName);
                 var userIdList = this.userIdList("treeDemo"+index);
                 //模拟失去焦点
                 var input = $(dom).parent().parent().parent().find(".validate");
-                console.log(input);
                 for(var i = 0; i < input.length; i++){
                     $(input[i]).trigger('focus');
                     $(input[i]).trigger('blur');
@@ -627,7 +635,8 @@
             },
             zNodesList:function () {  //获取用户组树 后台数据
                 var _this = this;
-                ajaxGetAsync(url+"user/getGroupListContainsUserList",function (data) {
+                ajaxGetAsync(url+"user/queryUserNameAndIdList",function (data) {
+                    console.log(data);
                     var data = data.data;
                     _this.zNodes_manage(data);
                 })
@@ -637,13 +646,7 @@
                     name:'全部用户',open:true,children:[]
                 }];
                 for(var i = 0;i < data.length; i++){
-                    if(data[i].groupName){
-                        this.zNodes[0].children.push({name:data[i].groupName,open:false,children:[]});
-                        for(var j = 0; j<data[i].userInfoList.length; j++){
-                            var userInfoList = data[i].userInfoList[j];
-                            this.zNodes[0].children[i].children.push({name:userInfoList.userName,userId:userInfoList.userId});
-                        }
-                    }
+                    this.zNodes[0].children.push({name:data[i].userName,userId:data[i].userId});
                 }
             },
             zNodes_search_left:function (currentIndex,key) {
@@ -696,7 +699,7 @@
                 var num= treeId.replace(/[^0-9]/ig,"");
                 var arrSel = zTreeObject.getCheckedNodes(true); //选择项
                 for(var k=0;k<arrSel.length;k++){
-                    if(arrSel[k].tId==item.tId &&arrSel[k].level == 2){
+                    if(arrSel[k].tId==item.tId){
                         zTreeObject.checkNode(arrSel[k],false, true);//取消这个节点的勾选状态
                         break;
                     }
@@ -712,16 +715,14 @@
                 var _this = this;
                 var arr = currentIndex?this.navLI[currentIndex].selected:this.zTreeArr;
                 arr.forEach(function (cValue,i) {
-                    if(cValue.level == 2){
-                        if(key == ""){
-                            _this.$set(cValue, "zTreeActive",false);
-                            return
-                        }
-                        if(cValue.name.indexOf(key) != -1){
-                            _this.$set(cValue, "zTreeActive",true);
-                        }else{
-                            _this.$set(cValue, "zTreeActive",false);
-                        }
+                    if(key == ""){
+                        _this.$set(cValue, "zTreeActive",false);
+                        return
+                    }
+                    if(cValue.name.indexOf(key) != -1){
+                        _this.$set(cValue, "zTreeActive",true);
+                    }else{
+                        _this.$set(cValue, "zTreeActive",false);
                     }
                 })
                 currentIndex?(this.navLI[currentIndex].selected=arr):(this.zTreeArr=arr)

@@ -41,6 +41,9 @@
                         <li class="pull-right" @click="editPop()">
                             <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
+                        <li class="pull-right"  @click="sharePop()">
+                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
+                        </li>
                         <li class="pull-right" @click="deleteList">
                             <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
                         </li>
@@ -59,6 +62,7 @@
                                 </th>
                                 <th style="width:6%">编号</th>
                                 <th style="width:30%">域名</th>
+                                <th style="width:20%;">状态</th>
                                 <th >IP地址信息</th>
                             </tr>
                         </thead>
@@ -70,10 +74,15 @@
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td @click="ipIndex=index" :class="{bule:ipIndex==index}" :title="item.domainName" style="cursor: pointer">{{item.domainName}}
+                            <td @click="ipIndex=index" :class="{bule:ipIndex==index}" :title="item.domainName" style="cursor: pointer">
+                                <i v-if="item.property==1" class="icon-icon-sy5" style="display: inline-block;width: 15px"></i>
+                                <span :class="{marginLitter:item.property!=1}">{{item.domainName}}</span>
+                            </td>
+                            <td>
+                                <span v-if="item.state==2">已分享</span>
                             </td>
                             <td >
-                                <div class="ipShow" style="display: none" :class="{'show':ipIndex==index}">
+                                <div class="ipShow" style="display: none;bottom: 0;left:61%;border-left: 1px solid #E7E7E7" :class="{'show':ipIndex==index}">
                                     <ul>
                                         <li v-for="list in item.ipStr.split(',')">{{list}}</li>
                                     </ul>
@@ -279,6 +288,9 @@
             },
             selectedList: function (item) {
                 var _this=this;
+                if(item.property==1){
+                    return
+                }
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -298,10 +310,12 @@
                 var _this = this;
                 this.checkAll=!this.checkAll;
                 _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
+                    if(item.property!=1) {  //不是系统自带的
+                        if (typeof item.checked == "undefined") {
+                            _this.$set(item, "checked", _this.checkAll);
+                        } else {
+                            item.checked = _this.checkAll;
+                        }
                     }
                 });
                 //复选框选中项
@@ -315,8 +329,10 @@
             isCheckAll: function () {
                 var flag = true;
                 this.list.forEach(function (item) {
-                    if(!item.checked){
-                        flag = false;
+                    if(item.property!=1) {
+                        if(!item.checked){
+                            flag = false;
+                        }
                     }
                 })
                 if(flag){
@@ -476,6 +492,26 @@
                     layer.alert('导入失败');
                 });
             },
+            sharePop:function () {
+                ///knowledge/{userId}/sharedIPDomainList?idList=120bd837d8c54599%2Cf2df83789ff34be9
+                var _this=this;
+                var idList = [];
+                this.selected.forEach(function (item) {
+                    idList.push(item.id);
+                });
+                console.log(this.selected)
+                if(this.selected.length > 0){
+                    ajaxGetArray(url+"knowledge/"+localStorage.getItem('userId')+"/sharedIPDomainList",
+                        {idList:idList},function (data) {
+                            //console.log(data);
+                            if(data.resultCode == ERR_OK ){
+                                layer.alert("分享成功");
+                            }else{
+                                layer.alert("删除失败");
+                            }
+                        });
+                }
+            }
         }
 
     })

@@ -3,8 +3,7 @@
 	padding: 0;
 }
 
-body
-{
+body {
 	font: 12px/1.5 Tahoma, Helvetica, Arial, '微软雅黑', sans-serif;
 	color: #666;
 }
@@ -45,10 +44,11 @@ a {
 
 /*新增login样式*/
 
-.box{
+.box {
 	position: relative;
 }
-.mulu{
+
+.mulu {
 	height: 60px;
 }
 
@@ -62,6 +62,7 @@ a {
 	bottom: 0;
 	left: 0;
 }
+
 .mulu h1 img {
 	width: 281px;
 	height: 32px;
@@ -69,9 +70,9 @@ a {
 }
 
 .ztbf {
-	width:100%;
+	width: 100%;
 	background: url(../image/login-bj.jpg) 0 0 no-repeat;
-	background-size:cover;
+	background-size: cover;
 }
 
 .dlk {
@@ -82,7 +83,6 @@ a {
 	margin-right: 8%;
 	margin-top: 8%;
 }
-
 
 .dlk h2 {
 	font-size: 16px;
@@ -107,7 +107,7 @@ a {
 }
 
 .dlk .login {
-	width: 256px;
+	width: 180px;
 	height: 42px;
 	line-height: 42px;
 	background: #f18101;
@@ -119,3 +119,123 @@ a {
 	margin-left: 128px;
 }
 
+
+/*4.20*/
+
+.dlk a {
+	padding-left: 12px;
+	text-decoration: underline;
+	color: #CCCCCC;
+}
+
+.dlk a:hover {
+	color: #045DEF;
+	cursor: pointer;
+}
+
+
+/*重置密码*/
+
+.dlk-cz {
+	width: 540px;
+	height: 400px;
+	background: #fff;
+	box-shadow: 5px 5px 5px #003082;
+	float: right;
+	margin-right: 8%;
+	margin-top: 6%;
+}
+
+.dlk-cz h2 {
+	font-size: 16px;
+	height: 18px;
+	line-height: 18px;
+	color: #373737;
+	margin: 28px 0 20px 100px;
+}
+
+.dlk-cz label {
+	width: 400px;
+	height: 34px;
+	line-height: 34px;
+	margin: 8px 0 8px 100px;
+	font-weight: bold;
+	float: left;
+}
+
+.dlk-cz label span {
+	width: 70px;
+	float: left;
+}
+
+.dlk-cz label i{
+	font-style: normal;
+	font-weight: normal;
+	margin-left: 10px;
+}
+.dlk-cz label.error input[type="text"],
+.dlk-cz label.error input[type="password"]{
+	border: 1px solid red;
+}
+.dlk-cz label.error i{
+	color: red;
+}
+
+.dlk-cz label input {
+	width: 250px;
+	height: 34px;
+	line-height: 34px;
+	padding: 0 8px;
+	font-weight: normal;
+	float: left;
+}
+
+.dlk-cz label .youx {
+	width: 160px;
+}
+
+.dlk-cz label .yanzm {
+	width: 80px;
+	margin-left: 10px;
+	height: 36px;
+	line-height: 36px;
+	color: #035FF0;
+	border: 1px solid #035FF0;
+	background: #fff;
+}
+
+.dlk-cz label .yanzm:hover {
+	background: #035FF0;
+	color: #fff;
+	cursor: pointer;
+}
+
+.dlk-cz label .chongzhimm {
+	width: 340px;
+	margin-top: 12px;
+	background: #F18101;
+	color: #fff;
+	height: 36px;
+	line-height: 36px;
+	font-weight: bold;
+	border: none;
+}
+
+.dlk-cz .fhsy {
+	margin-left: 100px;
+	line-height: 60px;
+	color: #ccc;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+.dlk-cz .fhsy:hover {
+	color: #045DEF;
+	cursor: pointer;
+}
+
+.dlk-cz .fhsy span {
+	width: 20px;
+	letter-spacing: -4px;
+	text-decoration: none;
+}

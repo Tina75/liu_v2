@@ -36,8 +36,8 @@
                         <label >操作状态:
                             <select class="form-control" @change="cartView(1)"  v-model="operatorState">
                                 <option value="">请选择状态</option>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
+                                <option value="0">成功</option>
+                                <option value="1">失败</option>
                             </select>
                         </label>
                     </div>
@@ -92,28 +92,32 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="page clearfix" v-show="show">
+                <div class="page clearfix" >
                     <div class="pageCut">
                         每页
-                        <select name="" class="form-control pageSelect" >
-                            <option value="1">1</option>
+                        <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
                         </select>
                         条记录
                     </div>
-                    <div class="pagelist">
+                    <div class="pagelist" >
                         <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
-                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">1</span>
+                        <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
                         <span class="ellipsis" v-show="efont">...</span>
                         <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
                               @click="jumpPage(num)">{{num}}</span>
                         <span class="ellipsis" v-show="ebehind">...</span>
 
                         <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
-                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">{{pages}}</span>
+                        <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
 
                         <span class="jumppoint">跳转到：</span>
-                        <span class="jumpinp"><input type="text" v-model="changePage"></span>
-                        <span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+                        <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+                        <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
                     </div>
                 </div>
             </div>

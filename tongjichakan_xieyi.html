@@ -29,7 +29,7 @@
         <div class="tab-pane active" id="home">
             <div class="content">
                 <div class="left">
-                    <div class="title">端口列表 <span>(最多可选5个)</span></div>
+                    <div class="title">协议列表 <span>(最多可选5个)</span></div>
                     <ul id="treeDemo" class="ztree">
 
                     </ul>
@@ -38,7 +38,7 @@
                     <div class="top clearfix">
                         <div class="items">
                             <div class="title">
-                                <div class="t">端口流量统计图</div>
+                                <div class="t">协议流量统计图</div>
                                 <div class="r" @click="echartsView()"><span class="fa fa-check"></span>确认</div>
                             </div>
                             <div class="line">
@@ -70,25 +70,7 @@
                                     <input v-model="timeType" value="current" type="radio">
                                     实时时间
                                 </label>
-                                <div v-show="timeType == 'month'" class="data1" style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
-                                    <div class="input-group date" >
-                                        <input type="text"   class="form-control" placeholder="开始时间">
-                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                </div>
-                                <div v-show="timeType == 'week'"  class="data2" style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
-                                    <div class="input-group date"  >
-                                        <input type="text"   class="form-control" placeholder="开始时间">
-                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                </div>
-                                <div v-show="timeType == 'day'" class="data3" style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
-                                    <div class="input-group date"  >
-                                        <input type="text"   class="form-control" placeholder="开始时间">
-                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                </div>
-                                <div v-show="timeType == 'current'" class="data4"  style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
+                                <div  class="data4"  style="margin-left:15px;display: inline-block;vertical-align: middle;width:180px">
                                     <div class="input-group date"  >
                                         <input type="text" v-model="currentDate"   class="form-control" placeholder="开始时间">
                                         <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
@@ -96,14 +78,14 @@
                                 </div>
                             </div>
                             <div class="line choose">
-                                已选端口：
-                                <span v-for="item in CheckedNodes">{{item}}</span>
+                                已选协议：
+                                <span v-for="item in CheckedNodes">{{item}}，</span>
                             </div>
                         </div>
                         <div class="topTen">
                             <div class="div1">
                                 <div class="title">
-                                    <b>端口流量排行</b><span>Top10</span>
+                                    <b>协议流量排行</b><span>Top10</span>
                                     <div class="pull-right toggle" @click="topTenShow=!topTenShow">
                                         <span class="fa " :class="{'fa-angle-up':topTenShow,'fa-angle-down':!topTenShow}"></span>
                                         <span v-if="topTenShow">收起</span>
@@ -190,21 +172,24 @@
             topTen:[],
             topTenShow:true,
             CheckedNodes:[],
-            valueType:1,
-            timeType:'current',
-            timer:'',
+            valueType:localStorage.getItem('valueType')||1,
+            timeType:localStorage.getItem('timeType')||'current',
+            timer:null,
             mychart:'',
             currentDate:''
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
+                //获取用户组树
                 _this.zNodesList();
                 _this.top();
                 //初始化echarts
                 _this.echartsInit();
+                //刚开始没有默认时间就给一个初始值
+                _this.currentDate = localStorage.getItem('currentDate')||_this.dateNow()
                 //默认展示
-                _this.dateDefind();
+                _this.dataJudge();
                 _this.echartsView()
             })
         },
@@ -217,15 +202,18 @@
                     str = '报文数（Mbps）';
                 }
                 return str;
-            }
+            },
         },
         watch:{
             timeType:function (nvalue,ovalue) {
                 if(this.timer){
-                    this.currentDate = '';
+                    //this.currentDate = '';
                     clearInterval(this.timer);
                     this.timer = '';
                 }
+                this.currentDate = '';
+                this.dataJudge(); //事件类型一旦改变，就要重新初始化input
+                localStorage.setItem('timeType',nvalue);
             },
             currentDate:function (nvalue, ovalue) {
                 console.log("===========时间改变了================");
@@ -233,6 +221,10 @@
                     clearInterval(this.timer);
                     this.timer = '';
                 }
+                localStorage.setItem('currentDate',nvalue);
+            },
+            valueType:function (nvalue,ovalue) {
+                localStorage.setItem('valueType',nvalue);
             }
         },
         methods:{
@@ -297,7 +289,6 @@
             },
             echartsInit:function () {
                 //默认初始时间
-                this.currentDate = this.dateNow();
                 this.mychart = echarts.init(document.getElementById('main'));
                 this.mychart.setOption({
                     title: {
@@ -365,15 +356,13 @@
                     ],
                     series : [
                         {
-                            type:'line',
-                            //stack: '总量',
-
-                            //data:[120, 132, 101, 134, 90, 230, 210]
+                            type:'line'
                         }
                     ]
                 })
             },
             dateNow:function () {
+                var str='';
                 var date;
                 date= new Date();
                 var y = date.getFullYear();
@@ -387,21 +376,77 @@
                 var second = date.getSeconds();
                 minute = minute < 10 ? ('0' + minute) : minute;
                 second = second < 10 ? ('0' + second) : second;
-                return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+                switch (this.timeType){
+                    case 'month':
+                        str = y + '-' + m;
+                        break
+                    case 'week':
+                        str = y + '-' + m + '-' + d + ' ' + h;
+                        break
+                    case 'day':
+                        str = y + '-' + m + '-' + d;
+                        break
+                    case 'current':
+                        str = y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+                        break
+                }
+                return str;
             },
-            dateDefind:function(){
-                var  s;
+            dataJudge:function () {  //判断选择时间类型
+                var timeTypeObj  = null;
+                switch (this.timeType){
+                    case 'month':
+                        timeTypeObj = {
+                            startDate:'2018-01',
+                            startView: 3,
+                            language:  'zh-CN',
+                            minView: 3,
+                            format: "yyyy-mm",
+                            todayBtn: 1,
+                            autoclose: true,
+                        }
+                        break
+                    case 'week':
+                        timeTypeObj={
+                            startDate:'2018-01-01 01',
+                            startView: 2,
+                            language:  'zh-CN',
+                            minView: 1,
+                            format: "yyyy-mm-dd hh",
+                            todayBtn: 1,
+                            autoclose: true,
+                        }
+                        break
+                    case 'day':
+                        timeTypeObj = {
+                            startDate:'2018-01-01',
+                            startView: 2,
+                            minView: 2,
+                            language:  'zh-CN',
+                            format: "yyyy-mm-dd",
+                            todayBtn: 1,
+                            autoclose: true,
+                        }
+                        break
+                    case 'current':
+                        timeTypeObj = {
+                            startDate:'2018-01-01 00:00:00',
+                            startView: 0,
+                            language: 'zh-CN',
+                            format: 'yyyy-mm-dd hh:ii:ss',
+                            todayBtn: 1,
+                            autoclose: 1
+                        }
+                        break
+                }
+                //console.log(timeTypeObj);
+                this.dateDefind(timeTypeObj);
+            },
+            dateDefind:function(timeTypeObj){
                 var self = this;
-                s = self.dateNow();
-                self.dateValue = s;
                 //初始化
-                $('.data4 .input-group.date').datetimepicker({
-                    startView: 0,
-                    language: 'zh-CN',
-                    format: 'yyyy-mm-dd hh:ii:ss',
-                    todayBtn: 1,
-                    autoclose: 1
-                });
+                $('.data4 .input-group.date').datetimepicker("remove");
+                $('.data4 .input-group.date').datetimepicker(timeTypeObj);
                 //当选择器隐藏时，讲选择框只赋值给data里面的time
                 $('.data4 .input-group.date').datetimepicker()
                     .on('hide', function (ev) {
@@ -417,24 +462,6 @@
                 var time_interval = 5000; //时间间隔为5秒
 //                var time_interval = 5000*60;
                 switch (this.timeType){
-                    case 'month':
-                        timeValue = $('.data1 .input-group.date input').val();
-                        if(this.validate(timeValue,'.data1')){
-                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
-                        }
-                        break;
-                    case 'week':
-                        timeValue = $('.data2 .input-group.date input').val();
-                        if(this.validate(timeValue,'.data2')){
-                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
-                        }
-                        break;
-                    case 'day':
-                        timeValue = $('.data3 .input-group.date input').val()
-                        if(this.validate(timeValue,'.data3')){
-                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
-                        }
-                        break;
                     case 'current':
                         startDate = this.currentDate;
                         startDateValue = formatDateTime(Date.parse(new Date(startDate)) / 1000);
@@ -448,6 +475,12 @@
                                 endDate = formatDateTime(t);
                                 _this.echartsAjax(_this.CheckedNodes,startDateValue,endDate,startDateValue);
                             },time_interval)
+                        }
+                        break;
+                    default:
+                        timeValue = this.currentDate;
+                        if(this.validate(timeValue,'.data4')){
+                            this.echartsAjax(this.CheckedNodes,startDate,endDate,timeValue);
                         }
                         break;
                 }
@@ -480,14 +513,26 @@
                         var series = [];
                         var legend = [];
                         var index = 0; //计算对象长度
-                        var obj = {};
+                        var color = ['#F5675D','#E4D44E','#72CB6F','#5FBDB7','#6984E3'];
                         for(var item in data.data){
                             xData.push(item);
                             data.data[item].sort(compare)//先排序
                             for(var j = 0;j<data.data[item].length;j++){
                                 if(index == 0){
                                     legend.push(data.data[item][j].itemName);
-                                    series.push({name:data.data[item][j].itemName,data:[],type:'line'});
+                                    series.push({
+                                        name:data.data[item][j].itemName,
+                                        data:[],
+                                        type:'line',
+                                        itemStyle : {
+                                            normal : {
+                                                color:color[j],
+                                                lineStyle:{
+                                                    color:color[j]
+                                                }
+                                            }
+                                        },
+                                    });
                                 }
                                 if(series[j].name == data.data[item][j].itemName){
                                     series[j].data.push(data.data[item][j].data_Y)
@@ -517,31 +562,5 @@
             }
         }
     })
-</script>
-<script>
-
-    $(function () {
-        $(".div1").Tdrag();
-        $('.data1 .input-group.date').datetimepicker({
-            startView:3,
-            minView:3,
-            format:"yyyy-mm",
-            autoclose: true,
-        });
-        $('.data2 .input-group.date').datetimepicker({
-            startView:2,
-            minView:1,
-            format:"yyyy-mm-dd hh",
-            autoclose: true,
-        });
-        $('.data3 .input-group.date').datetimepicker({
-            startView:2,
-            minView:2,
-            format:"yyyy-mm-dd",
-            autoclose: true,
-        });
-
-    });
-
 </script>
 </html>

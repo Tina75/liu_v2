@@ -80,8 +80,9 @@
                             <td>{{index+1}}</td>
                             <!-- property 1 系统自带 2 用户创建-->
                             <td :title="item.iprange">
-                                <i v-if="item.property==1" class="fa fa-bookmark bule" style="margin-right: 5px"></i>
-                                {{item.iprange}}</td>
+                                <i v-if="item.property==1" class="icon-icon-sy5" style="display: inline-block;width: 15px"></i>
+                                <span :class="{marginLitter:item.property!=1}">{{item.iprange}}</span>
+                            </td>
                             <td>{{item.provenceName}}</td>
                             <td>
                                 <span v-if="item.state==2">已分享</span>
@@ -355,6 +356,9 @@
             },
             selectedList: function (item) {
                 var _this=this;
+                if(item.property==1){ //系统自带不能编辑删除
+                 return
+                }
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -374,10 +378,12 @@
                 var _this = this;
                 this.checkAll=!this.checkAll;
                 _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
+                    if(item.property!=1){
+                        if (typeof item.checked == "undefined") {
+                            _this.$set(item, "checked", _this.checkAll);
+                        } else {
+                            item.checked = _this.checkAll;
+                        }
                     }
                 });
                 //复选框选中项
@@ -391,8 +397,10 @@
             isCheckAll: function () {
                 var flag = true;
                 this.list.forEach(function (item) {
-                    if(!item.checked){
-                        flag = false;
+                    if(item.property!=1){
+                        if(!item.checked){
+                            flag = false;
+                        }
                     }
                 })
                 if(flag){
@@ -462,6 +470,14 @@
             },
             editPop:function () {
                 var _this=this;
+                this.editList={   //初始化
+                    provenceName:'',
+                        iprange:{
+                        ip1:'',
+                            ip2:''
+                    },
+                    ip_placeId:''
+                };
                 if(this.selected.length == 1){
                     this.editList.ip_placeId = this.selected[0].ip_placeId;
                     this.editList.provenceName = this.selected[0].provenceName;
@@ -492,12 +508,13 @@
                 var _this = this;
                 var u = url +"knowledge/"+localStorage.getItem("userId")+"/editeIPPlaceInfo/"+this.editList.ip_placeId;
                 var iprange = '';
-                if(this.addList.iprange.ip2){
+                if(this.editList.iprange.ip2){
                     iprange = this.editList.iprange.ip1 + '-' +
                         this.editList.iprange.ip2;
                 }else{
                     iprange = this.editList.iprange.ip1;
                 }
+                console.log(iprange)
                 var ipPlaceInfo = {
                     iprange:iprange,
                     provenceName:this.editList.provenceName

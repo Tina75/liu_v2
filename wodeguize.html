@@ -119,8 +119,7 @@
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td v-if="item.rule_Discription" class="checkDetail" @click="detail(item.rule_Discription,item.ruleName)">{{item.ruleName}}</td>
-                            <td v-else>{{item.ruleName}}</td>
+                            <td class="checkDetail" @click="detail(item.rule_Discription,item.ruleName)">{{item.ruleName}}</td>
                             <td class="limitWidth">
                                 <div :title="item.ruleStr">
                                     {{item.ruleStr}}
@@ -934,6 +933,22 @@
             </div>
         </div>
     </div>
+    <!--复制-->
+    <div id="copy" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group"  :class="{error:!popDetail.copy.validate.isOk}">
+                            <label  class="bold"><span style="color: red">*</span>请输入新的规则名称:</label>
+                            <input   type="text"  class="form-control" @blur="vailName(popDetail.copy.copyRuleName)" v-model="popDetail.copy.copyRuleName"  placeholder="在此输入内容...">
+                            <span class="form-account-error">{{popDetail.copy.validate.str}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 <script src="js/jquery.min.js"></script>
@@ -1056,6 +1071,13 @@
                         r5:'',protocal:'',protocal_content:'',istrue:false,protocal_array:[{name:'',value:'',relation:''}]
                     }],
                     'isOk':{ruleName:false}
+                },
+                copy:{
+                    copyRuleName:'',
+                    validate:{
+                        str:'格式错误，仅支持汉字、字母、数字、“-”“_”的组合',
+                        isOk:true
+                    }
                 }
             },
             buControlSelectList:[], //布控前置条件列表
@@ -1456,30 +1478,90 @@
                 this.selected.forEach(function (item) {
                     ruleIdList.push(item.ruleId);
                 });
-                if(this.selected.length>0){
-                    layer.confirm('您确定要复制吗？', {
-                        btn: ['确定','取消'] //按钮
-                    }, function(){
-                        var u = url+"rule/"+localStorage.getItem("userId")+"/"+localStorage.getItem("userName")+"/copyRuleByRuleIdList";
-                        ajaxGetArray(u,{ruleIdList:ruleIdList},function (data) {
-                            if(data.resultCode == ERR_OK ){
-                                var index=layer.alert("复制成功",function () {
-                                    _this.cartView(_this.current_page);
-                                    _this.selected = [];
-                                    _this.checkAll = false;
-                                    layer.close(index);
-                                });
-
-                            }else{
-                                layer.alert("删除失败");
+//                if(this.selected.length>0){
+//                    layer.confirm('您确定要复制吗？', {
+//                        btn: ['确定','取消'] //按钮
+//                    }, function(){
+//                        var u = url+"rule/"+localStorage.getItem("userId")+"/"+localStorage.getItem("userName")+"/copyRuleByRuleIdList";
+//                        ajaxGetArray(u,{ruleIdList:ruleIdList},function (data) {
+//                            if(data.resultCode == ERR_OK ){
+//                                var index=layer.alert("复制成功",function () {
+//                                    _this.cartView(_this.current_page);
+//                                    _this.selected = [];
+//                                    _this.checkAll = false;
+//                                    layer.close(index);
+//                                });
+//
+//                            }else{
+//                                layer.alert("删除失败");
+//                            }
+//                        });
+//                    }, function(){
+//                        layer.closeAll();
+//                    });
+//                }
+                if(this.selected.length==1){
+                    layer.open({
+                        type: 1,
+                        title: ['复制 - '],
+                        closeBtn: 1,
+                        btn:['确定','取消'],
+                        btnAlign: 'c',
+                        area: ['400px', '300px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#copy'),
+                        yes:function () {
+                            if(_this.popDetail.copy.validate.str){
+                                _this.popDetail.copy.validate.isOk = false;
+                                _this.popDetail.copy.validate.str='名称不能为空'
+                                return
                             }
-                        });
-                    }, function(){
-                        layer.closeAll();
+                            _this.copy(_this.selected[0].ruleId);
+                        }
                     });
-                }else{
-                    return
                 }
+            },
+            copy:function (ruleId,copyRuleName) {
+                var _this = this;
+                ///rule/{userId}/copyRuleByRuleId?ruleId=2ca60be29fdf47a0&userName=lwx&copyRuleName=copy_%E8%A7%84%E5%88%99%E4%B8%80
+                var u = url+"rule/"+localStorage.getItem("userId")+"/copyRuleByRuleId?ruleId="+ruleId+'&userName='+localStorage.getItem("userName")+"&copyRuleName="+this.popDetail.copy.copyRuleName;
+                if(this.popDetail.copy.validate.isOk){
+                    ajaxGet(u,function (data) {
+                        console.log(data);
+                        if(data.resultCode == ERR_OK ){
+                            var index=layer.alert("复制成功",function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                _this.checkAll = false;
+                                layer.closeAll();
+                            });
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    });
+                }
+
+            },
+            vailName:function (str) {
+                if(str==""){
+                    this.popDetail.copy.validate.str = '名称不能为空';
+                    this.popDetail.copy.validate.isOk = false;
+                    return;
+                }
+                if(str.length>20){
+                    this.popDetail.copy.validate.str = '长度只能在20个字符之间';
+                    this.popDetail.copy.validate.isOk = false;
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(str)){
+                    this.popDetail.copy.validate.str = '';
+                    this.popDetail.copy.validate.isOk = true
+                }else{
+                    this.popDetail.copy.validate.str = '格式错误，仅支持汉字、字母、数字、“-”“_”的组合';
+                    this.popDetail.copy.validate.isOk = false
+                }
+
             },
             buControlReset:function () {
                 $("#start").val("");
@@ -1581,6 +1663,7 @@
                     missdata_DealTable:simple.missdata.missdata_DealTable,
                     missdata_DealType:simple.missdata.missdata_DealType,
                     parentTaskId:simple.pre_condition.parentTaskId,
+                    parentTaskName:'',
                     task_Descrption:simple.task_Descrption,
                     task_EndTime:document.getElementById("end").value,
                     task_Name:simple.task_Name,
@@ -1590,6 +1673,7 @@
                     task_StartTime:document.getElementById("start").value,
                     task_StartType:(simple.task_Run_Model==1)?simple.confirm_time.task_StartType:simple.pre_condition.task_StartType
                 }
+                taskInfo.parentTaskName= this.parentTaskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $("#buControl").find(".validate");
                 for(var i = 0; i < input.length; i++){
@@ -1612,6 +1696,15 @@
                     });
                 }
 
+            },
+            parentTaskIdToName:function (id) {
+                var name = '';
+                this.buControlSelectList.forEach(function (v,i) {
+                    if(v.taskId == id){
+                        name = v.task_Name
+                    }
+                })
+                return name;
             },
             vailusername:function (dom,item) {
                 var task_Name = item.task_Name;
@@ -1710,7 +1803,7 @@
                 var u = url+"rule/"+localStorage.getItem("userId")+"/shareRule";
                 var userIdList = this.userIdList("treeDemo");
                 var _this = this;
-                ajaxGetArray(u,{ruleIdList:ruleIdList,shareUserIdList:ruleIdList},function (data) {
+                ajaxGetArray(u,{ruleIdList:ruleIdList,shareUserIdList:userIdList},function (data) {
                     if(data.resultCode == ERR_OK ){
                         layer.alert("分享成功",function () {
                             _this.cartView(_this.current_page);

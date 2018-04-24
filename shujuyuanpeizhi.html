@@ -1,356 +1,394 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>数据源配置</title>
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/font-awesome.css">
-    <link rel="stylesheet" href="css/font.css">
-    <link rel="stylesheet" href="css/share.css">
-    <link rel="stylesheet" href="css/animate.css">
-    <style>
-        [v-cloak] {
-            display: none;
-        }
-    </style>
-    <style>
-       .sourceItem{
-           margin:10px 0;
-           overflow: hidden;
-       }
-       .sourceItem label{ position: relative; padding:0 10px 0 25px; cursor: pointer;}
-       /*.sourceItem label input{ display: none;}*/
-       .sourceItem label span{
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 12px;
-            height: 12px;
-            margin: auto;
-            border: 1px solid #ccc;
-            border-radius: 100%;
-        }
-       .sourceItem label span:after{
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 8px;
-            height: 8px;
-            margin: auto;
-            border-radius: 100%;
-            background: #fff;
-            -webkit-transform: scale(0);
-            transform: scale(0);
-            -webkit-transition: all .3s; transition: all .3s;
-        }
-       .sourceItem label input:checked + span{
-            border-color: #0078E6;
-            background: #0078E6;
-        }
-       .sourceItem label input:checked + span:after{ -webkit-transform: scale(1); transform: scale(1);}
-       .sourceItem .item{
-           float: left;
-       }
-       .sourceItem>select{
-           width: 120px;
-           border-radius: 0;
-           font-size: 12px;
-           height: 24px;
-           padding:2px 10px;
-       }
-       .sourceItem .force{
-           margin-left: 20px;
-           padding-top:4px
-       }
-       .sourceItem .force>label{
-           padding:0 10px 0 20px;
-       }
-        h5.title{
-            line-height: 40px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body class=" animated fadeInRight">
-<div class="container-fluid" id="example" v-cloak>
-    <!--页签-->
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#home" data-toggle="tab">数据源配置</a></li>
-    </ul>
 
-    <!-- Tab panes -->
-    <div class="tab-content">
-        <div class="tab-pane active" id="home">
-            <h5 class="title">数据源接入方式：</h5>
-            <div class="sourceItem">
-                <label><input v-model="inWays"  type="radio"  value="1"/>网络镜像</label>
-            </div>
-            <div class="sourceItem">
-                <label class="item" style="padding-top:4px">
+	<head>
+		<meta charset="UTF-8">
+		<title>数据源配置</title>
+		<link href="css/bootstrap.css" rel="stylesheet">
+		<link rel="stylesheet" href="css/common.css">
+		<link rel="stylesheet" href="css/font-awesome.css">
+		<link rel="stylesheet" href="css/font.css">
+		<link rel="stylesheet" href="css/share.css">
+		<link rel="stylesheet" href="css/animate.css">
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+		<style>
+			.sourceItem {
+				margin: 10px 0;
+				overflow: hidden;
+			}
+			
+			.sourceItem label {
+				position: relative;
+				/*padding: 0 10px 0 25px;*/
+				cursor: pointer;
+				height: 24px;
+				/*4.19*/
+				line-height: 24px;
+				/*4.19*/
+				vertical-align: middle;
+				/*4.19*/
+			}
+			
+			.sourceItem label input {
+				/*display: none;*/
+				float: left;
+				/*4.19*/
+				margin: 6px 2px 0 0;
+				/*4.19*/
+			}
+			
+			.sourceItem label span {
+				position: absolute;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				width: 12px;
+				height: 12px;
+				margin: auto;
+				border: 1px solid #ccc;
+				border-radius: 100%;
+			}
+			
+			.sourceItem label span:after {
+				content: '';
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				width: 8px;
+				height: 8px;
+				margin: auto;
+				border-radius: 100%;
+				background: #fff;
+				-webkit-transform: scale(0);
+				transform: scale(0);
+				-webkit-transition: all .3s;
+				transition: all .3s;
+			}
+			
+			.sourceItem label input:checked+span {
+				border-color: #0078E6;
+				background: #0078E6;
+			}
+			
+			.sourceItem label input:checked+span:after {
+				-webkit-transform: scale(1);
+				transform: scale(1);
+			}
+			
+			.sourceItem .item {
+				float: left;
+			}
+			
+			.sourceItem>select {
+				width: 120px;
+				border-radius: 0;
+				font-size: 12px;
+				height: 24px;
+				padding: 2px 10px;
+				margin: 4px 0 0 5px;
+				/*4.19*/
+			}
+			
+			.sourceItem .force {
+				margin-left: 40px;
+				padding-top: 4px;
+				
+			}
+			
+			.sourceItem .force>label {
+				padding: 0 5px 0 5px;
+			}
+			
+			h5.title {
+				line-height: 40px;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+
+	<body class=" animated fadeInRight">
+		<div class="container-fluid" id="example" v-cloak>
+			<!--页签-->
+			<!-- Nav tabs -->
+			<ul class="nav nav-tabs">
+				<li class="active">
+					<a href="#home" data-toggle="tab">数据源配置</a>
+				</li>
+			</ul>
+
+			<!-- Tab panes -->
+			<div class="tab-content">
+				<div class="tab-pane active" id="home">
+					<h5 class="title">数据源接入方式：</h5>
+					<div class="sourceItem">
+						<label><input v-model="inWays"  type="radio"  value="1" />网络镜像</label>
+					</div>
+					<div class="sourceItem">
+						<label class="item" style="padding-top:4px">
                     <input v-model="inWays"  type="radio" value="2" />
                    自定义设备</label>
-                <select class="form-control item">
-                    <option value="1">水电费</option>
-                </select>
-                <span class="item force">反压：
+						<select class="form-control item">
+							<option value="1">水电费</option>
+						</select>
+						<span class="item force">反压：
                     <label><input name="force" type="radio" checked />是</label>
                     <label><input name="force" type="radio"  />否</label>
                 </span>
-            </div>
-            <div class="sourceItem" >
-                <label style="padding-top:4px"><input v-model="inWays" type="radio" value="3"/>PCAP文件</label>
-                <div v-if="inWays == 3">
-                    <div class="search clearfix">
-                        <div class="form-inline pull-left searchItems">
-                            <div class="form-group">
-                                <label for="task">服务器:</label>
-                                <input type="text" v-model="server" @keyup="cartView(1)" class="form-control" id="task" placeholder="请输入关键字">
-                            </div>
-                            <button type="button"  @click="cartView(1)" class="btn btn-primary">搜索</button>
-                        </div>
-                        <div class="searchEdit pull-right">
-                            <ul class="clearfix">
-                                <li class="pull-right">
-                                    <span class="icon-icon-sy22">测试链接</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="tableContainer">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th style="width: 45px">
-                                        <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                            <span class="fa fa-check ok"></span>
-                                        </div>
-                                    </th>
-                                    <th  style="width: 6%">编号</th>
-                                    <th>服务器</th>
-                                    <th>文件目录</th>
-                                    <th>状态</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="(item,index) in list">
-                                    <td>
-                                        <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                            <span class="fa fa-check ok"></span>
-                                        </div>
-                                    </td>
-                                    <td>{{index+1}}</td>
-                                    <td>{{item.servername}}</td>
-                                    <td>{{item.catalog}}</td>
-                                    <td>{{item.state}}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="page clearfix" >
-                            <div class="pageCut">
-                                每页
-                                <select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
-                                    <option value="8">8</option>
-                                    <option value="10">10</option>
-                                    <option value="12">12</option>
-                                    <option value="14">14</option>
-                                    <option value="16">16</option>
-                                </select>
-                                条记录
-                            </div>
-                            <div class="pagelist" >
-                                <!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
-                                <span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
-                                <span class="ellipsis" v-show="efont">...</span>
-                                <span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}"
-                                      @click="jumpPage(num)">{{num}}</span>
-                                <span class="ellipsis" v-show="ebehind">...</span>
+					</div>
+					<div class="sourceItem">
+						<label style="padding-top:4px"><input v-model="inWays" type="radio" value="3"/>PCAP文件</label>
+						<div v-if="inWays == 3">
+							<div class="search clearfix">
+								<div class="form-inline pull-left searchItems">
+									<div class="form-group">
+										<label for="task">服务器:</label>
+										<input type="text" v-model="server" @keyup="cartView(1)" class="form-control" id="task" placeholder="请输入关键字">
+									</div>
+									<button type="button" @click="cartView(1)" class="btn btn-primary">搜索</button>
+								</div>
+								<div class="searchEdit pull-right">
+									<ul class="clearfix">
+										<li class="pull-right">
+											<span class="icon-icon-sy22">测试链接</span>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<div class="tableContainer">
+								<div class="table-responsive">
+									<table class="table">
+										<thead>
+											<tr>
+												<th style="width: 45px">
+													<div class="item-check-btn" :class="{'check':checkAll}" @click="isAll()">
+														<span class="fa fa-check ok"></span>
+													</div>
+												</th>
+												<th style="width: 6%">编号</th>
+												<th>服务器</th>
+												<th>文件目录</th>
+												<th>状态</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr v-for="(item,index) in list">
+												<td>
+													<div class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)">
+														<span class="fa fa-check ok"></span>
+													</div>
+												</td>
+												<td>{{index+1}}</td>
+												<td>{{item.servername}}</td>
+												<td><input type="text" :value="item.catalog"></td>
+												<td>{{item.state}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="page clearfix">
+									<div class="pageCut">
+										每页
+										<select name="" class="form-control pageSelect" v-model="pageSize" @change="jumpPage(1)">
+											<option value="8">8</option>
+											<option value="10">10</option>
+											<option value="12">12</option>
+											<option value="14">14</option>
+											<option value="16">16</option>
+										</select>
+										条记录
+									</div>
+									<div class="pagelist">
+										<!--<span class="jump" :class="{disabled:pstart}" @click="{current_page&#45;&#45;}"><</span>-->
+										<span v-show="current_page>5" class="jump" @click="jumpPage(1)">首页</span>
+										<span class="ellipsis" v-show="efont">...</span>
+										<span class="jump" v-for="num in indexs" :class="{bgprimary:current_page==num}" @click="jumpPage(num)">{{num}}</span>
+										<span class="ellipsis" v-show="ebehind">...</span>
 
-                                <!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
-                                <span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
+										<!--<span :class="{disabled:pend}" @click="{current_page++}" class="jump">></span>-->
+										<span v-show="current_page<pages-4" class="jump" @click="jumpPage(pages)">尾页</span>
 
-                                <span class="jumppoint">跳转到：</span>
-                                <span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
-                                <span class="jump gobtn" @click="jumpPage(changePage)" >GO</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+										<span class="jumppoint">跳转到：</span>
+										<span class="jumpinp"><input type="text" v-model="changePage" @keyup.enter="jumpPage(changePage)"></span>
+										<span class="jump gobtn" @click="jumpPage(changePage)">GO</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-</body>
-<script src="js/jquery.min.js"></script>
-<script src="js/layer/layer.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/vue.js"></script>
-<script src="js/ajaxMy.js"></script>
-<script src="js/url.js"></script>
+	</body>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/layer/layer.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/vue.js"></script>
+	<script src="js/ajaxMy.js"></script>
+	<script src="js/url.js"></script>
 
-<script>
-    // 创建根实例
-    new Vue({
-        el: '#example',
-        data: {
-            list: [],   //展示数组
-            server:'', //搜索项目
-            current_page: 1, //当前页
-            pageSize:14,  //每页数据条数
-            pages: 0, //总页数
-            changePage:0,//跳转页
-            checkAll:false,
-            inWays:3
-        },
-        mounted: function () {
-            var _this = this;
-            this.$nextTick(function () {
-                _this.cartView(_this.current_page);
-            })
-        },
-        computed:{
-            show:function(){
-                return this.pages && this.pages !=1
-            },
-            pstart: function() {
-                return this.current_page == 1;
-            },
-            pend: function() {
-                return this.current_page == this.pages;
-            },
-            efont: function() {
-                if (this.pages <= 7) return false;
-                return this.current_page > 5
-            },
-            ebehind: function() {
-                if (this.pages <= 7) return false;
-                var nowAy = this.indexs;
-                return nowAy[nowAy.length - 1] != this.pages;
-            },
-            indexs: function() {
+	<script>
+		// 创建根实例
+		new Vue({
+			el: '#example',
+			data: {
+				list: [], //展示数组
+				server: '', //搜索项目
+				current_page: 1, //当前页
+				pageSize: 14, //每页数据条数
+				pages: 0, //总页数
+				changePage: 0, //跳转页
+				checkAll: false,
+				inWays: 1
+			},
+			mounted: function() {
+				var _this = this;
+				this.$nextTick(function() {
+					_this.cartView(_this.current_page);
+				})
+			},
+			computed: {
+				show: function() {
+					return this.pages && this.pages != 1
+				},
+				pstart: function() {
+					return this.current_page == 1;
+				},
+				pend: function() {
+					return this.current_page == this.pages;
+				},
+				efont: function() {
+					if(this.pages <= 7) return false;
+					return this.current_page > 5
+				},
+				ebehind: function() {
+					if(this.pages <= 7) return false;
+					var nowAy = this.indexs;
+					return nowAy[nowAy.length - 1] != this.pages;
+				},
+				indexs: function() {
 
-                var left = 1,
-                    right = this.pages,
-                    ar = [];
-                if (this.pages >= 7) {
-                    if (this.current_page > 5 && this.current_page < this.pages - 4) {
-                        left = Number(this.current_page) - 3;
-                        right = Number(this.current_page) + 3;
-                    } else {
-                        if (this.current_page <= 5) {
-                            left = 1;
-                            right = 7;
-                        } else {
-                            right = this.pages;
+					var left = 1,
+						right = this.pages,
+						ar = [];
+					if(this.pages >= 7) {
+						if(this.current_page > 5 && this.current_page < this.pages - 4) {
+							left = Number(this.current_page) - 3;
+							right = Number(this.current_page) + 3;
+						} else {
+							if(this.current_page <= 5) {
+								left = 1;
+								right = 7;
+							} else {
+								right = this.pages;
 
-                            left = this.pages - 6;
-                        }
-                    }
-                }
-                while (left <= right) {
-                    ar.push(left);
-                    left++;
-                }
-                return ar;
-            }
-        },
-        methods: {
-            cartView:  function (cPage) {
-                var _this = this;
-                //模拟数据
-                //db/{userId}/getPCAPPageData/{currentPage}/{pageSize}?serverName=1
-                var u = url +"db/"+localStorage.getItem("userId")+"/getPCAPPageData/"
-                    +cPage+"/"+this.pageSize+"?serverName="+this.server;
-                ajaxGet(u,function (data) {
-                    if(data.resultCode == ERR_OK ){
-                        _this.list = data.data.infoData;
-                        _this.pages = parseInt(data.data.countPage);
-                    }else{
-                        layer.alert(data.message);
-                    }
-                });
-            },
-            selectedList: function (item) {
-                var _this=this;
-                if (typeof item.checked == "undefined") {
-                    // Vue.set(item,"checked",true);
-                    this.$set(item, "checked", true);
-                } else {
-                    item.checked = !item.checked;
-                }
-                this.isCheckAll();
-                //复选框选中项
-                _this.selected = [];
-                this.list.forEach(function (item) {
-                    if(item.checked){
-                        _this.selected.push(item);
-                    }
-                });
-            },
-            isAll: function () {  //全选
-                var _this = this;
-                this.checkAll=!this.checkAll;
-                _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
-                    }
-                });
-                //复选框选中项
-                _this.selected = [];
-                this.list.forEach(function (item) {
-                    if(item.checked){
-                        _this.selected.push(item);
-                    }
-                });
-            },
-            isCheckAll: function () {
-                var flag = true;
-                this.list.forEach(function (item) {
-                    if(!item.checked){
-                        flag = false;
-                    }
-                })
-                if(flag){
-                    this.checkAll = true;
-                }else{
-                    this.checkAll = false;
-                }
+								left = this.pages - 6;
+							}
+						}
+					}
+					while(left <= right) {
+						ar.push(left);
+						left++;
+					}
+					return ar;
+				}
+			},
+			methods: {
+				cartView: function(cPage) {
+					var _this = this;
+					//模拟数据
+					//db/{userId}/getPCAPPageData/{currentPage}/{pageSize}?serverName=1
+					var u = url + "db/" + localStorage.getItem("userId") + "/getPCAPPageData/" +
+						cPage + "/" + this.pageSize + "?serverName=" + this.server;
+					ajaxGet(u, function(data) {
+						if(data.resultCode == ERR_OK) {
+							_this.list = data.data.infoData;
+							_this.pages = parseInt(data.data.countPage);
+						} else {
+							layer.alert(data.message);
+						}
+					});
+				},
+				selectedList: function(item) {
+					var _this = this;
+					if(typeof item.checked == "undefined") {
+						// Vue.set(item,"checked",true);
+						this.$set(item, "checked", true);
+					} else {
+						item.checked = !item.checked;
+					}
+					this.isCheckAll();
+					//复选框选中项
+					_this.selected = [];
+					this.list.forEach(function(item) {
+						if(item.checked) {
+							_this.selected.push(item);
+						}
+					});
+				},
+				isAll: function() { //全选
+					var _this = this;
+					this.checkAll = !this.checkAll;
+					_this.list.forEach(function(item) {
+						if(typeof item.checked == "undefined") {
+							_this.$set(item, "checked", _this.checkAll);
+						} else {
+							item.checked = _this.checkAll;
+						}
+					});
+					//复选框选中项
+					_this.selected = [];
+					this.list.forEach(function(item) {
+						if(item.checked) {
+							_this.selected.push(item);
+						}
+					});
+				},
+				isCheckAll: function() {
+					var flag = true;
+					this.list.forEach(function(item) {
+						if(!item.checked) {
+							flag = false;
+						}
+					})
+					if(flag) {
+						this.checkAll = true;
+					} else {
+						this.checkAll = false;
+					}
 
-            },
-            jumpPage: function(id) {
-                if(id <=this.pages){
-                    this.current_page = id;
-                    this.cartView(this.current_page);
-                }else{
-                    layer.alert("超出最大页数")
-                }
+				},
+				jumpPage: function(id) {
+					if(id <= this.pages) {
+						this.current_page = id;
+						this.cartView(this.current_page);
+					} else {
+						layer.alert("超出最大页数")
+					}
 
-            },
-            detail:function () {
-                layer.open({
-                    type: 1,
-                    title: ['详情'],
-                    closeBtn: 1,
-                    btn:['关闭'],
-                    btnAlign: 'c',
-                    area: ['600px', '410px'],
-                    skin: 'detailPop', //没有背景色
-                    shadeClose: true,
-                    content: $('#detail')
-                });
-            }
-        }
+				},
+				detail: function() {
+					layer.open({
+						type: 1,
+						title: ['详情'],
+						closeBtn: 1,
+						btn: ['关闭'],
+						btnAlign: 'c',
+						area: ['600px', '410px'],
+						skin: 'detailPop', //没有背景色
+						shadeClose: true,
+						content: $('#detail')
+					});
+				}
+			}
 
-    })
-</script>
+		})
+	</script>
+
 </html>

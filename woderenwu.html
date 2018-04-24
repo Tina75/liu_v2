@@ -1013,14 +1013,15 @@
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
                     parentTaskId: simple.pre_condition.parentTaskId,
+                    parentTaskName:'',
                     task_RuleName: '',
+                    task_RuleId: simple.task_RuleId,
                     taskId: '',
                     task_CreateTime: '',
                     task_CreateUserName: localStorage.getItem("userName"),
                     task_Descrption: simple.task_Descrption,
                     task_EndTime:$(dom).parent().parent().parent().find(".end").val(),
                     task_Name: simple.task_Name,
-                    task_RuleId: simple.task_RuleId,
                     task_RunProgress: '',
                     task_RunState: '',
                     task_RunTimes: '',
@@ -1029,10 +1030,9 @@
                     task_StartTime: $(dom).parent().parent().parent().find(".start").val(),
                     task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
                 }
-                //simple.pre_condition.parentTaskId.taskId
                 //通过taskId对应前置条件task_RuleName
-                //模拟失去焦点
-                taskInfo.task_RuleName= this.taskIdToName(simple.pre_condition.parentTaskId);
+                taskInfo.task_RuleName= this.taskIdToName(simple.task_RuleId);
+                taskInfo.parentTaskName= this.parentTaskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $(dom).parent().parent().parent().find(".validateTask");
                 for (var i = 0; i < input.length; i++) {
@@ -1057,6 +1057,15 @@
                 }
             },
             taskIdToName:function (id) {
+                var name = '';
+                this.ruleItem.forEach(function (v,i) {
+                    if(v.ruleId == id){
+                        name = v.ruleName
+                    }
+                })
+                return name;
+            },
+            parentTaskIdToName:function (id) {
                 var name = '';
                 this.buControlSelectList.forEach(function (v,i) {
                     if(v.taskId == id){
@@ -1153,8 +1162,6 @@
                     }, function () {
                         layer.closeAll();
                     });
-                } else {
-                    return
                 }
             },
             buControlSelect: function () { //布控前置条件的下拉列表
@@ -1247,6 +1254,7 @@
                 this.popDetail.control.matchdata.matchdata_DealTable = item.matchdata_DealTable;
                 this.popDetail.control.missdata.missdata_DealType = item.missdata_DealType;
                 this.popDetail.control.missdata.missdata_DealTable = item.missdata_DealTable;
+                console.log(this.popDetail.control.pre_condition);
             },
             buControlPop: function () {
                 var _this = this;
@@ -1296,6 +1304,7 @@
                     missdata_DealTable: simple.missdata.missdata_DealTable,
                     missdata_DealType: simple.missdata.missdata_DealType,
                     parentTaskId: simple.pre_condition.parentTaskId,
+                    parentTaskName:'',
                     task_RuleName: '',
                     taskId: '',
                     task_CreateTime: '',
@@ -1303,7 +1312,7 @@
                     task_Descrption: simple.task_Descrption,
                     task_EndTime: document.getElementById("end").value,
                     task_Name: simple.task_Name,
-                    task_RuleId: item.task_RuleId,
+                    task_RuleId: simple.task_RuleId,
                     task_RunProgress: '',
                     task_RunState: '',
                     task_RunTimes: '',
@@ -1312,7 +1321,8 @@
                     task_StartTime: document.getElementById("start").value,
                     task_StartType: (simple.task_Run_Model == 1) ? simple.confirm_time.task_StartType : simple.pre_condition.task_StartType
                 }
-                taskInfo.task_RuleName= this.taskIdToName(simple.pre_condition.parentTaskId);
+                taskInfo.task_RuleName= this.taskIdToName(simple.task_RuleId);
+                taskInfo.parentTaskName= this.parentTaskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $("#buControl").find(".validate");
                 for (var i = 0; i < input.length; i++) {

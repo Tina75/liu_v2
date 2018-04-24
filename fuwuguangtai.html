@@ -20,7 +20,11 @@
     <ul class="nav nav-tabs">
         <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0">服务器状态</a></li>
         <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
-            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)">
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.apply_serverName">
+                {{item.apply_serverName}}
+                <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
+            </a>
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>
                 新建服务器
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
@@ -77,7 +81,7 @@
                                 <th>服务名称</th>
                                 <th>服务状态</th>
                                 <th>服务运行路径</th>
-                                <th>路径</th>
+                                <th>参数</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -92,7 +96,7 @@
                                 <td :title="item.apply_serverName">{{item.apply_serverName}}</td>
                                 <td>{{item.state}}</td>
                                 <td :title="item.apply_serverRunPath">{{item.apply_serverRunPath}}</td>
-                                <td :title="item.apply_serverPath">{{item.apply_serverPath}}</td>
+                                <td :title="item.apply_serverParam">{{item.apply_serverParam}}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -136,7 +140,8 @@
                         <div class="col-md-6">
                             <div class="form-group errValidate">
                                 <label  class="bold">服务名称:</label>
-                                <input type="text" v-model="item.apply_serverName" class="form-control"  placeholder="在此输入内容...">
+                                <input type="text" v-model="item.apply_serverName" @blur="vailruleName($event.target,item)" class="form-control validateRule"  placeholder="在此输入内容...">
+                                <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -152,22 +157,14 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label  class="bold">服务器路径:</label>
-                                <input type="text" class="form-control" v-model="item.apply_serverPath"  placeholder="在此输入内容...">
+                                <label  class="bold">参数:</label>
+                                <input type="text" class="form-control" v-model="item.apply_serverParam" placeholder="在此输入内容...">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="bold">服务器运行路径:</label>
                                 <input type="text" class="form-control" v-model="item.apply_serverRunPath"   placeholder="在此输入内容...">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label  class="bold">参数:</label>
-                                <input type="text" class="form-control" v-model="item.apply_serverParam" placeholder="在此输入内容...">
                             </div>
                         </div>
                     </div>
@@ -205,22 +202,14 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label  class="bold">服务器路径:</label>
-                            <input type="text" class="form-control" v-model="editList.apply_serverPath"  placeholder="在此输入内容...">
+                            <label  class="bold">参数:</label>
+                            <input type="text" class="form-control" v-model="editList.apply_serverParam" placeholder="在此输入内容...">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="bold">服务器运行路径:</label>
                             <input type="text" class="form-control" v-model="editList.apply_serverRunPath"   placeholder="在此输入内容...">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label  class="bold">参数:</label>
-                            <input type="text" class="form-control" v-model="editList.apply_serverParam" placeholder="在此输入内容...">
                         </div>
                     </div>
                 </div>
@@ -263,7 +252,7 @@
                 "apply_evalServerId": "",//所属服务器的Id
                 "apply_serverName": "",//新建服务器名称
                 "apply_serverParam": "",//新建服务器参数
-                "apply_serverPath": "",//应用服务器的服务器路径
+               // "apply_serverPath": "",//应用服务器的服务器路径
                 "apply_serverRunPath": ""//应用服务器的运行路径
             }
         },
@@ -424,8 +413,12 @@
                     "apply_evalServerId": this.dataList[0].id,//所属服务器的Id
                     "apply_serverName": "",//新建服务器名称
                     "apply_serverParam": "",//新建服务器参数
-                    "apply_serverPath": "",//应用服务器的服务器路径
-                    "apply_serverRunPath": ""//应用服务器的运行路径
+                    //"apply_serverPath": "",//应用服务器的服务器路径
+                    "apply_serverRunPath": "",//应用服务器的运行路径
+                    isOk:{
+                        apply_serverName:false,
+//                        sys_serverIp:false
+                    }
                 });
                 this.currentIndex = index;
             },
@@ -437,7 +430,7 @@
                     "apply_evalServerId": item.apply_evalServerId,//所属服务器的Id
                     "apply_serverName": item.apply_serverName,//新建服务器名称
                     "apply_serverParam": item.apply_serverParam,//新建服务器参数
-                    "apply_serverPath": item.apply_serverPath,//应用服务器的服务器路径
+                    "apply_serverPath": '',//应用服务器的服务器路径
                     "apply_serverRunPath": item.apply_serverRunPath//应用服务器的运行路径
                 }
                 if(!item.apply_serverName){
@@ -458,6 +451,39 @@
                         layer.alert(data.message);
                     }
                 })
+            },
+            vailruleName:function (dom,item) {  //验证布控任务名称
+                var sys_serverName = item.apply_serverName;
+                var span = dom.nextElementSibling;
+                if(sys_serverName==""){
+                    item.isOk.apply_serverName = false;
+                    this.valiWays(span,"名称不能为空",false);
+                    return;
+                }
+                if(sys_serverName.length>20){
+                    item.isOk.apply_serverName = false;
+                    this.valiWays(span,"长度只能在20个字符之间",false);
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(sys_serverName)){
+                    item.isOk.apply_serverName = true;
+                    this.valiWays(span,'',true);
+                    return;
+                }else{
+                    item.isOk.apply_serverName = false;
+                    this.valiWays(span,"格式错误，仅支持汉字、字母、数字、“-”“_”的组合",false);
+                    return;
+                }
+
+            },
+            valiWays:function (span,str,flag) {
+                span.innerHTML = str;
+                if(flag){
+                    removeClass(span.parentElement, "error")
+                }else{ //增加error
+                    addClass( span.parentElement, "error")
+                }
+
             },
             tabClose:function (index) {
                 if(this.navLI.length>1){
@@ -518,7 +544,7 @@
                     this.editList.apply_evalServerId = ruleIdList[0].apply_evalServerId;
                     this.editList.apply_serverName = ruleIdList[0].apply_serverName;
                     this.editList.apply_serverParam = ruleIdList[0].apply_serverParam;
-                    this.editList.apply_serverPath = ruleIdList[0].apply_serverPath;
+                   // this.editList.apply_serverPath = ruleIdList[0].apply_serverPath;
                     this.editList.apply_serverRunPath = ruleIdList[0].apply_serverRunPath;
                     layer.open({
                         type: 1,
@@ -526,7 +552,7 @@
                         closeBtn: 1,
                         btn:['确定','取消'],
                         btnAlign: 'c',
-                        area: ['600px', '350px'],
+                        area: ['600px', '320px'],
                         skin: '', //没有背景色
                         shadeClose: true,
                         content: $('#edit'),
@@ -545,7 +571,7 @@
                     "apply_evalServerId": this.editList.apply_evalServerId,
                     "apply_serverName": this.editList.apply_serverName,
                     "apply_serverParam":this.editList.apply_serverParam,
-                    "apply_serverPath":this.editList.apply_serverPath,
+                    "apply_serverPath":'',
                     "apply_serverRunPath": this.editList.apply_serverRunPath
                 }
                 ajaxPostObj(u,JSON.stringify(applyServerInfo),function (data) {

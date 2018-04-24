@@ -62,7 +62,7 @@
                                 </th>
                                 <th style="width:6%">编号</th>
                                 <th style="width:30%">虚拟身份名称</th>
-                                <th style="width:20%;border-right: 1px solid #E7E7E7">状态</th>
+                                <th style="width:20%;">状态</th>
                                 <th >虚拟身份信息</th>
                             </tr>
                         </thead>
@@ -75,21 +75,21 @@
                             </td>
                             <td>{{index+1}}</td>
                             <td @click="ipIndex=index" :class="{bule:ipIndex==index}" :title="item.virtualName"  style="cursor: pointer">
-                                <i v-if="item.property==1" class="fa fa-bookmark bule" style="margin-right: 5px"></i>
-                                {{item.virtualName}}
+                                <i v-if="item.property==1" class="icon-icon-sy5" style="display: inline-block;width: 15px"></i>
+                                <span :class="{marginLitter:item.property!=1}">{{item.virtualName}}</span>
                             </td>
-                            <td  style="border-right: 1px solid #E7E7E7">
-                                已分享
+                            <td>
+                                <span v-if="item.state==2">已分享</span>
                             </td>
                             <td >
-                                <div class="ipShow" style="display: none;left:65%" :class="{'show':ipIndex==index}">
+                                <div class="ipShow" style="display: none;left:61%;border-left: 1px solid #E7E7E7" :class="{'show':ipIndex==index}">
                                     <ul class="virtual">
                                         <li>
-                                            <div>身份证</div>
+                                            <div>身份证：</div>
                                             <div>{{item.identifyId}}</div>
                                         </li>
                                         <li v-if="item.phoneStr">
-                                            <div>电话</div>
+                                            <div>电话：</div>
                                             <div >
                                                 <span v-for="(phone,index) in item.phoneStr.split(',')">{{phone}}
                                                     <i v-if="item.phoneStr.split(',').length!=index+1">,</i>
@@ -97,23 +97,23 @@
                                             </div>
                                         </li>
                                         <li v-if="item.wechatIdStr">
-                                            <div>微信</div>
+                                            <div>微信：</div>
                                             <span v-for="(phone,index) in item.wechatIdStr.split(',')">{{phone}}
                                             <i v-if="item.wechatIdStr.split(',').length!=index+1">,</i>
                                             </span>
                                         </li>
                                         <li v-if="item.qqidStr">
-                                            <div>qq</div>
+                                            <div>qq：</div>
                                             <span v-for="(phone,index) in item.qqidStr.split(',')">{{phone}}
                                             <i v-if="item.qqidStr.split(',').length!=index+1">,</i></span>
                                         </li>
                                         <li v-if="item.ipstr">
-                                            <div>ip</div>
+                                            <div>ip：</div>
                                             <span v-for="(phone,index) in item.ipstr.split(',')">{{phone}}
                                             <i v-if="item.ipstr.split(',').length!=index+1">,</i></span>
                                         </li>
                                         <li v-if="item.accountName">
-                                            <div>账号</div>
+                                            <div>账号：</div>
                                             <span v-for="(phone,index) in item.accountName.split(',')">{{phone}}
                                             <i v-if="item.accountName.split(',').length!=index+1">,</i></span>
                                         </li>
@@ -455,6 +455,9 @@
             },
             selectedList: function (item) {
                 var _this=this;
+                if(item.property==1){
+                    return
+                }
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -474,10 +477,12 @@
                 var _this = this;
                 this.checkAll=!this.checkAll;
                 _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
+                    if(item.property!=1) {  //不是系统自带的
+                        if (typeof item.checked == "undefined") {
+                            _this.$set(item, "checked", _this.checkAll);
+                        } else {
+                            item.checked = _this.checkAll;
+                        }
                     }
                 });
                 //复选框选中项
@@ -491,8 +496,10 @@
             isCheckAll: function () {
                 var flag = true;
                 this.list.forEach(function (item) {
-                    if(!item.checked){
-                        flag = false;
+                    if(item.property!=1) {
+                        if(!item.checked){
+                            flag = false;
+                        }
                     }
                 })
                 if(flag){

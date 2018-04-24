@@ -571,20 +571,23 @@
                     "db_username": item.db_username,//数据库用户名
                     "con_state":item.con_state
                 }
-                //模拟失去焦点
-                ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
-                    console.log(data)
-                    if(data.resultCode == ERR_OK ){
-                        layer.alert("添加成功",function (i) {
-                            _this.cartView(_this.current_page);
-                            _this.selected=[];
-                            _this.tabClose(index);
-                            layer.close(i);
-                        })
-                    }else{
-                        layer.alert(data.message);
-                    }
-                })
+                if(item.con_state){
+                    ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
+                        console.log(data)
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("添加成功",function (i) {
+                                _this.cartView(_this.current_page);
+                                _this.selected=[];
+                                _this.tabClose(index);
+                                layer.close(i);
+                            })
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    })
+                }else{
+                    layer.alert("不存在该库");
+                }
 
             },
             testLink:function (item,dom,index) {
@@ -600,15 +603,9 @@
                 }
                 ajaxPostObj(u,JSON.stringify(dbInfo),function (data) {
                     console.log(data)
-                    if(data.data){ //true
-//                        $(dom).nextAll().remove();
-//                        $(dom).after('<span class="fa fa-check">连接成功</span>')
-                        this.navLI[index].con_state = 1;
+                    if(data.data){ //true 链接成功
+                        _this.navLI[index].con_state = 1;
                     }else{
-                        //layer.alert(data.message);
-//                        $(dom).nextAll().remove();
-//                        $(dom).after('<span class="fa fa-close">连接失败</span>')
-//                        console.log(_this.navLI)
                         _this.navLI[index].con_state = 0;
                     }
                 })

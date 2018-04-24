@@ -39,19 +39,8 @@
 </div>
 
 <script>
-    var outer = document.getElementById('outer');
-    var inner = document.getElementById('inner');
-    var center = document.getElementById('center');
+    current_inputKeyWord_condition= '/^(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])\.(\d|[1-9]\d|1\d{2}|2[0-5][0-5])$/';
 
-    outer.style.position = "relative";//这样inner和center的参照物都是outer
-    //console.log(center.offsetParent);//outer
-    //console.log(inner.offsetParent);//outer
-    console.log(outer.offsetTop);//body
-//    outer.style.position = "relative";//
-//    inner.style.position = "relative";
-//    center.offsetParent//inner
-//    inner.offsetParent//outer
-//    outer.offsetParent//body
 </script>
 </body>
 </html>

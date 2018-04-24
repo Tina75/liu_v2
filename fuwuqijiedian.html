@@ -133,14 +133,14 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="nName" class="bold">名称:</label>
-                                <input type="text" @blur="vailruleName($event.target,item)" class="form-control validateRule" v-model="item.sys_serverName" id="nName" placeholder="在此输入内容...">
+                                <input type="text" @blur="vailruleName($event.target,item)" class="form-control validateRule" v-model="item.sys_serverName"  placeholder="在此输入内容...">
                                 <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="nIP" class="bold">IP:</label>
-                                <input type="text" class="form-control" v-model="item.sys_serverIp"  id="nIP" placeholder="在此输入内容...">
+                                <input type="text" class="form-control" v-model="item.sys_serverIp"   placeholder="在此输入内容...">
                             </div>
                         </div>
                     </div>
@@ -398,7 +398,7 @@
                 var span = dom.nextElementSibling;
                 if(sys_serverName==""){
                     item.isOk.sys_serverName = false;
-                    this.valiWays(span,"规则名不能为空",false);
+                    this.valiWays(span,"名称不能为空",false);
                     return;
                 }
                 if(sys_serverName.length>20){

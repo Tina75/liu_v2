@@ -329,6 +329,7 @@ body.mini-navbar .nav-close{
     padding: 16px 15px;
     font-weight: normal;
     color: #0078E6;
+    cursor: pointer;
 }
  body>.container-fluid{
     padding:15px;
@@ -387,6 +388,9 @@ body.mini-navbar .nav-close{
     font-size: 12px;
     border-radius: 0;
     /*box-shadow: none;*/
+}
+.search .searchItems select{
+   width: 125px!important;
 }
 .search .searchItems button{
     height: 30px;
@@ -630,7 +634,7 @@ body .detailPop  .row span{
 }
 body  .layui-layer-btn{
     text-align: center;
-    /*padding-top:0;*/
+    padding-top:0!important;
 }
 body  .layui-layer-btn .layui-layer-btn0{
     border-color: #0078E6;
@@ -1012,7 +1016,7 @@ body  .layui-layer-btn a{
     margin-left: -270px;
     margin-top:10px;
     overflow-y: auto;
-    font-size: 13px;
+    font-size: 12px;
 }
 .server-left .server-litle{
     font-weight: bold;
@@ -1113,10 +1117,11 @@ body  .layui-layer-btn a{
 .ipShow{
     position: absolute;
     top:35px;
-    bottom: 1%;
-    left: 44%;
+    bottom: 0;
+    left: 41%;
     right: 0;
-    padding-left: 10px;
+    padding-left: 8px;
+    overflow: auto;
     background: #fff;
 }
 .ipShow li{
@@ -1124,7 +1129,7 @@ body  .layui-layer-btn a{
 }
 .ipShow .virtual li{
     padding:8px 0;
-    border-bottom: 1px solid #E6E6E6;
+    /*border-bottom: 1px solid #E6E6E6;*/
 }
 .add-checkbox-inline{
     margin-left: 10px;
@@ -1146,6 +1151,8 @@ body  .layui-layer-btn a{
     text-overflow:ellipsis;
 }
 .group_name .nocheck{
+    left:0;
+    right:0;
     border: 1px solid #ccc;
     border-top:none;
     padding: 10px 13px;
@@ -1260,3 +1267,6 @@ td.limitWidth div{
 select::-ms-expand{
     display:none;
 }/*ie11浏览器下拉框样式*/
+.marginLitter{
+    margin-left: 15px;
+}

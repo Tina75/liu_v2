@@ -177,7 +177,8 @@
         computed:{
             exportHref:function () {
 
-                var str = `${url}statisview/${localStorage.getItem('userId')}/exportMesListByTaskId/${this.list[this.currentIndex].taskId}?taskName=${this.list[this.currentIndex].taskName}`;
+//                var str = `${url}statisview/${localStorage.getItem('userId')}/exportMesListByTaskId/${this.list[this.currentIndex].taskId}?taskName=${this.list[this.currentIndex].taskName}`;
+                var str = url+'statisview/'+localStorage.getItem('userId')+'/exportMesListByTaskId/'+this.list[this.currentIndex].taskId+'?taskName='+this.list[this.currentIndex].taskName;
                 //console.log(str);
                 return str;
             }

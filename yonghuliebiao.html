@@ -21,12 +21,10 @@
     <ul class="nav nav-tabs">
         <li :class="{active:currentIndex == 0}"><a href="javascript:void(0)" @click.prevent="currentIndex=0" >用户列表</a></li>
         <li v-for="(item,index) in navLI_1" :class="{'active':currentIndex==index+1}">
-            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.userName">
-                {{item.userName}}
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-if="item.userName">{{item.userName}}
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
-            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>
-                新建用户
+            <a href="javascript:void(0)" @click.prevent.stop="demoClickLi(index+1)" v-else>新建用户
                 <span class="fa fa-close tabClose" @click.prevent.stop="tabClose(index+1)"></span>
             </a>
         </li>
@@ -71,7 +69,7 @@
                                     <span class="fa fa-check ok"></span>
                                 </div>
                             </th>
-                            <th>编号</th>
+                            <th width="6%">编号</th>
                             <th>用户名</th>
                             <th>手机</th>
                             <th>邮箱</th>
@@ -154,7 +152,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label  class="bold"><span style="color: red">*</span>用户名:</label>
-                                    <input v-model.lazy="item.userName"  @blur="vailusername($event.target,item)"  type="text" class="form-control validate"  placeholder="在此输入内容...">
+                                    <input v-model="item.userName"  @blur="vailusername($event.target,item)"  type="text" class="form-control validate"  placeholder="在此输入内容...">
                                     <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
                                 </div>
                             </div>
@@ -261,7 +259,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label  class="bold"><span style="color: red">*</span>用户名:</label>
-                            <input   type="text" @blur="vailusername($event.target,editList)" v-model="editList.userName" class="form-control"  placeholder="在此输入内容...">
+                            <input   type="text" @blur="vailusername($event.target,editList)" v-model="editList.userName" class="form-control validate"  placeholder="在此输入内容...">
                             <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
                         </div>
                     </div>
@@ -269,25 +267,25 @@
                         <div class="form-group">
                             <div  class="bold">组:</div>
                             <div  class="group_name">
-                                <div class="name_checked clearfix" @click="editList.isShow = !editList.isShow;">
-                                    <span class="pull-left" v-show="editList.userGroupInfoList.length==0">选择组</span>
-                                    <div class="checkedItem pull-left" v-show="editList.userGroupInfoList.length != 0">
-                                        <span  v-for="(name,l) in editList.userGroupInfoList">{{name.groupName}},</span>
+                                <div class="name_checked clearfix" @click="editList.groupIdStr.isShow = !editList.groupIdStr.isShow;">
+                                    <span class="pull-left" v-show="editList.groupIdStr.groupObj.length==0">选择组</span>
+                                    <div class="checkedItem pull-left" v-show="editList.groupIdStr.groupObj.length != 0">
+                                        <span  v-for="(name,l) in editList.groupIdStr.groupObj">{{name.groupName}},</span>
                                     </div>
-                                    <i class="fa  pull-right"  :class="{'fa-angle-up':editList.isShow,'fa-angle-down':!editList.isShow}"></i>
+                                    <i class="fa  pull-right"  :class="{'fa-angle-up':editList.groupIdStr.isShow,'fa-angle-down':!editList.groupIdStr.isShow}"></i>
                                 </div>
                                 <transition  enter-active-class="animated slideInDown"
                                              leave-active-class="animated slideOutUp">
-                                    <div v-show="editList.isShow" class="nocheck" v-if="queryGroupList.length!=0">
+                                    <div v-show="editList.groupIdStr.isShow" class="nocheck" v-if="queryGroupList.length!=0">
                                         <div class="name_nocheck" >
                                             <label class="checkbox-inline" :title="i.groupName" v-for="i in queryGroupList" v-if="queryGroupList.length!=0">
-                                                <input v-model="editList.userGroupInfoList"  type="checkbox"  :value="i" > {{i.groupName}}
+                                                <input v-model="editList.groupIdStr.groupObj"  type="checkbox"  :value="i" > {{i.groupName}}
                                             </label>
                                         </div>
                                         <div class="checkBtn">
-                                            <span @click=" editList.isShow = false">确定</span>
-                                            <span @click=" editList.userGroupInfoList = queryGroupList">全选</span>
-                                            <span @click=" editList.userGroupInfoList = []">取消全选</span>
+                                            <span @click=" editList.groupIdStr.isShow = false">确定</span>
+                                            <span @click=" editList.groupIdStr.groupObj = queryGroupList">全选</span>
+                                            <span @click=" editList.groupIdStr.groupObj = []">取消全选</span>
                                         </div>
                                     </div>
                                 </transition>
@@ -298,15 +296,15 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label  class="bold">邮箱:</label>
-                            <input  type="email" @blur="vailEmail($event.target,editList)" v-model="editList.email" class="form-control"  placeholder="在此输入内容...">
+                            <label  class="bold"><span style="color: red">*</span>邮箱:</label>
+                            <input  type="email" @blur="vailEmail($event.target,editList)" v-model="editList.email" class="form-control validate"  placeholder="在此输入内容...">
                             <span class="form-account-error"></span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label  class="bold">手机:</label>
-                            <input type="tel" @blur="vailPhone($event.target,editList)" v-model="editList.phoneNum" class="form-control"  placeholder="在此输入内容...">
+                            <input type="tel" @blur="vailPhone($event.target,editList)" v-model="editList.phoneNum" class="form-control validate"  placeholder="在此输入内容...">
                             <span class="form-account-error"></span>
                         </div>
                     </div>
@@ -359,7 +357,15 @@
             navLI:[{}],
             currentIndex:0,
             queryGroupList:[], //获取用户分组列表（下拉列表数据）
-            editList:{},    //编辑弹框显示内容
+            editList:{   //编辑弹框显示内容
+                'userName':'',
+                'groupIdStr':{'groupObj':[],isShow:false},
+                'email':'',
+                'phoneNum':'',
+                'role':1,
+                'onDisabled':1,
+                'isOk':{userName:false,password:false,cPassword:false,email:false,phoneNum:false}
+            },
             selected:[]    //选中项
         },
         mounted: function () {
@@ -596,19 +602,17 @@
             vailEmail:function (dom,item) {
                 var email = item.email;
                 var span = dom.nextElementSibling;
-                if(email==""){
-                    item.isOk.email = true;
-                    this.valiWays(span,"",true);
-                    return;
+                if(email.length==0){
+                    item.isOk.email = false;
+                    this.valiWays(span,"邮箱不能为空",false);
+                    return
                 }
                 if(/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(email)){
                     item.isOk.email = true;
                     this.valiWays(span,"",true);
-                    return;
                 }else{
                     item.isOk.email = false;
                     this.valiWays(span,"邮箱格式错误",false);
-                    return;
                 }
 
             },
@@ -735,10 +739,13 @@
                 this.selected.forEach(function (item) {
                     arr.push(item);
                 });
+                _this.editList.userName = arr[0].userName;
+                _this.editList.email = arr[0].email;
+                _this.editList.groupIdStr.groupObj = arr[0].userGroupInfoList;
+                _this.editList.phoneNum = arr[0].phoneNum;
+                _this.editList.role = arr[0].role;
+                _this.editList.onDisabled = arr[0].onDisabled;
                 if(arr.length==1){
-                    _this.editList = arr[0];
-                    this.$set(_this.editList, "isShow", false);
-                    this.$set(_this.editList, "isOk", {userName:false,email:false,phoneNum:false});
                     layer.open({
                         type: 1,
                         title: ['编辑 - '+ _this.editList.userName],
@@ -750,40 +757,56 @@
                         shadeClose: true,
                         content: $('#edit'),
                         yes:function () {
-                            _this.edit();
+                            _this.edit(arr[0].userId);
                         }
                     });
-                }else{
-                    return;
+                    //模拟失去焦点
+                    var input = $("#edit").find(".validate");
+                    for(var i = 0; i < input.length; i++){
+                        console.log($(input[i]))
+                        $(input[i]).trigger('focus');
+                        $(input[i]).trigger('blur');
+                    }
                 }
             },
-            edit:function () {
+            edit:function (userId) {
                 var _this=this;
-                var u = url+"user/editeUserInfoByUserId/"+this.editList.userId;
+                var u = url+"user/editeUserInfoByUserId/"+userId;
                 var groupIdStr = '';
-                this.editList.userGroupInfoList.forEach(function (v,i,array) {
+                this.editList.groupIdStr.groupObj.forEach(function (v,i,array) {
                     groupIdStr += v.groupId + ",";
                 });
                 groupIdStr=groupIdStr.slice(0,-1);
                 var user = {
                     "email": this.editList.email,
+                    "userId":userId,
                     "groupIdStr": groupIdStr,
                     "phoneNum": this.editList.phoneNum,
                     "role": this.editList.role,//管理员：0；1：普通用户
                     "userName":this.editList.userName,
                     "onDisabled":this.editList.onDisabled//启用：1；禁用：2
                 };
-                ajaxPostObj(u,JSON.stringify(user),function (data) {
-                    if(data.resultCode == ERR_OK ){
-                        layer.alert("修改成功",function () {
-                            _this.cartView(_this.current_page);
-                            _this.selected = [];
-                            layer.closeAll();
-                        });
-                    }else{
-                        layer.alert(data.message);
-                    }
-                });
+                //模拟失去焦点
+                var input = $("#edit").find(".validate");
+                for(var i = 0; i < input.length; i++){
+                    console.log($(input[i]))
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                }
+                var isOk = this.editList.isOk.userName&&this.editList.isOk.email&&this.editList.isOk.phoneNum;
+                if(isOk){
+                    ajaxPostObj(u,JSON.stringify(user),function (data) {
+                        if(data.resultCode == ERR_OK ){
+                            layer.alert("修改成功",function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                layer.closeAll();
+                            });
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    });
+                }
             },
             changeType:function (type) { //启用或者禁用判断能否进行//启用：1；禁用：2
                 var isChange = false;

@@ -67,10 +67,9 @@
                     </div>
                     <div class="form-group">
                         <label>创建人:
-                        <select class="form-control caret_position" v-model="create_User" >
-                            <option>admin</option>
-                            <option>上海</option>
-                            <option>广州</option>
+                        <select class="form-control caret_position" v-model="create_User" @change="cartView(1)">
+                            <option value="">请选择创建人</option>
+                            <option :value="item" v-for="item in taskCreateUserNameList">{{item}}</option>
                         </select>
                         </label>
                     </div>
@@ -120,8 +119,7 @@
                                 </div>
                             </td>
                             <td>{{index+1}}</td>
-                            <td v-if="item.rule_Discription" class="checkDetail" @click="detail(item.rule_Discription,item.ruleName)">{{item.ruleName}}</td>
-                            <td v-else>{{item.ruleName}}</td>
+                            <td  class="checkDetail" @click="detail(item.rule_Discription,item.ruleName)">{{item.ruleName}}</td>
                             <td class="limitWidth">
                                 <div :title="item.ruleStr">
                                 {{item.ruleStr}}
@@ -905,6 +903,22 @@
             </div>
         </div>
     </div>
+    <!--复制-->
+    <div id="copy" style="display: none">
+        <div class="add-target">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group"  :class="{error:!popDetail.copy.validate.isOk}">
+                            <label  class="bold"><span style="color: red">*</span>请输入新的规则名称:</label>
+                            <input   type="text"  class="form-control" @blur="vailName(popDetail.copy.copyRuleName)" v-model="popDetail.copy.copyRuleName"  placeholder="在此输入内容...">
+                            <span class="form-account-error">{{popDetail.copy.validate.str}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 <script src="js/jquery.min.js"></script>
@@ -926,6 +940,7 @@
             create_User:'', //搜索项
             ruleName:'',  //搜索项
             ruleStr:'',   //搜索项
+            taskCreateUserNameList:[], //用户下拉框
             current_page: 1, //当前页
             pageSize:14,  //每页数据条数
             pages: 0, //总页数
@@ -989,14 +1004,23 @@
                         r5:'',protocal:'',protocal_content:'',istrue:false,protocal_array:[{name:'',value:'',relation:''}]
                     }],
                     'isOk':{ruleName:false}
+                },
+                copy:{
+                    copyRuleName:'',
+                    validate:{
+                        str:'格式错误，仅支持汉字、字母、数字、“-”“_”的组合',
+                        isOk:true
+                    }
                 }
             },
             buControlSelectList:[], //布控前置条件列表,
             express:null,  //选择表达式中树
+            userName:localStorage.getItem('userName')
         },
         mounted: function () {
             var _this = this;
             this.$nextTick(function () {
+                _this.queryUserNameList();
                 _this.cartView(_this.current_page);
                 _this.buControlSelect();
                 _this.valueTree();
@@ -1090,6 +1114,19 @@
                     }
                 });
             },
+            queryUserNameList:function () {
+                http://localhost:8080/streamplatserver/user/queryUserNameList
+                    var _this = this;
+                var u = url + "user/queryUserNameList";
+                ajaxGet(u, function (data) {
+                    console.log(data);
+                    if (data.resultCode == ERR_OK) {
+                        _this.taskCreateUserNameList = data.data;
+                    }else{
+                        layer.alert(data.message)
+                    }
+                });
+            },
             sort:function () {
                 if(typeof this.sortFlag == "undefined"){
                     this.sortFlag=true;
@@ -1104,6 +1141,9 @@
             },
             selectedList: function (item) {
                 var _this=this;
+                if(this.userName !=item.create_UserName){
+                    return
+                }
                 if (typeof item.checked == "undefined") {
                     // Vue.set(item,"checked",true);
                     this.$set(item, "checked", true);
@@ -1123,10 +1163,12 @@
                 var _this = this;
                 this.checkAll=!this.checkAll;
                 _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
+                    if(_this.userName ==item.create_UserName){
+                        if (typeof item.checked == "undefined") {
+                            _this.$set(item, "checked", _this.checkAll);
+                        } else {
+                            item.checked = _this.checkAll;
+                        }
                     }
                 });
                 //复选框选中项
@@ -1138,10 +1180,13 @@
                 });
             },
             isCheckAll: function () {
+                var _this = this;
                 var flag = true;
                 this.list.forEach(function (item) {
-                    if(!item.checked){
-                        flag = false;
+                    if(_this.userName ==item.create_UserName){
+                        if(!item.checked){
+                            flag = false;
+                        }
                     }
                 })
                 if(flag){
@@ -1333,7 +1378,7 @@
                 this.popDetail.detail = str;
                 layer.open({
                     type: 1,
-                    title: [title],
+                    title: ['详情 - '+title],
                     closeBtn: 1,
                     btn:['关闭'],
                     btnAlign: 'c',
@@ -1380,30 +1425,90 @@
                 this.selected.forEach(function (item) {
                     ruleIdList.push(item.ruleId);
                 });
-                if(this.selected.length>0){
-                    layer.confirm('您确定要复制吗？', {
-                        btn: ['确定','取消'] //按钮
-                    }, function(){
-                        var u = url+"rule/"+localStorage.getItem("userId")+"/"+localStorage.getItem("userName")+"/copyRuleByRuleIdList";
-                        ajaxGetArray(u,{ruleIdList:ruleIdList},function (data) {
-                            if(data.resultCode == ERR_OK ){
-                                var index=layer.alert("复制成功",function () {
-                                    _this.cartView(_this.current_page);
-                                    _this.selected = [];
-                                    _this.checkAll = false;
-                                    layer.close(index);
-                                });
-
-                            }else{
-                                layer.alert("删除失败");
+//                if(this.selected.length>0){
+//                    layer.confirm('您确定要复制吗？', {
+//                        btn: ['确定','取消'] //按钮
+//                    }, function(){
+//                        var u = url+"rule/"+localStorage.getItem("userId")+"/"+localStorage.getItem("userName")+"/copyRuleByRuleIdList";
+//                        ajaxGetArray(u,{ruleIdList:ruleIdList},function (data) {
+//                            if(data.resultCode == ERR_OK ){
+//                                var index=layer.alert("复制成功",function () {
+//                                    _this.cartView(_this.current_page);
+//                                    _this.selected = [];
+//                                    _this.checkAll = false;
+//                                    layer.close(index);
+//                                });
+//
+//                            }else{
+//                                layer.alert("删除失败");
+//                            }
+//                        });
+//                    }, function(){
+//                        layer.closeAll();
+//                    });
+//                }
+                if(this.selected.length==1){
+                    layer.open({
+                        type: 1,
+                        title: ['复制 - '],
+                        closeBtn: 1,
+                        btn:['确定','取消'],
+                        btnAlign: 'c',
+                        area: ['400px', '300px'],
+                        skin: '', //没有背景色
+                        shadeClose: true,
+                        content: $('#copy'),
+                        yes:function () {
+                            if(_this.popDetail.copy.validate.str){
+                                _this.popDetail.copy.validate.isOk = false;
+                                _this.popDetail.copy.validate.str='名称不能为空'
+                                return
                             }
-                        });
-                    }, function(){
-                        layer.closeAll();
+                            _this.copy(_this.selected[0].ruleId);
+                        }
                     });
-                }else{
-                    return
                 }
+            },
+            copy:function (ruleId,copyRuleName) {
+                var _this = this;
+                ///rule/{userId}/copyRuleByRuleId?ruleId=2ca60be29fdf47a0&userName=lwx&copyRuleName=copy_%E8%A7%84%E5%88%99%E4%B8%80
+                var u = url+"rule/"+localStorage.getItem("userId")+"/copyRuleByRuleId?ruleId="+ruleId+'&userName='+localStorage.getItem("userName")+"&copyRuleName="+this.popDetail.copy.copyRuleName;
+                if(this.popDetail.copy.validate.isOk){
+                    ajaxGet(u,function (data) {
+                        console.log(data);
+                        if(data.resultCode == ERR_OK ){
+                            var index=layer.alert("复制成功",function () {
+                                _this.cartView(_this.current_page);
+                                _this.selected = [];
+                                _this.checkAll = false;
+                                layer.closeAll();
+                            });
+                        }else{
+                            layer.alert(data.message);
+                        }
+                    });
+                }
+
+            },
+            vailName:function (str) {
+                if(str==""){
+                    this.popDetail.copy.validate.str = '名称不能为空';
+                    this.popDetail.copy.validate.isOk = false;
+                    return;
+                }
+                if(str.length>20){
+                    this.popDetail.copy.validate.str = '长度只能在20个字符之间';
+                    this.popDetail.copy.validate.isOk = false;
+                    return;
+                }
+                if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(str)){
+                    this.popDetail.copy.validate.str = '';
+                    this.popDetail.copy.validate.isOk = true
+                }else{
+                    this.popDetail.copy.validate.str = '格式错误，仅支持汉字、字母、数字、“-”“_”的组合';
+                    this.popDetail.copy.validate.isOk = false
+                }
+
             },
             buControlReset:function () {
                 $("#start").val("");
@@ -1505,6 +1610,7 @@
                     missdata_DealTable:simple.missdata.missdata_DealTable,
                     missdata_DealType:simple.missdata.missdata_DealType,
                     parentTaskId:simple.pre_condition.parentTaskId,
+                    parentTaskName:'',
                     task_Descrption:simple.task_Descrption,
                     task_EndTime:document.getElementById("end").value,
                     task_Name:simple.task_Name,
@@ -1514,6 +1620,7 @@
                     task_StartTime:document.getElementById("start").value,
                     task_StartType:(simple.task_Run_Model==1)?simple.confirm_time.task_StartType:simple.pre_condition.task_StartType
                 }
+                taskInfo.parentTaskName= this.parentTaskIdToName(simple.pre_condition.parentTaskId);
                 //模拟失去焦点
                 var input = $("#buControl").find(".validate");
                 for(var i = 0; i < input.length; i++){
@@ -1536,6 +1643,15 @@
                     });
                 }
 
+            },
+            parentTaskIdToName:function (id) {
+                var name = '';
+                this.buControlSelectList.forEach(function (v,i) {
+                    if(v.taskId == id){
+                        name = v.task_Name
+                    }
+                })
+                return name;
             },
             vailusername:function (dom,item) {  //验证布控任务名称
                 var task_Name = item.task_Name;
