@@ -705,7 +705,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="task-name" class="bold">规则名称:</label>
-                            <input type="text" @blur="vailruleName($event.target,item)"  class="form-control validateRule" v-model="popDetail.edit.ruleName"  placeholder="在此输入内容...">
+                            <input type="text" @blur="vailruleName($event.target,popDetail.edit)"  class="form-control validateRule" v-model="popDetail.edit.ruleName"  placeholder="在此输入内容...">
                             <span class="form-account-error">支持中文、字母、数字、"-"、"_"的组合，1-20个字符</span>
                         </div>
                     </div>
@@ -1332,7 +1332,9 @@
                         shadeClose: true,
                         content: $('#edit'),
                         yes:function () {
-                            _this.edit(ruleIdList[0].ruleId);
+                            if(_this.popDetail.edit.isOk.ruleName){
+                                _this.edit(ruleIdList[0].ruleId);
+                            }
                         }
                     });
                 }

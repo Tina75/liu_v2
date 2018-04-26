@@ -27,7 +27,7 @@
                     </a>
                     <div class="miniDiv" style="display: none">
                     <span style="font-size:16px;">
-                        <i class="fa fa-area-chart"></i>
+                        <i class="icon-icon-sy11"></i>
                     </span>
                     </div>
                 </li>
@@ -161,12 +161,14 @@
         // MetsiMenu
         $("#menu").metisMenu();
         //计算高度
-        console.log("==============");
-        console.log(window.innerHeight);
         document.getElementById("content-main").style.height = window.innerHeight-50+"px";
         //修改用户名称
         var user = localStorage.getItem('userName');
         $("#user").html(user);
+        $(window).resize(function(){
+            //计算高度
+            document.getElementById("content-main").style.height = window.innerHeight-50+"px";
+        })
     });
     //时间显示
     timeFormate();

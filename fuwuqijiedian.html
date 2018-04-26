@@ -140,7 +140,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="nIP" class="bold">IP:</label>
-                                <input type="text" class="form-control" v-model="item.sys_serverIp"   placeholder="在此输入内容...">
+                                <input type="text" @blur="validateIp($event.target,item)" class="form-control validateRule" v-model="item.sys_serverIp"   placeholder="在此输入内容...">
+                                <span class="form-account-error"></span>
                             </div>
                         </div>
                     </div>
@@ -161,13 +162,15 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nName" class="bold">名称:</label>
-                        <input type="text"  class="form-control validateRule" v-model="editList.sys_serverName" id="nName" placeholder="在此输入内容...">
+                        <input type="text" @blur="vailruleName($event.target,editList)"  class="form-control validateRule" v-model="editList.sys_serverName" id="nName" placeholder="在此输入内容...">
+                        <span class="form-account-error"></span>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nIP" class="bold">IP:</label>
-                        <input type="text" class="form-control" v-model="editList.sys_serverIp"  id="nIP" placeholder="在此输入内容...">
+                        <input type="text"@blur="validateIp($event.target,editList)" class="form-control validateRule" v-model="editList.sys_serverIp"  id="nIP" placeholder="在此输入内容...">
+                        <span class="form-account-error"></span>
                     </div>
                 </div>
             </div>
@@ -200,7 +203,11 @@
             selected:[],    //选中项
             editList:{
                 sys_serverName:'',
-                sys_serverIp:''
+                sys_serverIp:'',
+                isOk:{
+                    sys_serverName:true,
+                    sys_serverIp:true
+                }
             }
         },
         mounted: function () {
@@ -357,7 +364,7 @@
                     sys_serverUserName:'',
                     isOk:{
                         sys_serverName:false,
-//                        sys_serverIp:false
+                        sys_serverIp:false
                     }
                 });
                 this.currentIndex = index;
@@ -377,7 +384,8 @@
                     $(input[i]).trigger('focus');
                     $(input[i]).trigger('blur');
                 }
-                var isOk = item.isOk.sys_serverName;
+                console.log(item.isOk)
+                var isOk = item.isOk.sys_serverName&&item.isOk.sys_serverIp;
                 if(isOk){
                     ajaxPostObj(u,JSON.stringify(syServerInfo),function (data) {
                         if(data.resultCode == ERR_OK ){
@@ -395,7 +403,7 @@
             },
             vailruleName:function (dom,item) {  //验证布控任务名称
                 var sys_serverName = item.sys_serverName;
-                var span = dom.nextElementSibling;
+                var span = dom;
                 if(sys_serverName==""){
                     item.isOk.sys_serverName = false;
                     this.valiWays(span,"名称不能为空",false);
@@ -409,16 +417,31 @@
                 if(/^[a-zA-Z0-9\u4e00-\u9fa5_-]{1,20}$/.test(sys_serverName)){
                     item.isOk.sys_serverName = true;
                     this.valiWays(span,'',true);
-                    return;
                 }else{
                     item.isOk.sys_serverName = false;
                     this.valiWays(span,"格式错误，仅支持汉字、字母、数字、“-”“_”的组合",false);
-                    return;
+                }
+
+            },
+            validateIp:function (dom,item) {
+                var str = item.sys_serverIp;
+                var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/;
+                if(!str){
+                    item.isOk.sys_serverIp = false;
+                    this.valiWays(dom,"ip不能为空",false);
+                    return
+                }
+                if(reg.test(str)){
+                    item.isOk.sys_serverIp = true;
+                    this.valiWays(dom,"",true);
+                }else{
+                    item.isOk.sys_serverIp = false;
+                    this.valiWays(dom,"ip格式错误",false);
                 }
 
             },
             valiWays:function (span,str,flag) {
-                span.innerHTML = str;
+                $(span).next().html(str);
                 if(flag){
                     removeClass(span.parentElement, "error")
                 }else{ //增加error
@@ -532,7 +555,11 @@
                         shadeClose: true,
                         content: $('#edit'),
                         yes:function () {
-                            _this.edit(ruleIdList[0].id);
+                            console.log(_this.editList.isOk)
+                            var isOk = _this.editList.isOk.sys_serverName&&_this.editList.isOk.sys_serverIp;
+                            if(isOk){
+                                _this.edit(ruleIdList[0].id);
+                            }
                         }
                     });
                 }
