@@ -152,13 +152,13 @@
 									</div>
 									<button type="button" @click="cartView(1)" class="btn btn-primary">搜索</button>
 								</div>
-								<div class="searchEdit pull-right">
-									<ul class="clearfix">
-										<li class="pull-right">
-											<span class="icon-icon-sy22">测试链接</span>
-										</li>
-									</ul>
-								</div>
+								<!--<div class="searchEdit pull-right">-->
+									<!--<ul class="clearfix">-->
+										<!--<li class="pull-right">-->
+											<!--<span class="icon-icon-sy22">测试链接</span>-->
+										<!--</li>-->
+									<!--</ul>-->
+								<!--</div>-->
 							</div>
 							<div class="tableContainer">
 								<div class="table-responsive">
@@ -184,8 +184,8 @@
 													</div>
 												</td>
 												<td>{{index+1}}</td>
-												<td>{{item.servername}}</td>
-												<td><input type="text" :value="item.catalog"></td>
+												<td :title="item.servername">{{item.servername}}</td>
+												<td :title="item.catalog">{{item.catalog}}</td>
 												<td>{{item.state}}</td>
 											</tr>
 										</tbody>

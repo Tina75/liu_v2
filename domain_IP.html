@@ -31,21 +31,21 @@
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right" @click="addPop">
-                            <span class="icon-icon-sy12 active">新建</span>
+                        <li class="pull-right" @click="deleteList">
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
+                        </li>
+                        <li class="pull-right"  @click="sharePop()">
+                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
+                        </li>
+                        <li class="pull-right" @click="editPop()">
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
                         <li class="pull-right fileParent">
                             <span class="icon-icon-sy14 active">导入</span>
                             <input type="file" name="excelFile" class="file" @change="importFile" id="excelFile">
                         </li>
-                        <li class="pull-right" @click="editPop()">
-                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
-                        </li>
-                        <li class="pull-right"  @click="sharePop()">
-                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
-                        </li>
-                        <li class="pull-right" @click="deleteList">
-                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
+                        <li class="pull-right" @click="addPop">
+                            <span class="icon-icon-sy12 active">新建</span>
                         </li>
                     </ul>
                 </div>
@@ -123,14 +123,15 @@
             </div>
         </div>
     </div>
-    <!--弹框-->
+    <!--编辑弹框-->
     <div id="edit" style="display: none">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
                         <label class="bold">域名:</label>
-                        <input type="text" class="form-control" v-model="editList.domainName" placeholder="在此输入内容...">
+                        <input type="text" :class="{error:!editList.validata.domainName.isOk}" @blur="validateNet(editList,editList.domainName)" class="form-control" v-model="editList.domainName" placeholder="在此输入内容...">
+                        <span style="color:red">{{editList.validata.domainName.str}}</span>
                     </div>
                 </div>
             </div>
@@ -138,7 +139,8 @@
                 <div class="col-md-8" style="padding-right: 10px">
                     <div class="form-group">
                         <label  class="bold">IP:</label>
-                        <input type="text" class="form-control"  v-model="editList.ipStr[index]"   placeholder="在此输入内容...">
+                        <input type="text" class="form-control validate" @blur="validateIp($event.target,editList.ipStr[index])"   v-model="editList.ipStr[index]"   placeholder="在此输入内容...">
+                        <span class="form-account-error"></span>
                     </div>
                 </div>
                 <div class="col-md-2" style="padding-left: 0;padding-right: 0;margin-top: 17px">
@@ -162,7 +164,8 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label class="bold">域名:</label>
-                        <input type="text" class="form-control" v-model="addList.domainName" placeholder="在此输入内容...">
+                        <input type="text" :class="{error:!addList.validata.domainName.isOk}" @blur="validateNet(addList,addList.domainName)" class="form-control" v-model="addList.domainName" placeholder="在此输入内容...">
+                        <span style="color:red">{{addList.validata.domainName.str}}</span>
                     </div>
                 </div>
             </div>
@@ -170,7 +173,8 @@
                 <div class="col-md-8" style="padding-right: 10px">
                     <div class="form-group">
                         <label  class="bold">IP:</label>
-                        <input type="text" class="form-control"  v-model="addList.ipStr[index]"   placeholder="在此输入内容...">
+                        <input type="text" class="form-control validate" @blur="validateIp($event.target,addList.ipStr[index])"   v-model="addList.ipStr[index]"   placeholder="在此输入内容...">
+                        <span class="form-account-error"></span>
                     </div>
                 </div>
                 <div class="col-md-2" style="padding-left: 0;padding-right: 0;margin-top: 17px">
@@ -211,11 +215,23 @@
             editList:{
                 id:'',
                 domainName:'',
-                ipStr:[]
+                ipStr:[],
+                validata:{
+                    domainName:{
+                        str:'',
+                        isOk:true
+                    }
+                }
             },
             addList:{
                 domainName:'',
-                ipStr:['']
+                ipStr:[''],
+                validata:{
+                    domainName:{
+                        str:'',
+                        isOk:true
+                    }
+                },
             },
         },
         mounted: function () {
@@ -398,19 +414,28 @@
                     shade: 0,
                     content: $('#edit'),
                     yes:function () {
+                        if(!_this.editList.domainName){
+                            _this.editList.validata.domainName.isOk=false
+                            _this.editList.validata.domainName.str='域名不能为空'
+                            return
+                        }
                         _this.edit(); //没有加验证
 
                     }
                 });
             },
             edit:function () {
-                var _this = this;
-                //knowledge/{userId}/editeIpDoMainInfo/{id}
-                var u = url +"knowledge/"+localStorage.getItem("userId")+"/editeIpDoMainInfo/"+this.editList.id;
-                if(!this.editList.domainName){
-                    layer.alert('域名不能为空');
-                    return
+                //ip验证
+                var input = $("#edit").find(".validate");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                    if($(input[i]).parent().hasClass('error')){
+                        return
+                    }
                 }
+                var _this = this;
+                var u = url +"knowledge/"+localStorage.getItem("userId")+"/editeIpDoMainInfo/"+this.editList.id;
                 var ipDomainInfo = {
                     ipStr:this.editList.ipStr.join(','),
                     domainName:this.editList.domainName
@@ -433,7 +458,17 @@
                 //初始化
                 this.addList={
                     domainName:'',
-                        ipStr:['']
+                        ipStr:[''],
+                    validata:{
+                        domainName:{
+                            str:'',
+                            isOk:true
+                        },
+                        ip1:[{
+                            str:'',
+                            isOk:true
+                        }]
+                    },
                 };
                 layer.open({
                     type: 1,
@@ -446,18 +481,28 @@
                     shade: 0,
                     content: $('#add'),
                     yes:function () {
+                        if(!_this.addList.domainName){
+                            _this.addList.validata.domainName.isOk=false
+                            _this.addList.validata.domainName.str='域名不能为空'
+                            return
+                        }
                         _this.add();
                     }
                 });
             },
             add:function () {
+                //ip验证
+                var input = $("#add").find(".validate");
+                for(var i = 0; i < input.length; i++){
+                    $(input[i]).trigger('focus');
+                    $(input[i]).trigger('blur');
+                    if($(input[i]).parent().hasClass('error')){
+                        return
+                    }
+                }
                 var _this = this;
                 var u = url +"knowledge/"+localStorage.getItem("userId")+"/addNewIpDoMainInfo?userName="+
                     localStorage.getItem('userName');
-                if(!this.addList.domainName){
-                    layer.alert('域名不能为空');
-                    return
-                }
                 var ipDomainInfo = {
                     createUserName:localStorage.getItem("userName"),
                     ipStr:this.addList.ipStr.join(','),
@@ -511,7 +556,36 @@
                             }
                         });
                 }
-            }
+            },
+            validateNet:function (list,str) {
+                var reg = /https?:\/\/(?:[^/]+\.)?([^./]+\.(?:cn|com|top))(?:$|\/)/;
+                if(reg.test(str)){
+                    list.validata.domainName.str = '';
+                    list.validata.domainName.isOk = true;
+                }else{
+                    list.validata.domainName.isOk = false;
+                    list.validata.domainName.str = '域名格式错误';
+                }
+            },
+            validateIp:function (dom,str) {
+                var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/;
+                if(reg.test(str)){
+                    this.valiWays(dom,"",true);
+                }else{
+                    console.log(dom)
+                    this.valiWays(dom.nextSibling,"ip格式错误",false);
+                }
+
+            },
+            valiWays:function (span,str,flag) {
+                $(span).next().html(str);
+                if(flag){
+                    removeClass(span.parentElement, "error")
+                }else{ //增加error
+                    addClass( span.parentElement, "error")
+                }
+
+            },
         }
 
     })

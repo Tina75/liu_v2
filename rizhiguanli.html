@@ -27,7 +27,7 @@
         <div class="tab-pane active" >
             <div class="search clearfix">
                 <div class="form-inline pull-left searchItems">
-                    <div class="form-group">
+                    <div class="form-group" v-if="role == 0">
                         <label >用户名称:
                             <input type="text" @keyup="cartView(1)"  v-model="userName" class="form-control"  placeholder="请输入关键字">
                         </label>
@@ -63,25 +63,25 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th style="width: 45px">
-                                <div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">
-                                    <span class="fa fa-check ok"></span>
-                                </div>
-                            </th>
+                            <!--<th style="width: 45px">-->
+                                <!--<div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">-->
+                                    <!--<span class="fa fa-check ok"></span>-->
+                                <!--</div>-->
+                            <!--</th>-->
                             <th  style="width: 6%">编号</th>
                             <th>用户名</th>
                             <th>内容</th>
-                            <th>操作时间<span class="fa fa-sort"></span></th>
+                            <th>操作时间</th>
                             <th>操作状态</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr v-for="(item,index) in list">
-                            <td>
-                                <div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >
-                                    <span class="fa fa-check ok"></span>
-                                </div>
-                            </td>
+                            <!--<td>-->
+                                <!--<div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >-->
+                                    <!--<span class="fa fa-check ok"></span>-->
+                                <!--</div>-->
+                            <!--</td>-->
                             <td>{{index+1}}</td>
                             <td>{{item.log_UserName}}</td>
                             <td>{{item.log_Content}}</td>
@@ -185,6 +185,7 @@
             pages: 0, //总页数
             changePage:0,//跳转页
             checkAll:false,
+            role:localStorage.getItem('role')
         },
         mounted: function () {
             var _this = this;

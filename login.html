@@ -64,7 +64,8 @@
                 console.log(data);
                 if(data.resultCode == ERR_OK){ //登陆成功
 					localStorage.setItem("userId",data.data.userId);
-					localStorage.setItem("userName",data.data.name)
+					localStorage.setItem("userName",data.data.name);
+                    localStorage.setItem("role",data.data.role);
                     self.location = "index.html";
 				}else{
                     layer.alert(data.message);

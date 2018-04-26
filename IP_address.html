@@ -35,21 +35,21 @@
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right" @click="addPop">
-                            <span class="icon-icon-sy12 active">新建</span>
+                        <li class="pull-right" @click="deleteList">
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
+                        </li>
+                        <li class="pull-right"  @click="sharePop()">
+                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
+                        </li>
+                        <li class="pull-right" @click="editPop">
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
                         <li class="pull-right fileParent">
                             <span class="icon-icon-sy14 active">导入</span>
                             <input type="file" name="excelFile" class="file" @change="importFile" id="excelFile">
                         </li>
-                        <li class="pull-right" @click="editPop">
-                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
-                        </li>
-                        <li class="pull-right"  @click="sharePop()">
-                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
-                        </li>
-                        <li class="pull-right" @click="deleteList">
-                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
+                        <li class="pull-right" @click="addPop">
+                            <span class="icon-icon-sy12 active">新建</span>
                         </li>
                     </ul>
                 </div>
@@ -122,14 +122,14 @@
             </div>
         </div>
     </div>
-    <!--弹框-->
+    <!--编辑弹框-->
     <div id="edit" style="display: none">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
                         <label class="bold">地区:</label>
-                        <select class="form-control" v-model="editList.provenceName">
+                        <select  class="form-control" v-model="editList.provenceName">
                             <option value="北京市">北京市</option>
                             <option value="天津市">天津市</option>
                             <option value="上海市">上海市</option>
@@ -173,9 +173,15 @@
                     <div class="form-group">
                         <label  class="bold">IP:</label>
                         <div class="clearfix">
-                            <input v-model="editList.iprange.ip1" type="text" class="form-control pull-left" style="width: 48%" placeholder="在此输入内容...">
+                            <div style="width: 48%"  class="pull-left">
+                                <input v-model="editList.iprange.ip1" type="text" @blur="validataIp(editList,'ip1')" :class="{error:!editList.validata.ip1.isOk}" class="form-control"  placeholder="在此输入内容...">
+                                <span style="color:red">{{editList.validata.ip1.str}}</span>
+                            </div>
                             <span class="pull-left" style="width:4%;text-align: center;line-height: 34px ">-</span>
-                            <input v-model="editList.iprange.ip2" type="text" class="form-control pull-right" style="width: 48%" placeholder="在此输入内容...">
+                            <div style="width: 48%" class="pull-right">
+                                <input v-model="editList.iprange.ip2" type="text" @blur="validataIp(editList,'ip2')" :class="{error:!editList.validata.ip2.isOk}" class="form-control"  placeholder="在此输入内容...">
+                                <span style="color: red">{{editList.validata.ip2.str}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +196,7 @@
                     <div class="form-group">
                         <label class="bold">地区:</label>
                         <!--<input type="text" class="form-control" v-model="addList.provenceName" placeholder="在此输入内容...">-->
-                        <select class="form-control" v-model="addList.provenceName">
+                        <select class="form-control" @change="validataProvince(addList,addList.provenceName)" :class="{error:!addList.validata.provenceName.isOk}" v-model="addList.provenceName">
                             <option value="">请选择省份</option>
                             <option value="北京市">北京市</option>
                             <option value="天津市">天津市</option>
@@ -235,9 +241,15 @@
                     <div class="form-group">
                         <label  class="bold">IP段:</label>
                         <div class="clearfix">
-                            <input v-model="addList.iprange.ip1" type="text" class="form-control pull-left" style="width: 48%" placeholder="在此输入内容...">
+                            <div style="width: 48%"  class="pull-left">
+                                <input v-model="addList.iprange.ip1" type="text" @blur="validataIp(addList,'ip1')" :class="{error:!addList.validata.ip1.isOk}" class="form-control"  placeholder="在此输入内容...">
+                                <span style="color:red">{{addList.validata.ip1.str}}</span>
+                            </div>
                             <span class="pull-left" style="width:4%;text-align: center;line-height: 34px ">-</span>
-                            <input v-model="addList.iprange.ip2" type="text" class="form-control pull-right" style="width: 48%" placeholder="在此输入内容...">
+                            <div style="width: 48%" class="pull-right">
+                                <input v-model="addList.iprange.ip2" type="text" @blur="validataIp(addList,'ip2')" :class="{error:!addList.validata.ip2.isOk}" class="form-control"  placeholder="在此输入内容...">
+                                <span style="color: red">{{addList.validata.ip2.str}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -274,6 +286,19 @@
                     ip1:'',
                     ip2:''
                 },
+                validata:{
+                    provenceName:{
+                        isOk:true
+                    },
+                    ip1:{
+                        str:'',
+                        isOk:true
+                    },
+                    ip2:{
+                        str:'',
+                        isOk:true
+                    }
+                },
                 ip_placeId:''
             },
             addList:{
@@ -281,6 +306,19 @@
                 iprange:{
                     ip1:'',
                     ip2:''
+                },
+                validata:{
+                    provenceName:{
+                        isOk:true
+                    },
+                    ip1:{
+                        str:'',
+                        isOk:true
+                    },
+                    ip2:{
+                        str:'',
+                        isOk:true
+                    }
                 }
             }
         },
@@ -476,6 +514,19 @@
                         ip1:'',
                             ip2:''
                     },
+                    validata:{
+                        provenceName:{
+                            isOk:true
+                        },
+                        ip1:{
+                            str:'',
+                            isOk:true
+                        },
+                        ip2:{
+                            str:'',
+                            isOk:true
+                        }
+                    },
                     ip_placeId:''
                 };
                 if(this.selected.length == 1){
@@ -500,7 +551,23 @@
                     shade: 0,
                     content: $('#edit'),
                     yes:function () {
-                        _this.edit();
+                        if(_this.editList.iprange.ip1||_this.editList.iprange.ip2){
+                            if(!(_this.editList.iprange.ip1&&_this.editList.iprange.ip2)){
+                                _this.editList.validata.ip1.isOk = true;
+                                _this.editList.validata.ip2.isOk = true;
+                                _this.editList.validata.ip1.str = '';
+                                _this.editList.validata.ip2.str = '';
+                                var ip = _this.editList.iprange.ip1||_this.editList.iprange.ip2;
+                                _this.editList.iprange.ip1 = ip;
+                                _this.editList.iprange.ip2 = ip;
+                            }
+                            _this.edit();
+                        }else{  //都为空
+                            _this.editList.validata.ip1.isOk = false;
+                            _this.editList.validata.ip2.isOk = false;
+                            _this.editList.validata.ip1.str = 'ip不能为空';
+                            _this.editList.validata.ip2.str = 'ip不能为空';
+                        }
                     }
                 });
             },
@@ -540,6 +607,19 @@
                     iprange:{
                         ip1:'',
                         ip2:''
+                    },
+                    validata:{
+                        provenceName:{
+                          isOk:true
+                        },
+                        ip1:{
+                            str:'',
+                            isOk:true
+                        },
+                        ip2:{
+                            str:'',
+                            isOk:true
+                        }
                     }
                 }
                 layer.open({
@@ -553,18 +633,29 @@
                     shade: 0,
                     content: $('#add'),
                     yes:function () {
-//                        var isOk = true;
-//                        _this.$refs.addDom.forEach(function (v,i) {
-//                            $(v).find('input').trigger('focus');
-//                            $(v).find('input').trigger('blur');
-//                            if($(v).hasClass('error')){
-//                                isOk = false;
-//                                return false
-//                            }
-//                        })
-//                        if(isOk){
+                        if(!_this.addList.provenceName){
+                            _this.addList.validata.provenceName.isOk = false;
+                            return
+                        }
+                        _this.addList.validata.provenceName.isOk = true;
+                        //ip验证
+                        if(_this.addList.iprange.ip1||_this.addList.iprange.ip2){
+                            if(!(_this.addList.iprange.ip1&&_this.addList.iprange.ip2)){
+                                _this.addList.validata.ip1.isOk = true;
+                                _this.addList.validata.ip2.isOk = true;
+                                _this.addList.validata.ip1.str = '';
+                                _this.addList.validata.ip2.str = '';
+                                var ip = _this.addList.iprange.ip1||_this.addList.iprange.ip2;
+                                _this.addList.iprange.ip1 = ip;
+                                _this.addList.iprange.ip2 = ip;
+                            }
                             _this.add();
-//                        }
+                        }else{  //都为空
+                            _this.addList.validata.ip1.isOk = false;
+                            _this.addList.validata.ip2.isOk = false;
+                            _this.addList.validata.ip1.str = 'ip不能为空';
+                            _this.addList.validata.ip2.str = 'ip不能为空';
+                        }
                     }
                 });
             },
@@ -613,16 +704,30 @@
                     layer.alert('导入失败');
                 });
             },
-//            vailIP:function (index,item,ref) {  //验证布控任务名称
-//                var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/;
-//                var dom = (ref == 'editDom'?this.$refs.editDom[index]:this.$refs.addDom[index]);
-//                if(reg.test(item)){
-//                    $(dom).removeClass('error')
-//                }else{
-//                    $(dom).addClass('error')
-//                }
-//
-//            },
+            validataIp:function (addList,ip) {  //验证布控任务名称
+                var str = addList.iprange[ip];
+                var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/;
+                if(!addList.iprange[ip]){   //失去焦点不做为空判断
+                    addList.validata[ip].isOk = true;
+                    addList.validata[ip].str = '';
+                    return
+                }
+                if(reg.test(str)){
+                    addList.validata[ip].str = '';
+                    addList.validata[ip].isOk = true;
+                }else{
+                    addList.validata[ip].isOk = false;
+                    addList.validata[ip].str = 'ip格式错误';
+                }
+
+            },
+            validataProvince:function (addList,str) {
+                if(str){
+                    addList.validata.provenceName.isOk = true;
+                }else{
+                    addList.validata.provenceName.isOk = false;
+                }
+            }
         }
 
     })

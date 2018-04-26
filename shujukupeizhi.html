@@ -257,7 +257,10 @@
             <div class="row">
                 <div class="col-md-6">
                     <b>数据库类型：</b>
-                    <span>{{dataDetail.db_type}}</span>
+                    <span v-if="dataDetail.db_type==1">mysql</span>
+                    <span v-else-if="dataDetail.db_type==2">oracle</span>
+                    <span v-else-if="dataDetail.db_type==3">sqlserver</span>
+                    <span v-else="dataDetail.db_type==4">db2</span>
                 </div>
             </div>
         </div>

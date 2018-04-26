@@ -80,7 +80,7 @@
                             <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
                         </li>
                         <li class="pull-right" @click="copyList">
-                            <span class="icon-icon-sy6" :class="{active: selected.length>0}">复制</span>
+                            <span class="icon-icon-sy6" :class="{active: selected.length==1}">复制</span>
                         </li>
                         <li class="pull-right" @click="buControlPop">
                             <span class="icon-icon-sy10" :class="{active: selected.length==1}">布控</span>
@@ -1476,6 +1476,7 @@
                 var _this=this;
                 var ruleIdList = [];
                 this.selected.forEach(function (item) {
+                    console.log(item)
                     ruleIdList.push(item.ruleId);
                 });
 //                if(this.selected.length>0){
@@ -1503,7 +1504,7 @@
                 if(this.selected.length==1){
                     layer.open({
                         type: 1,
-                        title: ['复制 - '],
+                        title: ['复制 - '+this.selected[0].ruleName],
                         closeBtn: 1,
                         btn:['确定','取消'],
                         btnAlign: 'c',

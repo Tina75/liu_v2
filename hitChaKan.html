@@ -33,7 +33,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="server-right" style="height:61rem;">
+            <div class="server-right" >
                 <div class="hit_top">
                     <div class="hit_top_Tittle">
                         <div class="title bold" @click="detail()"><span class="bule bold">{{list[currentIndex].taskName}}</span>报文条目</div>
@@ -41,7 +41,7 @@
                     </div>
                     <div class="hit_top_table">
                         <div class="tableContainer">
-                            <div class="table-responsive">
+                            <div class="table-responsive" style="height: auto">
                                 <table class="table" style="margin-bottom: 0">
                                     <thead>
                                     <tr>
@@ -70,14 +70,14 @@
                                         <!--</div>-->
                                         <!--</td>-->
                                         <td>{{index+1}}</td>
-                                        <td>{{item.message_getTime}}</td>
-                                        <td>{{item.message_src_ip}}</td>
-                                        <td>{{item.message_src_port}}</td>
-                                        <td>{{item.message_dst_ip}}</td>
-                                        <td>{{item.message_dst_port}}</td>
-                                        <td>{{item.message_protor}}</td>
-                                        <td>{{item.message_length}}</td>
-                                        <td class="limitWidth">
+                                        <td :title="item.message_getTime">{{item.message_getTime}}</td>
+                                        <td :title="item.message_src_ip">{{item.message_src_ip}}</td>
+                                        <td :title="item.message_src_port">{{item.message_src_port}}</td>
+                                        <td :title="item.message_dst_ip">{{item.message_dst_ip}}</td>
+                                        <td :title="item.message_dst_port">{{item.message_dst_port}}</td>
+                                        <td :title="item.message_protor">{{item.message_protor}}</td>
+                                        <td :title="item.message_length">{{item.message_length}}</td>
+                                        <td class="limitWidth" :title="item.message_content">
                                             <div>{{item.message_content}}</div>
                                         </td>
                                     </tr>
@@ -275,7 +275,7 @@
                 var u = url + "task/" + localStorage.getItem("userId") + "/getTaskDetailsInfo/" + taskId;
                 ajaxGet(u, function (data) {
                     if (data.resultCode == ERR_OK) {
-                        _this.detail = data.data;
+                        _this.detailList = data.data;
                         _this.detailPop();
                     }else{
                         layer.alert(data.message)
@@ -285,7 +285,7 @@
             detailPop: function () {
                 layer.open({
                     type: 1,
-                    title: ['详情'],
+                    title: ['详情 - '+this.list[this.currentIndex].taskName],
                     closeBtn: 1,
                     btn: ['关闭'],
                     btnAlign: 'c',

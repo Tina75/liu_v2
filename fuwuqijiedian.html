@@ -483,15 +483,17 @@
             deleteList:function () {
                 var _this=this;
                 var idList = [];
+                ///node/{userId}/deleteApplyServerList?idList=297540d957a849e7%2Ca678a0c9700f4b6a
                 //streamplatserver/node/433f19a6de35442b/deleteServerList?idList=e5e0e389c2ee4f6a%2Cdf3c49801071461d
                 this.selected.forEach(function (item) {
+                    console.log(item)
                     idList.push(item.id);
                 });
                 if(this.selected.length>0){
                     layer.confirm('您确定要删除吗？', {
                         btn: ['确定','取消'] //按钮
                     }, function(){
-                        var u = url+"rule/"+localStorage.getItem("userId")+"/deleteRuleByRuleIdList";
+                        var u = url+"node/"+localStorage.getItem("userId")+"/deleteServerList";
                         ajaxGetArray(u,{idList:idList},function (data) {
                             if(data.resultCode == ERR_OK ){
                                 var index=layer.alert("删除成功",function () {

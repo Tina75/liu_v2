@@ -13,7 +13,7 @@
     margin-right: 15px;
     margin-left: -265px;
     padding:5px;
-    height: 58rem;
+    height: 620px;
     /*overflow-y:scroll;*/
 }
 .content .left .title{
@@ -53,8 +53,8 @@
 .content .right .top .items .t{
     float: left;
     font-weight: bold;
-    font-size: 14px;
-    letter-spacing:3px;
+    font-size: 12px;
+    /*letter-spacing:3px;*/
     color: #000;
 }
 .content .right .top .items .r{
@@ -103,20 +103,21 @@
 }
 .content .right .div1 .title>b{
     font-weight: bold;
-    font-size: 14px;
-    letter-spacing: 3px;
+    font-size: 12px;
+    /*letter-spacing: 3px;*/
     color: #000;
 }
 .content .right .div1 .title>span{
+    margin-left: 5px;
     color: #0078E6;
-    font-weight: bold;
+    /*font-weight: bold;*/
 }
 .content .right .div1 .title>.toggle{
     color: #F27B00;
     cursor: pointer;
 }
 .content .right .div1 .title>.toggle span{
-    font-size: 14px;
+    font-size: 12px;
     margin-right: 5px;
 }
 .content .right .div1 .ten > thead > tr > th{
@@ -171,6 +172,7 @@
     color: #F98011;
 }
 .hit .hit_top_table{
+    border: 1px solid #E2E2E2;
     height: 300px;
     overflow-y: auto;
 }
@@ -178,13 +180,14 @@
     height: 150px;
     overflow-y: auto;
     border: 1px solid #E2E2E2;
-    margin-top: 10px;
+    border-top:none;
+    /*margin-top: 10px;*/
     /*border: 1px solid red;*/
     /*border-top:none;*/
 }
 .hit .hit_bottom{
     margin-top: 5px;
-    height: 150px;
+    height: 141px;
     overflow-y: auto;
     border: 1px solid #E2E2E2;
 }

@@ -397,8 +397,8 @@ body.mini-navbar .nav-close{
     font-size: 12px;
     padding:6px 20px;
     border-radius: 0;
-    background: #0078E6;
-    border-color: #0078E6;
+    background: #3DA6F7;
+    border-color: #3DA6F7;
 }
 .search .searchEdit li{
     margin-right: 8px;
@@ -1011,7 +1011,7 @@ body  .layui-layer-btn a{
 .server-left{
     width: 250px;
     border: 1px solid #E6E6E6;
-    height: 100%;
+    height: 620px;
     float: left;
     margin-left: -270px;
     margin-top:10px;
@@ -1077,8 +1077,9 @@ body  .layui-layer-btn a{
     color: #F98011;
 }
 .server-right .hit_top_table{
-    height: 150px;
+    height: 282px;
     overflow-y: auto;
+    border: 1px solid #E6E6E6;
 }
 .server-right .hit_middle{
     height: 150px;
@@ -1202,6 +1203,9 @@ body  .layui-layer-btn a{
 .error input,.error select{
     border-color:red!important;
 }
+input.error,select.error{
+    border-color:red!important;
+}
 
 /*表格长度限制*/
 td.limitWidth div{
@@ -1270,3 +1274,4 @@ select::-ms-expand{
 .marginLitter{
     margin-left: 15px;
 }
+

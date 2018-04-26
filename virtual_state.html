@@ -31,21 +31,21 @@
                 </div>
                 <div class="searchEdit pull-right">
                     <ul class="clearfix">
-                        <li class="pull-right" @click="addPop">
-                            <span class="icon-icon-sy12 active">新建</span>
+                        <li class="pull-right" @click="deleteList">
+                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
+                        </li>
+                        <li class="pull-right"  @click="sharePop()">
+                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
+                        </li>
+                        <li class="pull-right" @click="editPop">
+                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
                         </li>
                         <li class="pull-right fileParent">
                             <span class="icon-icon-sy14 active">导入</span>
                             <input type="file" name="excelFile" class="file" @change="importFile" id="excelFile">
                         </li>
-                        <li class="pull-right" @click="editPop">
-                            <span class="icon-icon-sy8" :class="{active: selected.length==1}">编辑</span>
-                        </li>
-                        <li class="pull-right"  @click="sharePop()">
-                            <span class="icon-icon-sy14" :class="{active: selected.length>0}">分享</span>
-                        </li>
-                        <li class="pull-right" @click="deleteList">
-                            <span class="icon-icon-sy7" :class="{active: selected.length>0}">删除</span>
+                        <li class="pull-right" @click="addPop">
+                            <span class="icon-icon-sy12 active">新建</span>
                         </li>
                     </ul>
                 </div>
