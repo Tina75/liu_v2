@@ -44,6 +44,12 @@
         var htmlHeight = window.innerHeight;
         document.getElementById("example").style.height = htmlHeight+"px";
         document.getElementById("content").style.height = htmlHeight-15*2-44+"px";
+        $(window).resize(function(){
+            //计算高度
+            var htmlHeight = window.innerHeight;
+            document.getElementById("example").style.height = htmlHeight+"px";
+            document.getElementById("content").style.height = htmlHeight-15*2-44+"px";
+        })
     });
     $(".J_menuItem").on('click',function(){
         $(this).parent().parent().find("li").removeClass("active");

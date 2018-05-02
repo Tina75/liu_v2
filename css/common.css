@@ -1034,7 +1034,7 @@ body  .layui-layer-btn a{
      cursor: pointer;
  }
 .server-left .server-list li:hover{
-    background: #ccc;
+    background: #efefef;
 }
 .server-left .server-list li.active{
     color: #0078E6;

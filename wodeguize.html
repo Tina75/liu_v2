@@ -1336,18 +1336,20 @@
                         }
                     }
                 }
-                currentIndex?this.navLI[currentIndex].ruleStr += rule_expression_str:
-                    this.popDetail.edit.ruleStr += rule_expression_str;
+                currentIndex?this.navLI[currentIndex].ruleStr += ' ' + rule_expression_str:
+                    this.popDetail.edit.ruleStr +=' '+ rule_expression_str;
             },
             chooseRelation:function (currentIndex,relation_exp) {
-                currentIndex?this.navLI[currentIndex].ruleStr += relation_exp:
-                    this.popDetail.edit.ruleStr += relation_exp;
+                currentIndex?this.navLI[currentIndex].ruleStr += ' '+relation_exp:
+                    this.popDetail.edit.ruleStr +=' '+ relation_exp;
             },
             ruleRule:function (event,currentIndex) {
                 //item.ruleStr += item.express.input.value
-
-                currentIndex?this.navLI[currentIndex].ruleStr += event.key :
-                    this.popDetail.edit.ruleStr += event.key;
+                var key = event.key.replace(/[^\d.]/g, '')
+                currentIndex?this.navLI[currentIndex].ruleStr += key :
+                    this.popDetail.edit.ruleStr += key;
+                currentIndex?this.navLI[currentIndex].express.input.value = this.navLI[currentIndex].express.input.value.replace(/[^\d.]/g, '') :
+                    this.popDetail.edit.express.input.value = this.popDetail.edit.express.input.value.replace(/[^\d.]/g, '');
                 console.log(event.key)
             },
             valueTree:function () {
@@ -1481,6 +1483,14 @@
                     console.log(item)
                     ruleIdList.push(item.ruleId);
                 });
+                //初始数据
+                this.popDetail.copy={
+                    copyRuleName:'',
+                        validate:{
+                        str:'格式错误，仅支持汉字、字母、数字、“-”“_”的组合',
+                            isOk:true
+                    }
+                }
                 if(this.selected.length==1){
                     layer.open({
                         type: 1,

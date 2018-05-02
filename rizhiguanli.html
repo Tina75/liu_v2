@@ -50,10 +50,12 @@
                         </label>
                     </div>
                     <div class="form-group">
+                        <label>
                         <div class="input-group">
                             <input type="text" id="endTime" class="form-control end_time" placeholder="结束时间">
                             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
                         </div>
+                        </label>
                     </div>
                     <button type="button" @click="cartView(1)" class="btn btn-primary">确认</button>
                 </div>
@@ -69,7 +71,7 @@
                                 <!--</div>-->
                             <!--</th>-->
                             <th  style="width: 6%">编号</th>
-                            <th>用户名</th>
+                            <th v-if="role == 0">用户名</th>
                             <th>内容</th>
                             <th>操作时间</th>
                             <th>操作状态</th>
@@ -83,7 +85,7 @@
                                 <!--</div>-->
                             <!--</td>-->
                             <td>{{index+1}}</td>
-                            <td>{{item.log_UserName}}</td>
+                            <td v-if="role == 0">{{item.log_UserName}}</td>
                             <td>{{item.log_Content}}</td>
                             <td>{{item.log_Time}}</td>
                             <td v-if="item.log_OPState==0">成功</td>
