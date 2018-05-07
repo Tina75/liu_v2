@@ -189,7 +189,7 @@
                         <div class="col-md-10" style="padding-right: 0">
                             <div class="form-group errValidate" >
                                 <label for="task-desc" class="bold">规则内容:</label>
-                                <input type="text" class="form-control" v-model="item.ruleStr"  placeholder="在此输入内容...">
+                                <input type="text" class="form-control ruleaaa"  v-model="item.ruleStr"  placeholder="在此输入内容...">
                             </div>
                         </div>
                         <ul class="col-md-2 addRule" >
@@ -216,7 +216,7 @@
                                                         {{list.rule_model_name}}
                                                     </div>
                                                     <ul class="s" v-show = "list.open">
-                                                        <li  v-for="(value,ruleIndex) in list.ruleExpList" @click.prevent="chooseValue(currentIndex,treeIndex,ruleIndex,value.rule_expression_str)">{{value.rule_expression_str}}</li>
+                                                        <li :class="{hover:value.selected}" v-for="(value,ruleIndex) in list.ruleExpList" @click.prevent="chooseValue(currentIndex,treeIndex,ruleIndex)">{{value.rule_expression_str}}</li>
                                                     </ul>
                                                 </li>
                                             </ul>
@@ -225,7 +225,7 @@
                                     <li class="pull-left two" style="margin-left: 2%">
                                         <div class="bold">关系:</div>
                                         <ul style="margin-bottom: 15px" class="relation">
-                                            <li v-for="(r,relationIndex) in item.express.relation"   @click="chooseRelation(currentIndex,r.relation_exp)">
+                                            <li v-for="(r,relationIndex) in item.express.relation" :class="{hover:r.selected}"    @click="chooseRelation(currentIndex,relationIndex)">
                                                 {{r.relation_exp}}
                                             </li>
                                         </ul>
@@ -233,7 +233,7 @@
                                     <li class="pull-right three">
                                         <div class="form-group" >
                                             <label for="task-desc" class="bold">值:</label>
-                                            <input type="text"  @keyup="ruleRule($event,currentIndex)" class="form-control" v-model="item.express.input.value">
+                                            <input type="text"  :disabled="item.express.input.type == false" class="form-control" v-model="item.express.input.value">
                                         </div>
                                         <div class="bold">预定义的值:</div>
                                         <ul class="fore-value">
@@ -243,7 +243,7 @@
                                             <label for="task-desc" class="bold">范围(偏移:长度):</label>
                                             <input type="text" class="form-control" >
                                         </div>
-                                        <!--<button class="fore-btn" :class="{y:item.express.input.value!=''}" @click="beforeValue(currentIndex)">确定</button>-->
+                                        <button class="fore-btn" :class="{y:item.express.input.value!=''}" @click="beforeValue(currentIndex)"><span class="fa fa-check facheck" ></span> 确定</button>
                                     </li>
                                 </ul>
                             </div>
@@ -747,7 +747,7 @@
                                                     {{list.rule_model_name}}
                                                 </div>
                                                 <ul class="s" v-show = "list.open">
-                                                    <li  v-for="(value,ruleIndex) in list.ruleExpList" @click.prevent="chooseValue(currentIndex,treeIndex,ruleIndex,value.rule_expression_str)">{{value.rule_expression_str}}</li>
+                                                    <li :class="{hover:value.selected}" v-for="(value,ruleIndex) in list.ruleExpList" @click.prevent="chooseValue(currentIndex,treeIndex,ruleIndex)">{{value.rule_expression_str}}</li>
                                                 </ul>
                                             </li>
                                         </ul>
@@ -756,7 +756,7 @@
                                 <li class="pull-left two" style="margin-left: 2%">
                                     <div class="bold">关系:</div>
                                     <ul style="margin-bottom: 15px" class="relation">
-                                        <li v-for="(r,relationIndex) in popDetail.edit.express.relation"   @click="chooseRelation(currentIndex,r.relation_exp)">
+                                        <li v-for="(r,relationIndex) in popDetail.edit.express.relation"  :class="{hover:r.selected}"  @click="chooseRelation(currentIndex,relationIndex)">
                                             {{r.relation_exp}}
                                         </li>
                                     </ul>
@@ -764,17 +764,17 @@
                                 <li class="pull-right three">
                                     <div class="form-group" >
                                         <label for="task-desc" class="bold">值:</label>
-                                        <input type="text" @keyup="ruleRule($event)"   class="form-control " v-model="popDetail.edit.express.input.value">
+                                        <input type="text"  :disabled="popDetail.edit.express.input.type == false"   class="form-control " v-model="popDetail.edit.express.input.value">
                                     </div>
                                     <div class="bold">预定义的值:</div>
                                     <ul class="fore-value">
 
                                     </ul>
-                                    <!--<button class="fore-btn" :class="{y:popDetail.edit.express.input.value!=''}" @click="beforeValue(currentIndex)">确定</button>-->
                                     <div class="form-group" >
                                         <label for="task-desc" class="bold">范围(偏移:长度):</label>
                                         <input type="text" class="form-control" >
                                     </div>
+                                    <button class="fore-btn" :class="{y:popDetail.edit.express.input.value!=''}" @click="beforeValue(currentIndex)">确定</button>
                                 </li>
                             </ul>
                         </div>
@@ -930,6 +930,7 @@
 <script src="js/url.js"></script>
 <script src="js/jquery.ztree.core.js"></script>
 <script src="js/jquery.ztree.excheck.js"></script>
+<script src="js/validateRuleStr.js"></script>
 <script>
     // 创建根实例
     new Vue({
@@ -1229,6 +1230,11 @@
                     'isOk':{ruleName:false}
                 });
                 this.currentIndex = index;
+                setTimeout(function () {
+                    console.log($(".ruleaaa").val())
+                    validateInputRule("ruleaaa")
+                },0)
+
             },
             addNewRule:function (item,index,dom) {
                 console.log(this.navLI[index])
@@ -1269,33 +1275,108 @@
                     })
                 }
             },
-            chooseValue:function (currentIndex,treeIndex,ruleIndex,rule_expression_str) {
+            chooseValue:function (currentIndex,treeIndex,ruleIndex) {
                 var tree = currentIndex ? this.navLI[currentIndex].express.tree : this.popDetail.edit.express.tree;
+                console.log(tree);
                 for(var i = 0; i < tree.length; i++){
                     if(i == treeIndex){
+                        this.$set(tree[i],'selected',true);
                         for(var j = 0,ruleExpList = tree[i].ruleExpList; j < ruleExpList.length; j++){
                             if(j == ruleIndex){
                                 currentIndex?(this.navLI[currentIndex].express.relation = ruleExpList[j].relationList):
                                     (this.popDetail.edit.express.relation = ruleExpList[j].relationList);
+                                this.$set(ruleExpList[j],'selected',true);
+                            }else{
+                                this.$set(ruleExpList[j],'selected',false);
+                            }
+                            for(var k = 0; k < tree[i].ruleExpList[j].relationList.length;k++){ //内层清空
+                                this.$set(tree[i].ruleExpList[j].relationList[k],'selected',false);
+                            }
+                            currentIndex?(this.navLI[currentIndex].express.input = {
+                                    'valuebefore':'',
+                                    'type':false,
+                                    'value':''
+                                })
+                                :(this.popDetail.edit.express.input= {
+                                    'valuebefore':'',
+                                    'type':false,
+                                    'value':''
+                                });
+                        }
+                    }else{
+                        this.$set(tree[i],'selected',false);
+                    }
+                }
+            },
+            chooseRelation:function (currentIndex,relationIndex) {
+                var tree = currentIndex ? this.navLI[currentIndex].express.tree : this.popDetail.edit.express.tree;
+                for(var i = 0; i < tree.length; i++){
+                    if(tree[i].selected == true){
+                        for(var j =0; j < tree[i].ruleExpList.length; j++){
+                            if(tree[i].ruleExpList[j].selected == true){
+                                for(var k = 0; k < tree[i].ruleExpList[j].relationList.length;k++){
+                                    if(k == relationIndex){
+                                        this.$set(tree[i].ruleExpList[j].relationList[k],'selected',true);
+                                        currentIndex?(this.navLI[currentIndex].express.input.type = true):
+                                            (this.popDetail.edit.express.input.type = true);
+                                    }else{
+                                        this.$set(tree[i].ruleExpList[j].relationList[k],'selected',false);
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                currentIndex?this.navLI[currentIndex].ruleStr += ' ' + rule_expression_str:
-                    this.popDetail.edit.ruleStr +=' '+ rule_expression_str;
+                currentIndex?this.navLI[currentIndex].express.input.valuebefore = this.treeSeleced(currentIndex):
+                    this.popDetail.edit.express.input.valuebefore = this.treeSeleced(currentIndex);
             },
-            chooseRelation:function (currentIndex,relation_exp) {
-                currentIndex?this.navLI[currentIndex].ruleStr += ' '+relation_exp:
-                    this.popDetail.edit.ruleStr +=' '+ relation_exp;
+            treeSeleced:function (currentIndex) {
+                var tree = currentIndex ? this.navLI[currentIndex].express.tree : this.popDetail.edit.express.tree;
+                var str = '';
+                for(var i = 0; i < tree.length; i++){
+                    if(tree[i].selected == true){
+                        for(var j =0,ruleExpList = tree[i].ruleExpList; j < ruleExpList.length; j++){
+                            if(ruleExpList[j].selected == true){
+                                str = ruleExpList[j].rule_expression_str+' ';
+                                for(var k = 0,relationList = tree[i].ruleExpList[j].relationList; k < relationList.length;k++){
+                                    if(relationList[k].selected == true){
+                                        str = str +relationList[k].relation_exp+' ' ;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return str;
             },
-            ruleRule:function (event,currentIndex) {
-                //item.ruleStr += item.express.input.value
-                var key = event.key.replace(/[^\d.]/g, '')
-                currentIndex?this.navLI[currentIndex].ruleStr += key :
-                    this.popDetail.edit.ruleStr += key;
-                currentIndex?this.navLI[currentIndex].express.input.value = this.navLI[currentIndex].express.input.value.replace(/[^\d.]/g, '') :
-                    this.popDetail.edit.express.input.value = this.popDetail.edit.express.input.value.replace(/[^\d.]/g, '');
-                console.log(event.key)
+            beforeValue:function (currentIndex) {
+                if(currentIndex){
+                    if(this.navLI[currentIndex].express.input.value){
+                        this.navLI[currentIndex].ruleStr +="   "+ this.navLI[currentIndex].express.input.valuebefore
+                            +this.navLI[currentIndex].express.input.value;
+                        //恢复初始值
+                        this.navLI[currentIndex].express.tree = JSON.parse(JSON.stringify(this.express));
+                        this.navLI[currentIndex].express.relation = null;
+                        this.navLI[currentIndex].express.input = {
+                            'valuebefore':'',
+                            'type':false,
+                            'value':''
+                        };
+                    }
+                }else{
+                    if(this.popDetail.edit.express.input.value){
+                        this.popDetail.edit.ruleStr +="   "+ this.popDetail.edit.express.input.valuebefore
+                            +this.popDetail.edit.express.input.value ;
+                        //恢复初始值
+                        this.popDetail.edit.express.tree = JSON.parse(JSON.stringify(this.express));
+                        this.popDetail.edit.express.relation = null;
+                        this.popDetail.edit.express.input = {
+                            'valuebefore':'',
+                            'type':false,
+                            'value':''
+                        };
+                    }
+                }
             },
             valueTree:function () {
                 var _this = this;
@@ -1411,7 +1492,7 @@
                                 });
 
                             }else{
-                                layer.alert("删除失败");
+                                layer.alert(data.message);
                             }
                         });
                     }, function(){
