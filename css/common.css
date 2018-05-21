@@ -1091,21 +1091,31 @@ body  .layui-layer-btn a{
     color: #F98011;
 }
 .server-right .hit_top_table{
-    height: 282px;
+    max-height: 282px;
     overflow-y: auto;
     border: 1px solid #E6E6E6;
 }
 .server-right .hit_middle{
-    height: 150px;
+    max-height: 150px;
     overflow-y: auto;
     border: 1px solid #E2E2E2;
     border-top:none;
+    padding:10px;
+}
+.hover_click:hover{
+    background: #efefef;
+}
+.font_add{
+    font-weight: bold;
+    margin-right: 5px;
+    cursor: pointer;
 }
 .server-right .hit_bottom{
     margin-top: 5px;
-    height: 150px;
+    max-height: 150px;
     overflow-y: auto;
     border: 1px solid #E2E2E2;
+    padding:10px;
 }
 .bule{
     color: #0078E6;

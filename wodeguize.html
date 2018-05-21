@@ -960,6 +960,7 @@
 <script src="js/url.js"></script>
 <script src="js/jquery.ztree.core.js"></script>
 <script src="js/jquery.ztree.excheck.js"></script>
+<script src="js/validateRuleStr.js"></script>
 <script>
     function DatePicker(beginSelector,endSelector){
         // 仅选择日期
@@ -1284,6 +1285,10 @@
                     'isOk':{ruleName:false}
                 });
                 this.currentIndex = index;
+                setTimeout(function () {
+                    console.log($(".ruleaaa").val())
+                    validateInputRule("ruleaaa")
+                },0)
             },
             addNewRule:function (item,index,dom) {
                 console.log(this.navLI[index])
@@ -1547,8 +1552,6 @@
                     }, function(){
                         layer.closeAll();
                     });
-                }else{
-                    return
                 }
             },
             copyList:function () {

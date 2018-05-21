@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/font.css">
     <link rel="stylesheet" href="css/common.css">
 </head>
-<body class="fixed-sidebar full-height-layout" style="overflow:hidden">
+<body class="fixed-sidebar full-height-layout" style="overflow:auto;min-width: 1500px">
     <div class="wrapper">
         <nav>
             <div class="nav-close"><i class="fa fa-bars"></i>
@@ -31,12 +31,6 @@
                     </span>
                     </div>
                 </li>
-                <!--<li>-->
-                    <!--<a href="2.html" class="J_menuItem">-->
-                        <!--<i class="fa fa-home"></i>-->
-                        <!--<span>首页</span>-->
-                    <!--</a>-->
-                <!--</li>-->
                 <li>
                     <a href="javascript:void(0)" >
                         <i class="icon-icon-sy1"></i>
@@ -162,6 +156,7 @@
         $("#menu").metisMenu();
         //计算高度
         document.getElementById("content-main").style.height = window.innerHeight-50+"px";
+        //计算宽度
         //修改用户名称
         var user = localStorage.getItem('userName');
         $("#user").html(user);

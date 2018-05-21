@@ -36,7 +36,7 @@
             <div class="server-right" >
                 <div class="hit_top">
                     <div class="hit_top_Tittle">
-                        <div class="title bold" @click="detail()"><span class="bule bold">{{list[currentIndex].taskName}}</span>报文条目</div>
+                        <div class="title bold" @click="detail()"><span class="bule bold">{{list[currentIndex].taskName}}</span>命中报文条目</div>
                         <a class="export" :href="exportHref"><i class="fa fa-upload"></i>导出</a>
                     </div>
                     <div class="hit_top_table">
@@ -45,12 +45,6 @@
                                 <table class="table" style="margin-bottom: 0">
                                     <thead>
                                     <tr>
-                                        <!--<th style="width: 45px">-->
-                                        <!--<input type="checkbox" name="btSelectAll" @click="isAll()">-->
-                                        <!--<div  class="item-check-btn" :class="{'check':checkAll}"  @click="isAll()">-->
-                                        <!--<span class="fa fa-check icon-ok"></span>-->
-                                        <!--</div>-->
-                                        <!--</th>-->
                                         <th style="width: 6%">编号</th>
                                         <th>时间</th>
                                         <th>源IP</th>
@@ -59,16 +53,11 @@
                                         <th>目的端口</th>
                                         <th>协议</th>
                                         <th>长度</th>
-                                        <th>内容</th>
+                                        <!--<th>内容</th>-->
                                     </tr>
                                     </thead>
                                     <tbody >
-                                    <tr v-for="(item,index) in tableList">
-                                        <!--<td>-->
-                                        <!--<div  class="item-check-btn" :class="{'check':item.checked}" @click="selectedList(item)" >-->
-                                        <!--<span class="fa fa-check icon-ok"></span>-->
-                                        <!--</div>-->
-                                        <!--</td>-->
+                                    <tr v-for="(item,index) in tableList" @click="change_m_b(item)" class="hover_click" >
                                         <td>{{index+1}}</td>
                                         <td :title="item.message_getTime">{{item.message_getTime}}</td>
                                         <td :title="item.message_src_ip">{{item.message_src_ip}}</td>
@@ -77,9 +66,9 @@
                                         <td :title="item.message_dst_port">{{item.message_dst_port}}</td>
                                         <td :title="item.message_protor">{{item.message_protor}}</td>
                                         <td :title="item.message_length">{{item.message_length}}</td>
-                                        <td class="limitWidth" :title="item.message_content">
-                                            <div>{{item.message_content}}</div>
-                                        </td>
+                                        <!--<td class="limitWidth" :title="item.message_content">-->
+                                            <!--<div>{{item.message_content}}</div>-->
+                                        <!--</td>-->
                                     </tr>
                                     </tbody>
                                 </table>
@@ -87,8 +76,23 @@
                         </div>
                     </div>
                 </div>
-                <div class="hit_middle"></div>
-                <div class="hit_bottom"></div>
+                <div class="hit_middle">
+                    <ul>
+                        <li v-for="item in tableMid">
+                            <span class="font_add" @click="mid_detail(item)" v-if="!item.opened">+</span>
+                            <span class="font_add" @click="mid_detail(item)" v-if="item.opened">-</span>
+                            <span>{{item.nodeName}}</span><span>{{item.nodeDescription}}</span>
+                            <div style="padding-left: 14px" v-show="item.opened">
+                                <ul>
+                                    <li v-for="list in item.childNodeStr">{{list}}</li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="hit_bottom">
+                    {{tableBottom}}}
+                </div>
             </div>
         </div>
     </div>
@@ -172,7 +176,9 @@
             getMesList:[], //报文详情
             currentIndex:0,
             checkAll:false,
-            detailList:''
+            detailList:'',
+            tableMid:[],
+            tableBottom:""
         },
         computed:{
             exportHref:function () {
@@ -213,60 +219,15 @@
                     console.log(data)
                     if(data.resultCode == ERR_OK ){
                         _this.tableList = data.data.messageList;
+                        if(data.data.messageList[0]){
+                            _this.tableBottom = data.data.messageList[0].message_content;
+                            _this.middleView(data.data.messageList[0].messageId);
+                        }
                         console.log(_this.tableList)
                     }else{
                         layer.alert("数据请求失败");
                     }
                 });
-            },
-            selectedList: function (item) {
-                var _this=this;
-                if (typeof item.checked == "undefined") {
-                    // Vue.set(item,"checked",true);
-                    this.$set(item, "checked", true);
-                } else {
-                    item.checked = !item.checked;
-                }
-                this.isCheckAll();
-                //复选框选中项
-                _this.selected = [];
-                this.list.forEach(function (item) {
-                    if(item.checked){
-                        _this.selected.push(item);
-                    }
-                });
-            },
-            isAll: function () {  //全选
-                var _this = this;
-                this.checkAll=!this.checkAll;
-                _this.list.forEach(function (item) {
-                    if (typeof item.checked == "undefined") {
-                        _this.$set(item, "checked", _this.checkAll);
-                    } else {
-                        item.checked = _this.checkAll;
-                    }
-                });
-                //复选框选中项
-                _this.selected = [];
-                this.list.forEach(function (item) {
-                    if(item.checked){
-                        _this.selected.push(item);
-                    }
-                });
-            },
-            isCheckAll: function () {
-                var flag = true;
-                this.list.forEach(function (item) {
-                    if(!item.checked){
-                        flag = false;
-                    }
-                })
-                if(flag){
-                    this.checkAll = true;
-                }else{
-                    this.checkAll = false;
-                }
-
             },
             detail:function () {
                 var taskId = this.list[this.currentIndex].taskId;
@@ -295,6 +256,29 @@
                     content: $('#detail')
                 });
             },
+            middleView:function(mesId){
+                var _this = this;
+                var u = url +"statisview/"+localStorage.getItem('userId')+'/getMesAnsyDataItem/'+mesId;
+                ajaxGet(u,function (data) {
+                    console.log(data)
+                    if(data.resultCode == ERR_OK ){
+                        _this.tableMid = data.data;
+                        console.log( _this.tableMid)
+                    }
+                });
+            },
+            mid_detail:function(item){
+                if(typeof item.opened == "undefined"){
+                    this.$set(item, "opened", true);
+                }else{
+                    item.opened = !item.opened;
+                }
+                console.log(item)
+            },
+            change_m_b:function (item) {
+                this.tableBottom = item.message_content;
+                this.middleView(item.messageId)
+            }
         }
 
     })
